@@ -1,0 +1,616 @@
+import { useEffect, useMemo, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import {
+  BillingSummary,
+  buildSubscriptionId,
+  createHostingSubscriptionCheckout,
+  createUpgradeCheckout,
+  getBillingSummary,
+  getHostingCatalog,
+  getUpgradePreview,
+  validateHostingCoupon,
+  HostingCatalogResponse,
+  HostingPlanDefinition,
+  type UpgradePreview,
+} from "../lib/customer-api";
+import { getCustomerSession } from "../lib/customer-session";
+import {
+  Globe,
+  Server,
+  ChevronRight,
+  Check,
+  Tag,
+  Database,
+  HardDrive,
+  FileText,
+  Layers,
+  Cpu,
+  Sparkles,
+} from "lucide-react";
+import { useLocalization } from "../lib/i18n";
+import { formatCurrency } from "../lib/display";
+
+type AppliedCoupon = { code: string; discountAmount: number; message: string };
+
+
+export function BuySubscriptionPage() {
+  const { t } = useLocalization();
+  const [catalog, setCatalog] = useState<HostingCatalogResponse | null>(null);
+  const [billingSummary, setBillingSummary] = useState<BillingSummary | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const [selectedRegion, setSelectedRegion] = useState<string>("");
+  const [selectedPlan, setSelectedPlan] = useState<string>("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const [couponInput, setCouponInput] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState<AppliedCoupon | null>(null);
+  const [couponError, setCouponError] = useState<string | null>(null);
+  const [couponBusy, setCouponBusy] = useState(false);
+
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const upgradeScope = searchParams.get("upgrade"); // e.g. "basic_global"
+  const isUpgradeMode = Boolean(upgradeScope);
+  const upgradePlanSlug = upgradeScope?.split("_")[0] ?? null;
+  const upgradeRegion = upgradeScope?.includes("_") ? upgradeScope.split("_").slice(1).join("_") : null;
+
+  const [upgradePreview, setUpgradePreview] = useState<UpgradePreview | null>(null);
+
+  const session = getCustomerSession();
+
+  const sortedPlans = useMemo(
+    () => (catalog ? [...catalog.plans].sort((a, b) => a.monthlyPrice - b.monthlyPrice) : []),
+    [catalog],
+  );
+  // Backend has no "popular" flag, so we highlight the middle-priced tier as a
+  // gentle default/anchor. Purely a frontend heuristic.
+  const popularSlug = useMemo(
+    () => (sortedPlans.length > 0 ? sortedPlans[Math.floor((sortedPlans.length - 1) / 2)].slug : ""),
+    [sortedPlans],
+  );
+
+  const selectedPlanDetails = useMemo(
+    () => catalog?.plans.find((plan) => plan.slug === selectedPlan) ?? null,
+    [catalog, selectedPlan],
+  );
+
+  const currency = billingSummary?.currency ?? "USD";
+  const availableBalance = billingSummary?.creditBalance ?? 0;
+  const subtotal = isUpgradeMode && upgradePreview?.success ? upgradePreview.upgradeTotal : (selectedPlanDetails?.monthlyPrice ?? 0);
+  const discount = !isUpgradeMode && appliedCoupon ? Math.min(appliedCoupon.discountAmount, subtotal) : 0;
+  const total = Math.max(subtotal - discount, 0);
+  const willPayByCard = Boolean(selectedPlanDetails) && total > 0 && availableBalance < total;
+  const canPurchase = isUpgradeMode
+    ? Boolean(selectedPlan && upgradePreview?.success)
+    : Boolean(selectedRegion && selectedPlan && billingSummary);
+
+  useEffect(() => {
+    let active = true;
+    async function load() {
+      try {
+        const [cat, summary] = await Promise.all([
+          getHostingCatalog(),
+          session ? getBillingSummary(session) : Promise.resolve(null),
+        ]);
+        if (!active) {
+          return;
+        }
+
+        setCatalog(cat);
+        setBillingSummary(summary);
+
+        // Smart defaults: default region + the highlighted (middle) plan.
+        // In upgrade mode, lock to the current region and don't preselect a plan.
+        if (isUpgradeMode && upgradeRegion) {
+          setSelectedRegion(upgradeRegion);
+        } else {
+          const defaultRegion = cat.regions.find((region) => region.isDefault)?.slug ?? cat.regions[0]?.slug ?? "";
+          setSelectedRegion((current) => current || defaultRegion);
+        }
+        if (!isUpgradeMode) {
+          const plansByPrice = [...cat.plans].sort((a, b) => a.monthlyPrice - b.monthlyPrice);
+          const popular = plansByPrice[Math.floor((plansByPrice.length - 1) / 2)]?.slug ?? plansByPrice[0]?.slug ?? "";
+          setSelectedPlan((current) => current || popular);
+        }
+
+        if (!session) {
+          setError(t("Please sign in before purchasing a hosting subscription.", "Please sign in before purchasing a hosting subscription."));
+        }
+      } catch (err) {
+        if (active) setError(t("Could not load your hosting catalog or account balance. Please try again later.", "Could not load your hosting catalog or account balance. Please try again later."));
+      } finally {
+        if (active) setLoading(false);
+      }
+    }
+    void load();
+    return () => {
+      active = false;
+    };
+  }, [session?.customerId, session?.token]);
+
+  // Fetch upgrade proration preview when the target plan changes in upgrade mode.
+  useEffect(() => {
+    if (!isUpgradeMode || !upgradeScope || !selectedPlan) {
+      setUpgradePreview(null);
+      return;
+    }
+    const activeSession = getCustomerSession();
+    if (!activeSession) return;
+    let cancelled = false;
+    void (async () => {
+      try {
+        const preview = await getUpgradePreview(activeSession, { currentScope: upgradeScope, newPlanSlug: selectedPlan });
+        if (!cancelled) setUpgradePreview(preview);
+      } catch {
+        if (!cancelled) setUpgradePreview(null);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [isUpgradeMode, upgradeScope, selectedPlan]);
+
+  // Re-validate an applied coupon when the plan (and therefore subtotal) changes,
+  // since the discount amount depends on the subtotal.
+  useEffect(() => {
+    const activeSession = getCustomerSession();
+    if (!appliedCoupon || !activeSession || !selectedPlanDetails) {
+      return;
+    }
+    let cancelled = false;
+    void (async () => {
+      try {
+        const result = await validateHostingCoupon(activeSession, {
+          code: appliedCoupon.code,
+          subtotal: selectedPlanDetails.monthlyPrice,
+        });
+        if (cancelled) return;
+        if (result.success) {
+          setAppliedCoupon({ code: appliedCoupon.code, discountAmount: result.discountAmount, message: result.message });
+          setCouponError(null);
+        } else {
+          setAppliedCoupon(null);
+          setCouponError(result.message || t("This coupon is no longer valid for the selected plan.", "This coupon is no longer valid for the selected plan."));
+        }
+      } catch {
+        // Leave the previously applied coupon in place on transient errors.
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedPlan]);
+
+  async function handleApplyCoupon() {
+    const activeSession = getCustomerSession();
+    const code = couponInput.trim().toUpperCase();
+    if (!activeSession || !code || !selectedPlanDetails) return;
+
+    setCouponBusy(true);
+    setCouponError(null);
+    try {
+      const result = await validateHostingCoupon(activeSession, {
+        code,
+        subtotal: selectedPlanDetails.monthlyPrice,
+      });
+      if (result.success) {
+        setAppliedCoupon({ code, discountAmount: result.discountAmount, message: result.message });
+        setCouponInput(code);
+      } else {
+        setAppliedCoupon(null);
+        setCouponError(result.message || t("Coupon is not valid for this purchase.", "Coupon is not valid for this purchase."));
+      }
+    } catch (err) {
+      setAppliedCoupon(null);
+      setCouponError(err instanceof Error ? err.message : t("Could not validate coupon.", "Could not validate coupon."));
+    } finally {
+      setCouponBusy(false);
+    }
+  }
+
+  function removeCoupon() {
+    setAppliedCoupon(null);
+    setCouponInput("");
+    setCouponError(null);
+  }
+
+  async function handlePurchase(e: React.FormEvent) {
+    e.preventDefault();
+    if (!selectedRegion || !selectedPlan) return;
+
+    const activeSession = getCustomerSession();
+    if (!activeSession) {
+      setError(t("Your session has expired. Please sign in again.", "Your session has expired. Please sign in again."));
+      return;
+    }
+    if (!billingSummary) {
+      setError(t("We could not confirm your account balance. Please reload and try again.", "We could not confirm your account balance. Please reload and try again."));
+      return;
+    }
+
+    setIsSubmitting(true);
+    setError(null);
+
+    try {
+      let checkout;
+      if (isUpgradeMode && upgradeScope) {
+        checkout = await createUpgradeCheckout(activeSession, {
+          currentScopeReference: upgradeScope,
+          newPlanSlug: selectedPlan,
+        });
+      } else {
+        checkout = await createHostingSubscriptionCheckout(activeSession, {
+          planSlug: selectedPlan,
+          regionSlug: selectedRegion,
+          couponCode: appliedCoupon?.code,
+        });
+      }
+      if (checkout.checkoutUrl) {
+        if (checkout.subscriptionScopeReference) {
+          sessionStorage.setItem("pendingSubscriptionScope", checkout.subscriptionScopeReference);
+        }
+        window.location.assign(checkout.checkoutUrl);
+        return;
+      }
+      const subscriptionId = checkout.subscriptionScopeReference ?? buildSubscriptionId(selectedPlan, selectedRegion);
+      navigate(`/subscription/${subscriptionId}/overview`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : isUpgradeMode ? t("Upgrade failed.", "Upgrade failed.") : t("Purchase failed.", "Purchase failed."));
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  if (loading) {
+    return <div className="empty-panel">{t("Loading available regions and plans...", "Loading available regions and plans...")}</div>;
+  }
+
+  if (error && !catalog) {
+    return <div className="inline-message inline-message--error">{error}</div>;
+  }
+
+  const noCatalog = !catalog || catalog.plans.length === 0 || catalog.regions.length === 0;
+
+  return (
+    <div className="stack" style={{ maxWidth: "960px", margin: "0 auto" }}>
+      <section className="page-hero">
+        <p className="eyebrow">{t("Store", "Store")}</p>
+        <h1>{isUpgradeMode ? t("Upgrade Your Plan", "Upgrade Your Plan") : t("Purchase Hosting Subscription", "Purchase Hosting Subscription")}</h1>
+        <p className="page-copy">
+          {isUpgradeMode
+            ? t("Select your new plan below. You only pay the prorated difference for the remaining days in your current billing cycle.", "Select your new plan below. You only pay the prorated difference for the remaining days in your current billing cycle.")
+            : t("Pick your region and plan. We use your account balance when it covers the price, otherwise you'll continue to secure card checkout — and your card is saved for automatic renewals.", "Pick your region and plan. We use your account balance when it covers the price, otherwise you'll continue to secure card checkout — and your card is saved for automatic renewals.")}
+        </p>
+      </section>
+
+      {error ? <div className="inline-message inline-message--error">{error}</div> : null}
+
+      {noCatalog ? (
+        <div className="empty-panel">{t("No hosting plans are available right now. Please check back shortly.", "No hosting plans are available right now. Please check back shortly.")}</div>
+      ) : (
+        <form onSubmit={handlePurchase} className="stack">
+          {/* Step 1 — Region (hidden in upgrade mode — locked to current region) */}
+          {!isUpgradeMode ? <div className="card stack-sm">
+            <div className="section-head">
+              <h3 style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <Globe size={18} /> {t("1. Select Region", "1. Select Region")}
+              </h3>
+            </div>
+            <div className="two-up-grid" style={{ marginTop: "12px" }}>
+              {catalog!.regions.map((region) => {
+                const active = selectedRegion === region.slug;
+                return (
+                  <label
+                    key={region.slug}
+                    style={{
+                      display: "flex",
+                      alignItems: "flex-start",
+                      gap: "12px",
+                      padding: "16px",
+                      cursor: "pointer",
+                      border: active ? "2px solid var(--primary)" : "1px solid var(--border)",
+                      borderRadius: "16px",
+                      background: active ? "var(--primary-soft)" : "transparent",
+                    }}
+                  >
+                    <input
+                      type="radio"
+                      name="region"
+                      value={region.slug}
+                      checked={active}
+                      onChange={(event) => setSelectedRegion(event.target.value)}
+                      style={{ marginTop: "4px" }}
+                    />
+                    <div>
+                      <h4 style={{ margin: 0 }}>{region.name}</h4>
+                      <p className="muted" style={{ margin: "4px 0 0", fontSize: "0.85rem" }}>
+                        {t("{region} · {count} node(s) available", "{region} · {count} node(s) available").replace("{region}", region.slug.toUpperCase()).replace("{count}", String(region.availableNodeCount))}
+                      </p>
+                    </div>
+                  </label>
+                );
+              })}
+            </div>
+          </div> : null}
+
+          {/* Step 2 — Plan comparison cards */}
+          <div
+            className="card stack-sm"
+            style={{ opacity: selectedRegion ? 1 : 0.5, pointerEvents: selectedRegion ? "auto" : "none" }}
+          >
+            <div className="section-head">
+              <h3 style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <Server size={18} /> {t("2. Select Plan", "2. Select Plan")}
+              </h3>
+            </div>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+                gap: "14px",
+                marginTop: "12px",
+              }}
+            >
+              {sortedPlans.map((plan) => {
+                const isCurrent = isUpgradeMode && plan.slug === upgradePlanSlug;
+                const isDowngrade = isUpgradeMode && upgradePlanSlug != null && plan.monthlyPrice <= (catalog?.plans.find((p) => p.slug === upgradePlanSlug)?.monthlyPrice ?? 0);
+                return (
+                  <PlanCard
+                    key={plan.slug}
+                    plan={plan}
+                    currency={currency}
+                    selected={selectedPlan === plan.slug}
+                    popular={!isUpgradeMode && plan.slug === popularSlug}
+                    isCurrent={isCurrent}
+                    disabled={isCurrent || isDowngrade}
+                    onSelect={() => setSelectedPlan(plan.slug)}
+                  />
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Step 3 — Coupon */}
+          <div className="card stack-sm" style={{ opacity: selectedPlanDetails ? 1 : 0.5, pointerEvents: selectedPlanDetails ? "auto" : "none" }}>
+            <div className="section-head">
+              <h3 style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <Tag size={18} /> {t("3. Coupon (optional)", "3. Coupon (optional)")}
+              </h3>
+            </div>
+            {appliedCoupon ? (
+              <div className="billing-list-row" style={{ marginTop: "12px" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                  <Check size={16} color="var(--primary)" />
+                  <strong>{appliedCoupon.code}</strong>
+                  <span className="muted">−{formatCurrency(discount, currency)}</span>
+                </div>
+                <button type="button" className="text-button text-button--danger" onClick={removeCoupon}>
+                  {t("Remove", "Remove")}
+                </button>
+              </div>
+            ) : (
+              <div style={{ display: "flex", gap: "10px", marginTop: "12px", flexWrap: "wrap" }}>
+                <input
+                  value={couponInput}
+                  onChange={(event) => setCouponInput(event.target.value.toUpperCase())}
+                  placeholder={t("Enter coupon code", "Enter coupon code")}
+                  style={{ flex: "1 1 200px" }}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter") {
+                      event.preventDefault();
+                      void handleApplyCoupon();
+                    }
+                  }}
+                />
+                <button
+                  type="button"
+                  className="secondary-button"
+                  onClick={() => void handleApplyCoupon()}
+                  disabled={couponBusy || !couponInput.trim() || !selectedPlanDetails}
+                >
+                  {couponBusy ? t("Checking...", "Checking...") : t("Apply", "Apply")}
+                </button>
+              </div>
+            )}
+            {couponError ? <div className="inline-message inline-message--error" style={{ marginTop: "10px" }}>{couponError}</div> : null}
+          </div>
+
+          {/* Order summary */}
+          <div className="card stack-sm">
+            <div className="section-head">
+              <h3>{isUpgradeMode ? t("Upgrade summary", "Upgrade summary") : t("Order summary", "Order summary")}</h3>
+            </div>
+
+            {isUpgradeMode && upgradePreview?.success && selectedPlanDetails ? (
+              <div className="stack-sm" style={{ marginTop: "8px" }}>
+                <SummaryRow label={t("Current: {name}", "Current: {name}").replace("{name}", upgradePreview.oldPlanName)} value={`${formatCurrency(upgradePreview.oldMonthlyPrice, currency)}/mo`} />
+                <SummaryRow label={t("New: {name}", "New: {name}").replace("{name}", upgradePreview.newPlanName)} value={`${formatCurrency(upgradePreview.newMonthlyPrice, currency)}/mo`} />
+                <SummaryRow label={t("Remaining in cycle", "Remaining in cycle")} value={t("{remaining} of {total} days", "{remaining} of {total} days").replace("{remaining}", String(upgradePreview.remainingDays)).replace("{total}", String(upgradePreview.totalDays))} />
+                <SummaryRow label={t("Credit for unused {name}", "Credit for unused {name}").replace("{name}", upgradePreview.oldPlanName)} value={`−${formatCurrency(upgradePreview.prorationCredit, currency)}`} tone="positive" />
+                <SummaryRow label={t("{name} for {days} days", "{name} for {days} days").replace("{name}", upgradePreview.newPlanName).replace("{days}", String(upgradePreview.remainingDays))} value={formatCurrency(upgradePreview.prorationCharge, currency)} />
+                <div style={{ height: 1, background: "var(--border)", margin: "4px 0" }} />
+                <SummaryRow label={t("Upgrade cost", "Upgrade cost")} value={formatCurrency(upgradePreview.upgradeTotal, currency)} strong />
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "10px", marginTop: "4px" }}>
+                  <span className="muted" style={{ fontSize: "0.9rem" }}>
+                    {willPayByCard ? t("Paid by card", "Paid by card") : t("Paid from account balance", "Paid from account balance")}
+                  </span>
+                  <span className={`badge ${willPayByCard ? "" : "badge--success"}`}>
+                    {willPayByCard ? t("Card checkout", "Card checkout") : t("Account balance", "Account balance")}
+                  </span>
+                </div>
+                <p className="muted" style={{ fontSize: "0.85rem", margin: 0 }}>
+                  {t("Your next renewal date stays the same. Future renewals will be at the new plan rate.", "Your next renewal date stays the same. Future renewals will be at the new plan rate.")}
+                </p>
+              </div>
+            ) : isUpgradeMode && selectedPlan && !upgradePreview?.success ? (
+              <p className="muted" style={{ marginTop: "8px" }}>{upgradePreview?.message || t("Select a plan above to see upgrade pricing.", "Select a plan above to see upgrade pricing.")}</p>
+            ) : selectedPlanDetails && !isUpgradeMode ? (
+              <div className="stack-sm" style={{ marginTop: "8px" }}>
+                <SummaryRow label={t("{name} · monthly", "{name} · monthly").replace("{name}", selectedPlanDetails.name)} value={formatCurrency(selectedPlanDetails.monthlyPrice, currency)} />
+                {discount > 0 ? (
+                  <SummaryRow label={t("Coupon {code}", "Coupon {code}").replace("{code}", appliedCoupon?.code ?? "")} value={`−${formatCurrency(discount, currency)}`} tone="positive" />
+                ) : null}
+                <div style={{ height: 1, background: "var(--border)", margin: "4px 0" }} />
+                <SummaryRow label={t("Total due today", "Total due today")} value={formatCurrency(total, currency)} strong />
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "10px", marginTop: "4px" }}>
+                  <span className="muted" style={{ fontSize: "0.9rem" }}>
+                    {willPayByCard ? t("Paid by card · saved for automatic renewals", "Paid by card · saved for automatic renewals") : t("Paid from account balance", "Paid from account balance")}
+                  </span>
+                  <span className={`badge ${willPayByCard ? "" : "badge--success"}`}>
+                    {willPayByCard ? t("Card checkout", "Card checkout") : t("Account balance", "Account balance")}
+                  </span>
+                </div>
+                <p className="muted" style={{ fontSize: "0.85rem", margin: 0 }}>
+                  {t("Available balance: {balance} · Renews monthly at {total}.", "Available balance: {balance} · Renews monthly at {total}.").replace("{balance}", formatCurrency(availableBalance, currency)).replace("{total}", formatCurrency(total, currency))}
+                </p>
+              </div>
+            ) : (
+              <p className="muted" style={{ marginTop: "8px" }}>{t("Choose a plan to see your total.", "Choose a plan to see your total.")}</p>
+            )}
+
+            <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "12px" }}>
+              <button
+                type="submit"
+                className="primary-button"
+                disabled={!canPurchase || isSubmitting}
+                style={{ padding: "0 32px", fontSize: "1.05rem" }}
+              >
+                {isSubmitting
+                  ? t("Processing...", "Processing...")
+                  : isUpgradeMode && upgradePreview?.success
+                    ? t("Upgrade for {amount}", "Upgrade for {amount}").replace("{amount}", formatCurrency(upgradePreview.upgradeTotal, currency))
+                    : willPayByCard
+                      ? t("Continue to card checkout", "Continue to card checkout")
+                      : t("Purchase with account balance", "Purchase with account balance")}{" "}
+                <ChevronRight size={18} />
+              </button>
+            </div>
+          </div>
+        </form>
+      )}
+    </div>
+  );
+}
+
+function PlanCard({
+  plan,
+  currency,
+  selected,
+  popular,
+  isCurrent,
+  disabled,
+  onSelect,
+}: {
+  plan: HostingPlanDefinition;
+  currency: string;
+  selected: boolean;
+  popular: boolean;
+  isCurrent?: boolean;
+  disabled?: boolean;
+  onSelect: () => void;
+}) {
+  const { t } = useLocalization();
+  return (
+    <label
+      style={{
+        position: "relative",
+        display: "block",
+        padding: "18px",
+        opacity: disabled ? 0.5 : 1,
+        pointerEvents: disabled ? "none" : "auto",
+        cursor: "pointer",
+        border: selected ? "2px solid var(--primary)" : "1px solid var(--border)",
+        borderRadius: "18px",
+        background: selected ? "var(--primary-soft)" : "transparent",
+      }}
+    >
+      <input
+        type="radio"
+        name="plan"
+        value={plan.slug}
+        checked={selected}
+        onChange={onSelect}
+        style={{ position: "absolute", opacity: 0, pointerEvents: "none" }}
+      />
+      {isCurrent ? (
+        <span
+          className="badge"
+          style={{ position: "absolute", top: "-10px", right: "14px" }}
+        >
+          {t("Current plan", "Current plan")}
+        </span>
+      ) : popular ? (
+        <span
+          className="badge badge--success"
+          style={{ position: "absolute", top: "-10px", right: "14px", display: "inline-flex", alignItems: "center", gap: "4px" }}
+        >
+          <Sparkles size={12} /> {t("Most popular", "Most popular")}
+        </span>
+      ) : null}
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px" }}>
+        <h4 style={{ margin: 0 }}>{plan.name}</h4>
+        {selected ? <Check size={18} color="var(--primary)" /> : null}
+      </div>
+      <div style={{ marginTop: "6px", color: "var(--primary)", fontWeight: 700, fontSize: "1.35rem" }}>
+        {formatCurrency(plan.monthlyPrice, currency)}
+        <span style={{ fontSize: "0.8rem", color: "var(--muted)", fontWeight: 400 }}> /mo</span>
+      </div>
+      {plan.description ? (
+        <p className="muted" style={{ margin: "6px 0 0", fontSize: "0.85rem" }}>{t(plan.description, plan.description)}</p>
+      ) : null}
+      <div className="stack-sm" style={{ marginTop: "12px", gap: "6px" }}>
+        <SpecRow icon={<Layers size={14} />} text={t("Up to {count} site(s)", "Up to {count} site(s)").replace("{count}", String(plan.recommendedSiteLimit))} />
+        <SpecRow icon={<HardDrive size={14} />} text={t("{size} disk", "{size} disk").replace("{size}", formatStorage(plan.diskLimitMb))} />
+        <SpecRow icon={<FileText size={14} />} text={t("{count} files", "{count} files").replace("{count}", plan.fileLimitCount.toLocaleString())} />
+        <SpecRow icon={<Database size={14} />} text={t("Up to {count} database(s)", "Up to {count} database(s)").replace("{count}", String(plan.recommendedDatabaseLimit))} />
+        <SpecRow icon={<Cpu size={14} />} text={plan.nodeType} />
+      </div>
+    </label>
+  );
+}
+
+function SpecRow({ icon, text }: { icon: React.ReactNode; text: string }) {
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "0.85rem", color: "var(--text)" }}>
+      <span style={{ color: "var(--primary)", display: "inline-flex" }}>{icon}</span>
+      <span>{text}</span>
+    </div>
+  );
+}
+
+function SummaryRow({
+  label,
+  value,
+  strong,
+  tone,
+}: {
+  label: string;
+  value: string;
+  strong?: boolean;
+  tone?: "positive";
+}) {
+  return (
+    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "10px" }}>
+      <span className={strong ? "" : "muted"} style={{ fontSize: strong ? "1rem" : "0.9rem", fontWeight: strong ? 700 : 400 }}>
+        {label}
+      </span>
+      <span
+        style={{
+          fontSize: strong ? "1.15rem" : "0.95rem",
+          fontWeight: strong ? 700 : 500,
+          color: tone === "positive" ? "var(--primary)" : strong ? "var(--primary-ink)" : "var(--text)",
+        }}
+      >
+        {value}
+      </span>
+    </div>
+  );
+}
+
+function formatStorage(mb: number) {
+  if (mb >= 1024) {
+    const gb = mb / 1024;
+    return `${Number.isInteger(gb) ? gb : gb.toFixed(1)} GB`;
+  }
+  return `${mb} MB`;
+}

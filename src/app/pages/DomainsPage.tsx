@@ -54,15 +54,17 @@ const emptyContact: DomainContactProfilePayload = {
   phone: "",
 };
 
-function formatDate(value: string | null) {
-  if (!value) return "Unknown";
+function formatDate(value: string | null | undefined, t?: (key: string, def: string) => string) {
+  const unknown = t?.("Unknown", "Unknown") ?? "Unknown";
+  if (!value) return unknown;
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "Unknown";
+  if (Number.isNaN(date.getTime())) return unknown;
   return new Intl.DateTimeFormat(undefined, { year: "numeric", month: "2-digit", day: "2-digit" }).format(date);
 }
 
-function formatPrice(value: number | null | undefined) {
-  if (value === null || value === undefined) return "Price unavailable";
+function formatPrice(value: number | null | undefined, t?: (key: string, def: string) => string) {
+  const unavailable = t?.("Price unavailable", "Price unavailable") ?? "Price unavailable";
+  if (value === null || value === undefined) return unavailable;
   return new Intl.NumberFormat(undefined, { style: "currency", currency: "USD", maximumFractionDigits: 2 }).format(value);
 }
 
@@ -607,7 +609,7 @@ export function DomainsPage() {
                   <div className={`dm-result-row${result.purchasable ? "" : " is-unavailable"}`} key={result.domainName}>
                     <div>
                       <strong>{result.domainName}</strong>
-                      <span>{result.purchasable ? t("{price} for {years} year(s)", "{price} for {years} year(s)").replace("{price}", formatPrice(result.customerPurchasePrice) ?? "").replace("{years}", String(registerYears)) : t(result.reason ?? "Unavailable", result.reason ?? "Unavailable")}</span>
+                      <span>{result.purchasable ? t("{price} for {years} year(s)", "{price} for {years} year(s)").replace("{price}", formatPrice(result.customerPurchasePrice, t) ?? "").replace("{years}", String(registerYears)) : t(result.reason ?? "Unavailable", result.reason ?? "Unavailable")}</span>
                     </div>
                     <button
                       className="dm-button dm-button--dark"
@@ -736,8 +738,8 @@ export function DomainsPage() {
             <p>{t("Renew ownership, control registrar protection, or bind this domain to a hosted site.", "Renew ownership, control registrar protection, or bind this domain to a hosted site.")}</p>
 
             <div className="domain-drawer__stats">
-              <div><span>{t("Expires", "Expires")}</span><strong>{formatDate(selectedDomain.expireDateUtc)}</strong></div>
-              <div><span>{t("Renewal", "Renewal")}</span><strong>{formatPrice(selectedDomain.renewalPrice)}</strong></div>
+              <div><span>{t("Expires", "Expires")}</span><strong>{formatDate(selectedDomain.expireDateUtc, t)}</strong></div>
+              <div><span>{t("Renewal", "Renewal")}</span><strong>{formatPrice(selectedDomain.renewalPrice, t)}</strong></div>
               <div><span>{t("Status", "Status")}</span><strong>{domainState(selectedDomain).label}</strong></div>
             </div>
 
@@ -889,12 +891,12 @@ function DomainCard({
         <div>
           <CalendarDays size={16} />
           <span>{t("Registration Date", "Registration Date")}</span>
-          <strong>{formatDate(domain.createDateUtc)}</strong>
+          <strong>{formatDate(domain.createDateUtc, t)}</strong>
         </div>
         <div>
           <CalendarDays size={16} />
           <span>{t("Expiry Date", "Expiry Date")}</span>
-          <strong>{formatDate(domain.expireDateUtc)}</strong>
+          <strong>{formatDate(domain.expireDateUtc, t)}</strong>
         </div>
       </div>
 
@@ -917,7 +919,7 @@ function DomainCard({
       <div className="dm-domain-card__footer">
         <span><Shield size={14} /> {domain.privacyEnabled ? t("Privacy enabled", "Privacy enabled") : t("Public Whois", "Public Whois")}</span>
         <span><Lock size={14} /> {domain.locked ? t("Transfer locked", "Transfer locked") : t("Unlocked", "Unlocked")}</span>
-        <span>{formatPrice(domain.renewalPrice)}</span>
+        <span>{formatPrice(domain.renewalPrice, t)}</span>
       </div>
       {transferPending ? <TransferProgressCallout domain={domain} variant="card" getTransferProgressDetails={(d) => {
         const rawNote = d.lastError?.replace(/\s+/g, " ").trim() ?? "";

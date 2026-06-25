@@ -21,10 +21,12 @@ function formatCurrency(value: number, currency = "USD") {
   }).format(value);
 }
 
-function formatDate(value: string | null | undefined) {
-  if (!value) return "Not scheduled";
+function formatDate(value: string | null | undefined, t?: (key: string, def: string) => string) {
+  const notScheduled = t?.("Not scheduled", "Not scheduled");
+  const unknown = t?.("Unknown", "Unknown");
+  if (!value) return notScheduled;
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "Unknown";
+  if (Number.isNaN(date.getTime())) return unknown;
   return new Intl.DateTimeFormat(undefined, {
     year: "numeric",
     month: "short",
@@ -275,7 +277,7 @@ export function BillingPage() {
             <MetricCard icon={<DollarSign size={18} />} label={t("Open balance", "Open balance")} value={formatCurrency(overview.summary.openBalance, overview.summary.currency)} note={t("{count} invoice(s) due", "{count} invoice(s) due").replace("{count}", String(overview.summary.openInvoiceCount))} />
             <MetricCard icon={<ShieldCheck size={18} />} label={t("Account balance", "Account balance")} value={formatCurrency(overview.summary.creditBalance, overview.summary.currency)} note={t("Available account credit", "Available account credit")} />
             <MetricCard icon={<CreditCard size={18} />} label={t("Saved payment methods", "Saved payment methods")} value={String(overview.summary.savedPaymentMethodCount)} note={t("Saved for checkout & renewals", "Saved for checkout & renewals")} />
-            <MetricCard icon={<Receipt size={18} />} label={t("Monthly recurring", "Monthly recurring")} value={formatCurrency(overview.summary.totalMonthlyRecurring, overview.summary.currency)} note={overview.summary.nextRenewalUtc ? t("Next renewal {date}", "Next renewal {date}").replace("{date}", formatDate(overview.summary.nextRenewalUtc)) : t("Renewal schedule not confirmed yet", "Renewal schedule not confirmed yet")} />
+            <MetricCard icon={<Receipt size={18} />} label={t("Monthly recurring", "Monthly recurring")} value={formatCurrency(overview.summary.totalMonthlyRecurring, overview.summary.currency)} note={overview.summary.nextRenewalUtc ? t("Next renewal {date}", "Next renewal {date}").replace("{date}", formatDate(overview.summary.nextRenewalUtc, t)) : t("Renewal schedule not confirmed yet", "Renewal schedule not confirmed yet")} />
           </section>
 
           <div className="billing-tabs">
@@ -345,7 +347,7 @@ export function BillingPage() {
                             <strong>{subscription.displayName}</strong>
                             <span className={`badge ${statusTone(subscription.status)}`}>{getStatusLabel(subscription.status)}</span>
                           </div>
-                          <div className="muted">{formatCurrency(subscription.monthlyAmount, subscription.currency)} / mo · {t("Next invoice {date}", "Next invoice {date}").replace("{date}", formatDate(subscription.nextInvoiceAtUtc))}</div>
+                          <div className="muted">{formatCurrency(subscription.monthlyAmount, subscription.currency)} / mo · {t("Next invoice {date}", "Next invoice {date}").replace("{date}", formatDate(subscription.nextInvoiceAtUtc, t))}</div>
                           {subscription.lastError ? <div className="inline-message inline-message--error">{subscription.lastError}</div> : null}
                           <div className="billing-inline-actions">
                             {subscription.cancelAtPeriodEnd ? (
@@ -461,7 +463,7 @@ export function BillingPage() {
                       <div className="billing-list-row" key={invoice.id}>
                         <div>
                           <strong>{invoice.invoiceNumber}</strong>
-                          <div className="muted">{invoice.description ?? t("Invoice", "Invoice")} · {t("Due {date}", "Due {date}").replace("{date}", formatDate(invoice.dueUtc))} · <span className={`badge ${statusTone(invoice.status)}`}>{getStatusLabel(invoice.status)}</span></div>
+                          <div className="muted">{invoice.description ?? t("Invoice", "Invoice")} · {t("Due {date}", "Due {date}").replace("{date}", formatDate(invoice.dueUtc, t))} · <span className={`badge ${statusTone(invoice.status)}`}>{getStatusLabel(invoice.status)}</span></div>
                         </div>
                         <div className="billing-list-actions">
                           <strong>{formatCurrency(invoice.amountDue, invoice.currency)}</strong>
@@ -490,7 +492,7 @@ export function BillingPage() {
                       <div className="billing-list-row" key={invoice.id}>
                         <div>
                           <strong>{invoice.invoiceNumber}</strong>
-                          <div className="muted">{invoice.description ?? t("Invoice", "Invoice")} · {t("Issued {date}", "Issued {date}").replace("{date}", formatDate(invoice.issuedUtc))}</div>
+                          <div className="muted">{invoice.description ?? t("Invoice", "Invoice")} · {t("Issued {date}", "Issued {date}").replace("{date}", formatDate(invoice.issuedUtc, t))}</div>
                         </div>
                         <div className="billing-list-actions">
                           <span className={`badge ${statusTone(invoice.status)}`}>{getStatusLabel(invoice.status)}</span>
@@ -522,7 +524,7 @@ export function BillingPage() {
                         <div className="billing-list-row" key={transaction.id}>
                           <div>
                             <strong>{transaction.description ?? transaction.type}</strong>
-                            <div className="muted">{formatDate(transaction.occurredUtc)} · {transaction.provider} · <span className={`badge ${statusTone(transaction.status)}`}>{getStatusLabel(transaction.status)}</span></div>
+                            <div className="muted">{formatDate(transaction.occurredUtc, t)} · {transaction.provider} · <span className={`badge ${statusTone(transaction.status)}`}>{getStatusLabel(transaction.status)}</span></div>
                           </div>
                           <strong>{formatCurrency(transaction.amount, transaction.currency)}</strong>
                         </div>
@@ -548,7 +550,7 @@ export function BillingPage() {
                         <div className="billing-ledger-row" key={entry.id}>
                           <div>
                             <strong>{entry.description}</strong>
-                            <div className="muted">{formatDate(entry.createdUtc)} · {entry.entryType.replace(/_/g, " ")}</div>
+                            <div className="muted">{formatDate(entry.createdUtc, t)} · {entry.entryType.replace(/_/g, " ")}</div>
                           </div>
                           <div className="billing-ledger-values">
                             <span className={entry.direction === "credit" ? "billing-amount billing-amount--positive" : "billing-amount billing-amount--negative"}>

@@ -10,10 +10,11 @@ import { AuthPasswordField } from "../components/AuthPasswordField";
 import { PasswordRequirements } from "../components/PasswordRequirements";
 import { useLocalization } from "../lib/i18n";
 
-function formatDate(value: string | null | undefined) {
-  if (!value) return "-";
+function formatDate(value: string | null | undefined, t?: (key: string, def: string) => string) {
+  const dash = t?.("-", "-");
+  if (!value) return dash;
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return "-";
+  if (Number.isNaN(date.getTime())) return dash;
   return new Intl.DateTimeFormat(undefined, { year: "numeric", month: "long", day: "numeric" }).format(date);
 }
 
@@ -231,7 +232,7 @@ export function SettingsPage() {
                   <Calendar size={18} style={{ color: "var(--muted)" }} />
                   <strong style={{ fontWeight: 600, color: "var(--text)" }}>{t("Member Since", "Member Since")}</strong>
                 </span>
-                <span style={{ fontWeight: 700, color: "var(--text)" }}>{formatDate(profile?.createdUtc)}</span>
+                <span style={{ fontWeight: 700, color: "var(--text)" }}>{formatDate(profile?.createdUtc, t)}</span>
               </div>
             </div>
           </article>

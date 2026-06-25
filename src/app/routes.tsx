@@ -1,29 +1,32 @@
-import { createBrowserRouter, Navigate, useParams } from "react-router-dom";
+import { lazy } from "react";
+import { createBrowserRouter, Navigate, Outlet, useParams } from "react-router-dom";
 import { AuthGuard } from "./components/AuthGuard";
 import { GuestGuard } from "./components/GuestGuard";
 import { RootLayout } from "./layout/RootLayout";
 import { SiteLayout } from "./layout/SiteLayout";
-import { DashboardPage } from "./pages/DashboardPage";
-import { AddonsPage } from "./pages/AddonsPage";
-import { BillingPage } from "./pages/BillingPage";
-import { SupportPage } from "./pages/SupportPage";
-import { SettingsPage } from "./pages/SettingsPage";
-import { NotFoundPage } from "./pages/NotFoundPage";
-import { LoginPage } from "./pages/LoginPage";
-import { LoginAsPage } from "./pages/LoginAsPage";
-import { RegisterPage } from "./pages/RegisterPage";
-import { ForgotPasswordPage } from "./pages/ForgotPasswordPage";
-import { ResetPasswordPage } from "./pages/ResetPasswordPage";
-import { BuySubscriptionPage } from "./pages/BuySubscriptionPage";
-import { TopupPage } from "./pages/TopupPage";
-import { DomainsPage } from "./pages/DomainsPage";
-import { SubscriptionLayout } from "./layout/SubscriptionLayout";
-import { SubscriptionOverviewPage } from "./pages/SubscriptionOverviewPage";
-import { SubscriptionDatabasesPage } from "./pages/SubscriptionDatabasesPage";
-import { SubscriptionFilesPage } from "./pages/SubscriptionFilesPage";
-import { SubscriptionSecurityPage } from "./pages/SubscriptionSecurityPage";
-import { SiteDomainsPage } from "./pages/SiteDomainsPage";
-import { SiteSettingsPage } from "./pages/SiteSettingsPage";
+
+// Lazy-loaded page components (named exports wrapped for React.lazy)
+const DashboardPage = lazy(() => import("./pages/DashboardPage").then(m => ({ default: m.DashboardPage })));
+const AddonsPage = lazy(() => import("./pages/AddonsPage").then(m => ({ default: m.AddonsPage })));
+const BillingPage = lazy(() => import("./pages/BillingPage").then(m => ({ default: m.BillingPage })));
+const SupportPage = lazy(() => import("./pages/SupportPage").then(m => ({ default: m.SupportPage })));
+const SettingsPage = lazy(() => import("./pages/SettingsPage").then(m => ({ default: m.SettingsPage })));
+const NotFoundPage = lazy(() => import("./pages/NotFoundPage").then(m => ({ default: m.NotFoundPage })));
+const LoginPage = lazy(() => import("./pages/LoginPage").then(m => ({ default: m.LoginPage })));
+const LoginAsPage = lazy(() => import("./pages/LoginAsPage").then(m => ({ default: m.LoginAsPage })));
+const RegisterPage = lazy(() => import("./pages/RegisterPage").then(m => ({ default: m.RegisterPage })));
+const ForgotPasswordPage = lazy(() => import("./pages/ForgotPasswordPage").then(m => ({ default: m.ForgotPasswordPage })));
+const ResetPasswordPage = lazy(() => import("./pages/ResetPasswordPage").then(m => ({ default: m.ResetPasswordPage })));
+const BuySubscriptionPage = lazy(() => import("./pages/BuySubscriptionPage").then(m => ({ default: m.BuySubscriptionPage })));
+const TopupPage = lazy(() => import("./pages/TopupPage").then(m => ({ default: m.TopupPage })));
+const DomainsPage = lazy(() => import("./pages/DomainsPage").then(m => ({ default: m.DomainsPage })));
+const SubscriptionLayout = lazy(() => import("./layout/SubscriptionLayout").then(m => ({ default: m.SubscriptionLayout })));
+const SubscriptionOverviewPage = lazy(() => import("./pages/SubscriptionOverviewPage").then(m => ({ default: m.SubscriptionOverviewPage })));
+const SubscriptionDatabasesPage = lazy(() => import("./pages/SubscriptionDatabasesPage").then(m => ({ default: m.SubscriptionDatabasesPage })));
+const SubscriptionFilesPage = lazy(() => import("./pages/SubscriptionFilesPage").then(m => ({ default: m.SubscriptionFilesPage })));
+const SubscriptionSecurityPage = lazy(() => import("./pages/SubscriptionSecurityPage").then(m => ({ default: m.SubscriptionSecurityPage })));
+const SiteDomainsPage = lazy(() => import("./pages/SiteDomainsPage").then(m => ({ default: m.SiteDomainsPage })));
+const SiteSettingsPage = lazy(() => import("./pages/SiteSettingsPage").then(m => ({ default: m.SiteSettingsPage })));
 
 function SiteSettingsRedirect() {
   const { subId, siteId } = useParams();

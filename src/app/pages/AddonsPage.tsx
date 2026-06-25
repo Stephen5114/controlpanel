@@ -328,7 +328,7 @@ export function AddonsPage() {
                           <span className="muted">{t(tier.description, tier.description)}</span>
                         </div>
                         <div className="addon-tier__price">
-                          {formatCurrency(tier.amount, tier.currency)}<span className="muted">/mo</span>
+                          {formatCurrency(tier.amount, tier.currency)}<span className="muted">{t("/mo", "/mo")}</span>
                         </div>
                       </label>
                     ))}
@@ -373,7 +373,7 @@ export function AddonsPage() {
                 {subscriptions.map((sub) => (
                   <tr key={sub.id}>
                     <td><strong>{sub.displayName}</strong></td>
-                    <td>{formatCurrency(sub.monthlyAmount, sub.currency)}/mo</td>
+                    <td>{formatCurrency(sub.monthlyAmount, sub.currency)}{t("/mo", "/mo")}</td>
                     <td>
                       <span className={`badge${sub.status === "active" ? " badge--success" : sub.status === "canceled" ? " badge--danger" : ""}`}>
                         {sub.status === "active" ? t("Active", "Active") : sub.status === "canceled" ? t("Canceled", "Canceled") : sub.status}

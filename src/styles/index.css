@@ -1677,6 +1677,18 @@ select {
     display: block;
   }
 
+  /* Hide brand text on mobile */
+  .brand__title,
+  .brand__subtitle {
+    display: none;
+  }
+
+  /* Hide text inside theme button and lang selector on mobile */
+  .theme-toggle-btn span,
+  .nav-lang-selector span {
+    display: none;
+  }
+
   .content-grid,
   .stat-grid,
   .two-up-grid,

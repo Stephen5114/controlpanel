@@ -19,6 +19,7 @@ export function RootLayout() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [accountBalance, setAccountBalance] = useState<{ amount: number; currency: string } | null>(null);
   const [username, setUsername] = useState<string | null>(null);
+  const [avatarDropdownOpen, setAvatarDropdownOpen] = useState(false);
   const navigate = useNavigate();
   const session = getCustomerSession();
   
@@ -47,6 +48,19 @@ export function RootLayout() {
   useEffect(() => {
     setTempLang(currentLang);
   }, [currentLang]);
+
+  // Close avatar dropdown when clicking outside
+  useEffect(() => {
+    if (!avatarDropdownOpen) return;
+    function handleClick(e: MouseEvent) {
+      const target = e.target as HTMLElement;
+      if (!target.closest(".account__avatar-wrapper")) {
+        setAvatarDropdownOpen(false);
+      }
+    }
+    document.addEventListener("click", handleClick);
+    return () => document.removeEventListener("click", handleClick);
+  }, [avatarDropdownOpen]);
 
   const handleSaveLangSettings = () => {
     setLang(tempLang);
@@ -147,7 +161,7 @@ export function RootLayout() {
           <button className="mobile-toggle" onClick={() => setMobileOpen((value) => !value)} type="button">
             {mobileOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
-          
+
           <button className="theme-toggle-btn" onClick={cycleTheme} type="button" title={t("Switch Theme", "Switch Theme")}>
             <ThemeIcon size={15} />
             <span>{t(theme === "day" ? "Day" : theme === "dark" ? "Dark" : "Classic", theme === "day" ? "Day" : theme === "dark" ? "Dark" : "Classic")}</span>
@@ -158,16 +172,25 @@ export function RootLayout() {
             <span>{currentLang}</span>
           </button>
 
-          <div className="account__info">
-            <div className="account__name">{username ?? session?.email ?? "Signed in"}</div>
-            <div className={`account__balance ${accountBalanceTone}`}>
-              <span>{t("Balance", "Balance")}</span>
-              <strong>{accountBalance ? formatCurrency(accountBalance.amount, accountBalance.currency) : "..."}</strong>
-            </div>
-          </div>
-          <button className="text-button" onClick={handleSignOut} type="button">{t("Sign out", "Sign out")}</button>
-          <div className="avatar">
-            <User size={18} />
+          <div className="account__avatar-wrapper" style={{ position: "relative" }}>
+            <button className="avatar" onClick={() => setAvatarDropdownOpen((v) => !v)} type="button" aria-label={t("Account menu", "Account menu")}>
+              <User size={18} />
+            </button>
+            {avatarDropdownOpen && (
+              <div className="account__dropdown">
+                <div className="account__dropdown-header">
+                  <div className="account__dropdown-name">{username ?? session?.email ?? "Signed in"}</div>
+                </div>
+                <div className={`account__dropdown-balance ${accountBalanceTone}`}>
+                  <span>{t("Balance", "Balance")}</span>
+                  <strong>{accountBalance ? formatCurrency(accountBalance.amount, accountBalance.currency) : "..."}</strong>
+                </div>
+                <div className="account__dropdown-divider" />
+                <button className="account__dropdown-item" onClick={() => { handleSignOut(); setAvatarDropdownOpen(false); }} type="button">
+                  {t("Sign out", "Sign out")}
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </header>

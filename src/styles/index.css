@@ -169,6 +169,97 @@ button:disabled {
   font-weight: 800;
   font-size: 0.8rem;
   box-shadow: 0 14px 24px rgba(37, 99, 235, 0.28);
+  cursor: pointer;
+  border: none;
+  padding: 0;
+  transition: transform 150ms ease, box-shadow 150ms ease;
+}
+
+.avatar:hover {
+  transform: scale(1.05);
+  box-shadow: 0 16px 28px rgba(37, 99, 235, 0.35);
+}
+
+.account__dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 220px;
+  background: var(--surface, #fff);
+  border: 1px solid var(--border, #e5e7eb);
+  border-radius: 12px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+  z-index: 1000;
+  padding: 12px;
+  animation: dropdownFadeIn 150ms ease;
+}
+
+@keyframes dropdownFadeIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.account__dropdown-header {
+  padding: 4px 8px 8px;
+}
+
+.account__dropdown-name {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--text, #111827);
+  word-break: break-word;
+}
+
+.account__dropdown-balance {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 8px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  background: var(--bg-muted, #f9fafb);
+}
+
+.account__dropdown-balance span {
+  color: var(--text-muted, #6b7280);
+}
+
+.account__dropdown-balance strong {
+  font-weight: 700;
+}
+
+.account__dropdown-balance.is-positive strong { color: #059669; }
+.account__dropdown-balance.is-negative strong { color: #dc2626; }
+.account__dropdown-balance.is-neutral strong,
+.account__dropdown-balance.is-loading strong { color: var(--text-muted, #6b7280); }
+
+.account__dropdown-divider {
+  height: 1px;
+  background: var(--border, #e5e7eb);
+  margin: 8px 0;
+}
+
+.account__dropdown-item {
+  display: block;
+  width: 100%;
+  padding: 8px 12px;
+  border: none;
+  background: none;
+  text-align: left;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text, #111827);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 100ms ease;
+}
+
+.account__dropdown-item:hover {
+  background: var(--bg-muted, #f3f4f6);
+}
+
+.account__dropdown-item:active {
+  background: var(--border, #e5e7eb);
 }
 
 .brand__mark {

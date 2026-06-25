@@ -31,21 +31,37 @@ function formatDate(value: string | null | undefined) {
   }).format(date);
 }
 
+function AddonsCategoryHeader({ categoryKey }: { categoryKey: string }) {
+  const { t } = useLocalization();
+  const titles: Record<string, { title: string; description: string }> = {
+    site_quota: { title: "Site Quota", description: "Add more website slots to your account" },
+    disk_space: { title: "Web Space", description: "Increase your disk storage allocation" },
+    database_quota: { title: "Database Quota", description: "Add more database slots" },
+    database_space: { title: "Database Space", description: "Increase database storage capacity" },
+    file_quota: { title: "File Quota", description: "Increase the maximum number of files allowed" },
+  };
+  const entry = titles[categoryKey];
+  return (
+    <>
+      <h3>{t(entry.title, entry.title)}</h3>
+      <p className="muted">{t(entry.description, entry.description)}</p>
+    </>
+  );
+}
+
 type AddonCategory = {
   key: string;
-  title: string;
-  description: string;
   icon: typeof Package;
   tiers: AddonPriceTier[];
 };
 
 function groupAddonsByCategory(addons: AddonPriceTier[]): AddonCategory[] {
   const categories: AddonCategory[] = [
-    { key: "site_quota", title: "Site Quota", description: "Add more website slots to your account", icon: Globe, tiers: [] },
-    { key: "disk_space", title: "Web Space", description: "Increase your disk storage allocation", icon: HardDrive, tiers: [] },
-    { key: "database_quota", title: "Database Quota", description: "Add more database slots", icon: Database, tiers: [] },
-    { key: "database_space", title: "Database Space", description: "Increase database storage capacity", icon: Database, tiers: [] },
-    { key: "file_quota", title: "File Quota", description: "Increase the maximum number of files allowed", icon: FileText, tiers: [] },
+    { key: "site_quota", icon: Globe, tiers: [] },
+    { key: "disk_space", icon: HardDrive, tiers: [] },
+    { key: "database_quota", icon: Database, tiers: [] },
+    { key: "database_space", icon: Database, tiers: [] },
+    { key: "file_quota", icon: FileText, tiers: [] },
   ];
 
   for (const addon of addons) {
@@ -293,8 +309,7 @@ export function AddonsPage() {
                   <div className="addon-card__header">
                     <Icon size={20} />
                     <div>
-                      <h3>{t(cat.title, cat.title)}</h3>
-                      <p className="muted">{t(cat.description, cat.description)}</p>
+                      <AddonsCategoryHeader categoryKey={cat.key} />
                     </div>
                   </div>
 

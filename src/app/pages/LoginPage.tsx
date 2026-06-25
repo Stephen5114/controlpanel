@@ -12,25 +12,32 @@ export function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams] = useSearchParams();
+  const { currentLang, setLang, t } = useLocalization();
+
   const [email, setEmail] = useState(() => searchParams.get("email") ?? "");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(() =>
-    searchParams.get("verificationError") === "1"
-      ? "This verification link is invalid or has expired. Request a new code below."
-      : null);
-  const [notice, setNotice] = useState<string | null>(() =>
-    searchParams.get("passwordReset") === "1"
-      ? "Password reset successful. Sign in with your new password."
-      : searchParams.get("verified") === "1"
-        ? "Email verified. Sign in to continue."
-        : null);
+  const [submitting, setSubmitting] = useState(false);
+  const [resending, setResending] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [verificationEmail, setVerificationEmail] = useState<string | null>(() =>
     searchParams.get("verificationError") === "1" ? searchParams.get("email") : null);
-  const [submitting, setSubmitting] = useState(false);
-  const [resending, setResending] = useState(false);
 
-  const { currentLang, setLang, t } = useLocalization();
+  const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
+
+  // Set initial error/notice from URL params (translated)
+  useEffect(() => {
+    if (searchParams.get("verificationError") === "1") {
+      setError(t("This verification link is invalid or has expired. Request a new code below.", "This verification link is invalid or has expired. Request a new code below."));
+    }
+    if (searchParams.get("passwordReset") === "1") {
+      setNotice(t("Password reset successful. Sign in with your new password.", "Password reset successful. Sign in with your new password."));
+    }
+    if (searchParams.get("verified") === "1") {
+      setNotice(t("Email verified. Sign in to continue.", "Email verified. Sign in to continue."));
+    }
+  }, [searchParams, t]);
+
   const [isLangModalOpen, setIsLangModalOpen] = useState(false);
   const [tempLang, setTempLang] = useState(currentLang);
 
@@ -61,7 +68,7 @@ export function LoginPage() {
         if (result.requiresEmailVerification) {
           const normalized = email.trim().toLowerCase();
           setVerificationEmail(normalized);
-          setNotice("Enter the 6-digit code we emailed you, or use the link in the email.");
+          setNotice(t("Enter the 6-digit code we emailed you, or use the link in the email.", "Enter the 6-digit code we emailed you, or use the link in the email."));
         }
         return;
       }
@@ -73,7 +80,7 @@ export function LoginPage() {
       });
       navigate(target, { replace: true });
     } catch (requestError) {
-      setError(requestError instanceof Error ? requestError.message : "Cannot connect to backend.");
+      setError(requestError instanceof Error ? requestError.message : t("Cannot connect to backend.", "Cannot connect to backend."));
     } finally {
       setSubmitting(false);
     }
@@ -82,7 +89,7 @@ export function LoginPage() {
   async function handleStandaloneResend() {
     const normalizedEmail = email.trim();
     if (!normalizedEmail) {
-      setError("Enter your email first so we know where to send the verification link.");
+      setError(t("Enter your email first so we know where to send the verification link.", "Enter your email first so we know where to send the verification link."));
       return;
     }
 
@@ -106,7 +113,7 @@ export function LoginPage() {
       setPreviewUrl(result.verificationPreviewUrl);
       setVerificationEmail(normalizedEmail.toLowerCase());
     } catch (requestError) {
-      setError(requestError instanceof Error ? requestError.message : "Cannot connect to backend.");
+      setError(requestError instanceof Error ? requestError.message : t("Cannot connect to backend.", "Cannot connect to backend."));
     } finally {
       setResending(false);
     }
@@ -114,7 +121,7 @@ export function LoginPage() {
 
   function handleVerified(verifiedEmail: string) {
     setVerificationEmail(null);
-    setNotice("Email verified. Sign in to continue.");
+    setNotice(t("Email verified. Sign in to continue.", "Email verified. Sign in to continue."));
     const params = new URLSearchParams({ verified: "1", email: verifiedEmail });
     navigate(`/login?${params.toString()}`, { replace: true });
   }
@@ -143,7 +150,7 @@ export function LoginPage() {
             <input
               value={email}
               onChange={(event) => setEmail(event.target.value)}
-              placeholder="you@company.com"
+              placeholder={t("you@company.com", "you@company.com")}
               required
               type="email"
             />

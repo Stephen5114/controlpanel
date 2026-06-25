@@ -6,7 +6,7 @@ export const MIN_PASSWORD_LENGTH = 8;
 
 export type PasswordRule = {
   id: string;
-  label: string;
+  labelKey: string;
   passed: boolean;
 };
 
@@ -14,27 +14,27 @@ export function evaluatePassword(password: string): PasswordRule[] {
   return [
     {
       id: "length",
-      label: `At least ${MIN_PASSWORD_LENGTH} characters`,
+      labelKey: "At least {min} characters",
       passed: password.length >= MIN_PASSWORD_LENGTH,
     },
     {
       id: "lower",
-      label: "A lowercase letter",
+      labelKey: "A lowercase letter",
       passed: /\p{Ll}/u.test(password),
     },
     {
       id: "upper",
-      label: "An uppercase letter",
+      labelKey: "An uppercase letter",
       passed: /\p{Lu}/u.test(password),
     },
     {
       id: "digit",
-      label: "A number",
+      labelKey: "A number",
       passed: /\d/.test(password),
     },
     {
       id: "symbol",
-      label: "A symbol (e.g. !@#$%)",
+      labelKey: "A symbol (e.g. !@#$%)",
       passed: /[^\p{L}\p{N}]/u.test(password),
     },
   ];

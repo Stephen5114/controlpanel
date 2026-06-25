@@ -1,5 +1,6 @@
 import { FormEvent, useEffect, useId, useState } from "react";
 import { resendVerificationEmail, verifyEmailWithCode } from "../lib/customer-api";
+import { useLocalization } from "../lib/i18n";
 
 type EmailVerificationCodePanelProps = {
   email: string;
@@ -16,6 +17,7 @@ export function EmailVerificationCodePanel({
   onVerified,
   resendCooldownSeconds = RESEND_COOLDOWN_DEFAULT,
 }: EmailVerificationCodePanelProps) {
+  const { t } = useLocalization();
   const codeInputId = useId();
   const [code, setCode] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -43,7 +45,7 @@ export function EmailVerificationCodePanel({
     event.preventDefault();
     const trimmedCode = code.trim();
     if (!/^\d{6}$/.test(trimmedCode)) {
-      setError("Enter the 6-digit code from your email.");
+      setError(t("Enter the 6-digit code from your email.", "Enter the 6-digit code from your email."));
       return;
     }
 
@@ -59,7 +61,7 @@ export function EmailVerificationCodePanel({
       }
       onVerified(result.email ?? email);
     } catch (requestError) {
-      setError(requestError instanceof Error ? requestError.message : "Cannot connect to backend.");
+      setError(requestError instanceof Error ? requestError.message : t("Cannot connect to backend.", "Cannot connect to backend."));
     } finally {
       setSubmitting(false);
     }
@@ -85,19 +87,25 @@ export function EmailVerificationCodePanel({
       setCooldownRemaining(resendCooldownSeconds);
       setCode("");
     } catch (requestError) {
-      setError(requestError instanceof Error ? requestError.message : "Cannot connect to backend.");
+      setError(requestError instanceof Error ? requestError.message : t("Cannot connect to backend.", "Cannot connect to backend."));
     } finally {
       setResending(false);
     }
   }
 
+  const resendText = resending
+    ? t("Sending...", "Sending...")
+    : cooldownRemaining > 0
+      ? t("Resend in {seconds}s", "Resend in {seconds}s").replace("{seconds}", String(cooldownRemaining))
+      : t("Resend code", "Resend code");
+
   return (
     <form className="otp-panel" onSubmit={handleSubmit}>
       <p className="otp-panel__hint">
-        Enter the 6-digit code we emailed to <strong>{email}</strong>.
+        {t("Enter the 6-digit code we emailed to", "Enter the 6-digit code we emailed to")} <strong>{email}</strong>.
       </p>
       <label className="otp-panel__field" htmlFor={codeInputId}>
-        <span>Verification code</span>
+        <span>{t("Verification code", "Verification code")}</span>
         <input
           autoComplete="one-time-code"
           className="otp-panel__input"
@@ -120,7 +128,7 @@ export function EmailVerificationCodePanel({
 
       <div className="auth-action-row">
         <button className="primary-button" disabled={submitting || code.length !== 6} type="submit">
-          {submitting ? "Verifying..." : "Verify email"}
+          {submitting ? t("Verifying...", "Verifying...") : t("Verify email", "Verify email")}
         </button>
         <button
           className="secondary-button"
@@ -128,15 +136,11 @@ export function EmailVerificationCodePanel({
           onClick={handleResend}
           type="button"
         >
-          {resending
-            ? "Sending..."
-            : cooldownRemaining > 0
-              ? `Resend in ${cooldownRemaining}s`
-              : "Resend code"}
+          {resendText}
         </button>
         {activePreviewUrl ? (
           <a className="secondary-button" href={activePreviewUrl}>
-            Open verification link
+            {t("Open verification link", "Open verification link")}
           </a>
         ) : null}
       </div>

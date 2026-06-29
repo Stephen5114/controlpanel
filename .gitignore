@@ -1,0 +1,48 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# TypeScript build cache
+*.tsbuildinfo
+
+# Vite compiled config (source is vite.config.ts)
+vite.config.js
+vite.config.d.ts
+
+# Environment files
+.env.local
+.env.*.local
+.env.production
+
+# .NET / NuGet tooling (not part of the frontend project)
+.appdata/
+.dotnet-home/
+.nuget/
+
+# Logs and temp files
+*.log
+dev-server.log
+tsc_output.txt
+tmp_*.js
+
+# Backup files
+*.bak
+
+# AI/design scratch files
+.codex-stitch/
+
+# Claude Code local config
+.claude/
+
+# Environment files (all)
+.env
+
+# Editor / OS
+.vscode/
+.idea/
+*.suo
+*.sw?
+Thumbs.db
+.DS_Store

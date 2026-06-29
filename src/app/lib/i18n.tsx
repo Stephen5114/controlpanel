@@ -36,8 +36,8 @@ export function useLocalization() {
   return context;
 }
 
-// ── Language detection (unchanged from original) ─────────────────────────────
-function detectInitialLang(): string {
+// ── Language detection (exported for pre-render fallback) ────────────────────
+export function detectInitialLang(): string {
   const cookies = document.cookie.split(";").reduce((acc, cookie) => {
     const parts = cookie.trim().split("=");
     if (parts.length >= 2) {

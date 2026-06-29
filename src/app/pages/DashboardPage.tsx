@@ -1,4 +1,4 @@
-import { Globe, Plus, Server, Activity, CalendarClock, AlertTriangle, ArrowUpCircle, Database, RefreshCw, Wallet, CreditCard } from "lucide-react";
+import { Globe, Plus, Server, Activity, CalendarClock, AlertTriangle, ArrowUpCircle, Database, RefreshCw, Wallet, CreditCard, ArrowUpDown } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
@@ -70,6 +70,7 @@ export function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [busyKey, setBusyKey] = useState<string | null>(null);
+  const [sortBy, setSortBy] = useState<"name-asc" | "name-desc" | "renewal-asc" | "renewal-desc">("name-asc");
   const [confirmRenew, setConfirmRenew] = useState<{ sub: HostingSubscription; billing: BillingSubscriptionView | undefined } | null>(null);
   const navigate = useNavigate();
 
@@ -188,10 +189,19 @@ export function DashboardPage() {
   }, [state.billing]);
 
   // Canceled subscriptions are not manageable — keep them off the dashboard.
-  const visibleSubs = useMemo(
-    () => state.subs.filter((sub) => billingByScope.get(sub.id.toLowerCase())?.status !== "canceled"),
-    [state.subs, billingByScope],
-  );
+  const visibleSubs = useMemo(() => {
+    const filtered = state.subs.filter((sub) => billingByScope.get(sub.id.toLowerCase())?.status !== "canceled");
+    return [...filtered].sort((a, b) => {
+      if (sortBy === "name-asc") return a.name.localeCompare(b.name);
+      if (sortBy === "name-desc") return b.name.localeCompare(a.name);
+      const getTime = (sub: typeof a) => {
+        const billing = billingByScope.get(sub.id.toLowerCase());
+        const dateStr = billing?.nextInvoiceAtUtc ?? billing?.currentPeriodEndUtc;
+        return dateStr ? new Date(dateStr).getTime() : Infinity;
+      };
+      return sortBy === "renewal-asc" ? getTime(a) - getTime(b) : getTime(b) - getTime(a);
+    });
+  }, [state.subs, billingByScope, sortBy]);
 
   const currency = state.summary?.currency ?? "USD";
 
@@ -298,8 +308,23 @@ export function DashboardPage() {
 
       <section className="stack-sm">
         <div className="section-head">
-          <h3>{t("Your Subscriptions", "Your Subscriptions")}</h3>
-          <p className="muted">{t("Select a subscription plan to manage its assigned websites and resources.", "Select a subscription plan to manage its assigned websites and resources.")}</p>
+          <div>
+            <h3 style={{ margin: 0 }}>{t("Your Subscriptions", "Your Subscriptions")}</h3>
+            <p className="muted" style={{ margin: 0 }}>{t("Select a subscription plan to manage its assigned websites and resources.", "Select a subscription plan to manage its assigned websites and resources.")}</p>
+          </div>
+          <label style={{ display: "flex", alignItems: "center", gap: "6px", flexShrink: 0, fontSize: "0.85rem", color: "var(--muted)" }}>
+            <ArrowUpDown size={14} />
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
+              style={{ minHeight: "auto", height: "34px", padding: "0 10px", fontSize: "0.85rem", borderRadius: "8px", border: "1px solid var(--border)", background: "var(--surface)", color: "var(--text)", cursor: "pointer" }}
+            >
+              <option value="name-asc">{t("Name A → Z", "Name A → Z")}</option>
+              <option value="name-desc">{t("Name Z → A", "Name Z → A")}</option>
+              <option value="renewal-asc">{t("Renewal (Soonest)", "Renewal (Soonest)")}</option>
+              <option value="renewal-desc">{t("Renewal (Latest)", "Renewal (Latest)")}</option>
+            </select>
+          </label>
         </div>
 
         {loading && visibleSubs.length === 0 ? <div className="empty-panel">{t("Loading subscriptions...", "Loading subscriptions...")}</div> : null}

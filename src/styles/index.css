@@ -536,6 +536,18 @@ button:disabled {
   100% { opacity: 1; }
 }
 
+/* Loading-only auth-brand — full screen, no centering */
+.auth-brand--loading {
+  min-height: 100vh;
+  justify-content: flex-start;
+}
+
+.auth-brand--loading .auth-brand-host,
+.auth-brand--loading .auth-brand-inner,
+.auth-brand--loading .auth-brand-badges {
+  display: none;
+}
+
 /* Server racks — blade silhouettes */
 .auth-brand-racks {
   position: absolute;

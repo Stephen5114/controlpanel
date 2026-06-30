@@ -7,7 +7,7 @@ import type {
   SupportOperationResponse,
   SupportChatMessage,
   SupportChatSession,
-} from "./customer-api";
+} from "./api-types";
 
 // ── Support tickets ─────────────────────────────────────────────────────────
 

@@ -30,7 +30,7 @@ import type {
   RegionDefinition,
   HostingCatalogResponse,
   CustomerProfile,
-} from "./customer-api";
+} from "./api-types";
 import { apiRequest, apiBinaryRequest, withCustomerHeaders } from "./api-core";
 import type { CustomerSession } from "./api-core";
 

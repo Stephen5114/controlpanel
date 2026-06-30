@@ -12,7 +12,7 @@ import type {
   BillingOverview,
   BillingCheckoutResponse,
   UpgradePreview,
-} from "./customer-api";
+} from "./api-types";
 
 // ── Billing overview ────────────────────────────────────────────────────────
 

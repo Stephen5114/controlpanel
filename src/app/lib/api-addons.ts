@@ -6,7 +6,7 @@ import type {
   SubscriptionChoice,
   AddonCatalogResponse,
   BillingCheckoutResponse,
-} from "./customer-api";
+} from "./api-types";
 
 export function getAddonCatalog(session: CustomerSession) {
   return apiRequest<AddonCatalogResponse>("/api/addons/catalog", {

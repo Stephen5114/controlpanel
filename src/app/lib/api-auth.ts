@@ -6,7 +6,7 @@ import type {
   VerifyEmailResponse,
   ForgotPasswordResponse,
   ResetPasswordResponse,
-} from "./customer-api";
+} from "./api-types";
 
 export function registerCustomer(payload: { email: string; password: string; username?: string; turnstileToken?: string }) {
   return apiRequest<RegisterCustomerResponse>("/api/auth/register", {

@@ -12,7 +12,7 @@ import type {
   SubscriptionSecuritySite,
   HostedDatabase,
   HostingSubscription,
-} from "./customer-api";
+} from "./api-types";
 import type { CustomerSession } from "./api-core";
 import { getCustomerSites } from "./api-sites";
 import { buildSubscriptionId } from "./subscription-utils";

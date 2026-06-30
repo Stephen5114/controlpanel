@@ -1,4 +1,3 @@
-import "../../styles/subscription-overview.css";
 import { useCallback, useEffect, useMemo, useState, type FormEvent } from "react";
 import { driver, type DriveStep } from "driver.js";
 import { useNavigate, useParams } from "react-router-dom";

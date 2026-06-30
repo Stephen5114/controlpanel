@@ -1,4 +1,3 @@
-import "../../styles/dashboard.css";
 import { Globe, Plus, Server, Activity, CalendarClock, AlertTriangle, ArrowUpCircle, Database, RefreshCw, Wallet, CreditCard, ArrowUpDown } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";

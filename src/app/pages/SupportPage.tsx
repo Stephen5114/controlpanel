@@ -1,4 +1,3 @@
-import "../../styles/support.css";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { HubConnection, HubConnectionBuilder, HubConnectionState, LogLevel } from "@microsoft/signalr";
 import { BookOpen, ImageIcon, Lock, MessageSquare, Plus, Search, Send, Ticket, Wifi, WifiOff } from "lucide-react";

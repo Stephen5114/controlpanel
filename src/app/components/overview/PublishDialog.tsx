@@ -23,6 +23,18 @@ interface PublishDialogProps {
   onGetDeployLog: (siteId: string) => Promise<{ success: boolean; data?: { logText: string } }>;
 }
 
+function estimateDeployProgress(log: string | null): number {
+  if (!log) return 8;
+  const lower = log.toLowerCase();
+  if (lower.includes("succeeded") || lower.includes("complete") || lower.includes("finished")) return 95;
+  if (lower.includes("restart") || lower.includes("recycle") || lower.includes("iisreset")) return 82;
+  if (lower.includes("web.config") || lower.includes("configur")) return 68;
+  if (lower.includes("build") || lower.includes("compil")) return 54;
+  if (lower.includes("npm install") || lower.includes("install")) return 38;
+  if (lower.includes("clone") || lower.includes("fetch") || lower.includes("pull")) return 22;
+  return 12;
+}
+
 export function PublishDialog({
   site, stackCatalog, availableStacks, onlyOneStack,
   onClose, onStackChange, onUpdateStack, onPublish,
@@ -47,7 +59,7 @@ export function PublishDialog({
   const [isSubmittingStack, setIsSubmittingStack] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
   const [isDownloadingProfile, setIsDownloadingProfile] = useState(false);
-  const [deployMode, setDeployMode] = useState<"git" | "ftp">(site.gitRepoUrl ? "git" : "ftp");
+  const [deployMode, setDeployMode] = useState<"git" | "ftp">("git");
   const [gitRepoUrl, setGitRepoUrl] = useState(site.gitRepoUrl ?? "");
   const [gitBranch, setGitBranch] = useState(site.gitBranch ?? "main");
   const [gitPat, setGitPat] = useState("");
@@ -253,9 +265,21 @@ export function PublishDialog({
         {/* Status messages */}
         {publishError && <div className="inline-message inline-message--error" style={{ marginBottom: "16px" }}>{publishError}</div>}
         {!publishError && site.hasActivePublishJob && (
-          <div className="inline-message" style={{ background: "#eff6ff", color: "#1e40af", borderColor: "#bfdbfe", marginBottom: "16px" }}>
-            <Loader2 size={14} className="al-spin" style={{ marginRight: 6, verticalAlign: "-2px" }} />
-            {t("Publishing... the agent is preparing your web container.", "Publishing... the agent is preparing your web container.")}
+          <div style={{ background: "#eff6ff", border: "1px solid #bfdbfe", borderRadius: 10, padding: "12px 14px", marginBottom: "16px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10, color: "#1e40af" }}>
+              <Loader2 size={14} className="al-spin" />
+              <span style={{ fontSize: "0.88rem", fontWeight: 600 }}>{t("Publishing... the agent is preparing your web container.", "Publishing... the agent is preparing your web container.")}</span>
+            </div>
+            <div style={{ height: 6, borderRadius: 999, background: "#bfdbfe", overflow: "hidden" }}>
+              <div style={{ height: "100%", width: `${estimateDeployProgress(deployLog)}%`, background: "linear-gradient(90deg, #2563eb, #60a5fa)", borderRadius: 999, transition: "width 0.8s ease" }} />
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between", marginTop: 6, fontSize: "0.68rem", color: "#3b82f6" }}>
+              {(["Queued", "Cloning", "Installing", "Building", "Deploying", "Done"] as const).map((step, i, arr) => {
+                const stepPct = i === 0 ? 0 : (i / (arr.length - 1)) * 95;
+                const progress = estimateDeployProgress(deployLog);
+                return <span key={step} style={{ fontWeight: progress >= stepPct ? 700 : 400, opacity: progress >= stepPct ? 1 : 0.45 }}>{step}</span>;
+              })}
+            </div>
           </div>
         )}
         {!publishError && !site.hasActivePublishJob && site.lastPublishStatus?.toLowerCase() === "succeeded" && (
@@ -346,7 +370,7 @@ export function PublishDialog({
                 <div style={{ display: "grid", gap: 12, padding: 16, borderRadius: 14, border: "1px solid var(--border)", background: "var(--surface-soft)" }}>
                   <label style={{ display: "grid", gap: 4 }}>
                     <span style={{ fontSize: "0.82rem", fontWeight: 600, color: "var(--muted)" }}>Repository URL</span>
-                    <input type="url" placeholder="https://github.com/your-org/your-repo" value={gitRepoUrl} onChange={(e) => setGitRepoUrl(e.target.value)}
+                    <input type="url" placeholder="https://github.com/youruser/xxxx.git" value={gitRepoUrl} onChange={(e) => setGitRepoUrl(e.target.value)}
                       disabled={isSavingGitConfig || isDeployingFromGit}
                       style={{ width: "100%", minHeight: 42, padding: "0 14px", borderRadius: 10, border: "1.5px solid var(--border)", background: "var(--surface)", fontSize: "0.88rem", outline: "none", boxSizing: "border-box" }} />
                   </label>

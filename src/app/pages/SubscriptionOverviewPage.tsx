@@ -183,6 +183,15 @@ export function SubscriptionOverviewPage() {
     return () => window.clearInterval(intervalId);
   }, [publishTarget?.hasActivePublishJob, publishTarget?.id, subId]);
 
+  // Keep the open publish dialog in sync with polled site data
+  useEffect(() => {
+    setPublishTarget((current) => {
+      if (!current) return current;
+      const latest = sites.find((s) => s.id === current.id);
+      return latest ? { ...current, ...latest } : current;
+    });
+  }, [sites]);
+
   const availableStacks = useMemo(() => getAvailableStacks(stackCatalog), [stackCatalog]);
   const onlyOneStack = availableStacks.length === 1;
 

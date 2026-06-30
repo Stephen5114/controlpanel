@@ -2443,7 +2443,7 @@ select {
   .auth-brand-inner { transform: scale(0.92); transform-origin: top center; }
 
   /* Align nav-lang-selector with auth-brand-logo top on tablet */
-  .nav-lang-selector { margin-top: 20px; }
+  .auth-shell .nav-lang-selector { margin-top: 20px; }
 
   .topnav,
   .account__info {
@@ -2533,7 +2533,7 @@ select {
   .auth-brand-orb { display: none; }
 
   /* Align nav-lang-selector with auth-brand-logo top on mobile */
-  .nav-lang-selector { margin-top: 12px; }
+  .auth-shell .nav-lang-selector { margin-top: 12px; }
 
   .site-card__actions {
     width: 100%;

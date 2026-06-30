@@ -1,3 +1,4 @@
+import "../../styles/domain-bind.css";
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { driver, type DriveStep } from "driver.js";
 import {

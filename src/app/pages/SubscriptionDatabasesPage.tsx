@@ -1,3 +1,5 @@
+import "../../styles/databases.css";
+import "../../styles/databases-v2.css";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { useParams } from "react-router-dom";
 import { getCustomerSession } from "../lib/customer-session";

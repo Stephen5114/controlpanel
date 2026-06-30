@@ -1,0 +1,127 @@
+/* Support page enhancements */
+.support-reply textarea {
+  width: 100%;
+  border: 0;
+  outline: none;
+  resize: vertical;
+  min-height: 38px;
+  max-height: 160px;
+  color: var(--text);
+  background: transparent;
+  font: inherit;
+}
+
+.support-reply--stacked {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+}
+
+.support-reply__actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.support-reply__send {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  height: 36px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--primary);
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.support-reply__send:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.support-attach-button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border: 1px dashed var(--border);
+  border-radius: 12px;
+  color: var(--primary);
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.support-attach-button input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.support-ticket-row__badges {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.support-status--reply-needed {
+  background: rgba(217, 119, 6, 0.14);
+  color: #b45309;
+}
+
+.support-reopen-hint {
+  margin: 4px 0 0;
+  font-size: 13px;
+}
+
+.support-empty {
+  display: grid;
+  gap: 12px;
+  justify-items: start;
+  padding: 16px 4px;
+}
+
+.support-kb-view {
+  display: grid;
+  gap: 16px;
+}
+
+.support-skeleton {
+  display: grid;
+  gap: 10px;
+}
+
+.support-skeleton__row {
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+}
+
+.support-skeleton__pill,
+.support-skeleton__line {
+  height: 12px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, rgba(148, 163, 184, 0.18) 25%, rgba(148, 163, 184, 0.32) 37%, rgba(148, 163, 184, 0.18) 63%);
+  background-size: 400% 100%;
+  animation: support-skeleton-shimmer 1.3s ease infinite;
+}
+
+.support-skeleton__pill { width: 84px; height: 18px; border-radius: 999px; }
+.support-skeleton__line { width: 100%; }
+.support-skeleton__line--short { width: 55%; }
+
+@keyframes support-skeleton-shimmer {
+  0% { background-position: 100% 0; }
+  100% { background-position: 0 0; }
+}
+

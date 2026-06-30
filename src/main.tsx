@@ -4,9 +4,11 @@ import { RouterProvider } from "react-router-dom";
 import { router } from "./app/routes";
 import { LocalizationProvider } from "./app/lib/i18n";
 import { ThemeProvider } from "./app/lib/theme";
-import "./styles/index.css";
-import "driver.js/dist/driver.css";
 
+import "./styles/index.css";
+import "./styles/auth-loading.css";
+import "./styles/ui-controls.css";
+import "driver.js/dist/driver.css";
 function AuthLoadingFallback() {
   return (
     <div className="auth-brand auth-brand--loading">

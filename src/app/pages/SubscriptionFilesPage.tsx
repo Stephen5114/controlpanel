@@ -1,3 +1,4 @@
+import "../../styles/files.css";
 import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import { useLocalization } from "../lib/i18n";
 import { useParams, useSearchParams } from "react-router-dom";

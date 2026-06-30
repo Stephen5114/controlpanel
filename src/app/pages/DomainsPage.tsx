@@ -1,3 +1,4 @@
+import "../../styles/domains.css";
 import { useEffect, useMemo, useState, type FormEvent, type ReactNode } from "react";
 import {
   AlertTriangle,

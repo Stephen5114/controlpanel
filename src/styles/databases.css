@@ -1,0 +1,628 @@
+/* Site databases studio */
+.site-content {
+  min-width: 0;
+}
+
+.db-studio {
+  position: relative;
+  display: grid;
+  gap: 24px;
+  padding: 28px;
+  border-radius: 36px;
+  background: #f7f9fb;
+  box-shadow: 0 24px 48px rgba(25, 28, 30, 0.06);
+  overflow: hidden;
+}
+
+.db-studio::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at top left, rgba(43, 75, 185, 0.14), transparent 24%),
+    radial-gradient(circle at 78% 0%, rgba(148, 55, 0, 0.09), transparent 18%);
+  pointer-events: none;
+}
+
+.db-studio>* {
+  position: relative;
+  z-index: 1;
+}
+
+.db-studio__hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 20px;
+  align-items: start;
+  padding: 30px;
+  border-radius: 32px;
+  background:
+    radial-gradient(circle at top right, rgba(72, 101, 211, 0.14), transparent 28%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(242, 244, 246, 0.98));
+}
+
+.db-studio__eyebrow,
+.db-studio__section-label,
+.db-record__eyebrow,
+.db-metric__eyebrow {
+  margin: 0;
+  color: #943700;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.db-studio__hero h1,
+.db-studio__inventory h2,
+.db-note h3,
+.db-composer h2,
+.db-record h3,
+.db-record h4 {
+  margin: 0;
+  font-family: "Manrope", "Inter", sans-serif;
+  letter-spacing: -0.04em;
+  color: #191c1e;
+}
+
+.db-studio__hero h1 {
+  margin-top: 8px;
+  font-size: clamp(2.4rem, 4vw, 4rem);
+  line-height: 0.95;
+}
+
+.db-studio__lede {
+  margin: 14px 0 0;
+  max-width: 760px;
+  color: #434655;
+  font-size: 1rem;
+  line-height: 1.8;
+}
+
+.db-studio__hero-meta,
+.db-studio__hero-actions,
+.db-record__header,
+.db-record__credential-head,
+.db-studio__section-head,
+.db-composer__header,
+.db-composer__actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.db-studio__hero-meta {
+  margin-top: 18px;
+}
+
+.db-studio__meta-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: #d5e3fc;
+  color: #57657a;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.db-studio__primary-button,
+.db-studio__ghost-button,
+.db-studio__icon-button,
+.db-note__link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border: 0;
+  cursor: pointer;
+  transition: background-color 180ms ease, color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+}
+
+.db-studio__primary-button {
+  min-height: 48px;
+  padding: 0 18px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #2b4bb9, #4865d3);
+  color: #fff;
+  font-weight: 700;
+  box-shadow: 0 20px 34px rgba(43, 75, 185, 0.24);
+}
+
+.db-studio__primary-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 24px 38px rgba(43, 75, 185, 0.28);
+}
+
+.db-studio__ghost-button {
+  min-height: 46px;
+  padding: 0 16px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.88);
+  color: #173bab;
+  font-weight: 700;
+}
+
+.db-studio__ghost-button:hover,
+.db-studio__icon-button:hover,
+.db-note__link:hover {
+  background: rgba(230, 232, 234, 0.92);
+  color: #173bab;
+}
+
+.db-studio__icon-button {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  background: var(--surface);
+  color: #173bab;
+}
+
+.db-studio__primary-button:focus-visible,
+.db-studio__ghost-button:focus-visible,
+.db-studio__icon-button:focus-visible,
+.db-note__link:focus-visible,
+.db-composer__field input:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(43, 75, 185, 0.16);
+}
+
+.db-studio__metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.db-metric {
+  display: grid;
+  gap: 12px;
+  padding: 26px;
+  border-radius: 28px;
+  background: var(--surface);
+  box-shadow: 0 18px 34px rgba(25, 28, 30, 0.05);
+}
+
+.db-metric strong {
+  font-family: "Manrope", "Inter", sans-serif;
+  font-size: clamp(2.2rem, 4vw, 3.5rem);
+  line-height: 0.95;
+  color: #191c1e;
+}
+
+.db-metric p {
+  margin: 0;
+  color: #57657a;
+  line-height: 1.7;
+}
+
+.db-metric--dark {
+  color: #fff;
+  background: linear-gradient(135deg, #111c2d, #1f4273);
+}
+
+.db-metric--dark strong,
+.db-metric--dark p,
+.db-metric--dark .db-metric__eyebrow {
+  color: inherit;
+}
+
+.db-metric--dark .db-metric__eyebrow {
+  opacity: 0.68;
+}
+
+.db-metric--soft {
+  background: #eff4ff;
+}
+
+.db-studio__message {
+  padding: 16px 18px;
+  border-radius: 18px;
+  background: #f2f4f6;
+  color: #434655;
+}
+
+.db-studio__message--error {
+  background: #ffdad6;
+  color: #93000a;
+}
+
+.db-studio__workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1.45fr) minmax(280px, 0.9fr);
+  gap: 20px;
+  align-items: start;
+}
+
+.db-studio__inventory,
+.db-note {
+  display: grid;
+  gap: 18px;
+  padding: 24px;
+  border-radius: 28px;
+  background: var(--surface);
+  box-shadow: 0 18px 34px rgba(25, 28, 30, 0.05);
+}
+
+.db-studio__section-head {
+  align-items: flex-end;
+}
+
+.db-studio__section-head h2 {
+  margin-top: 6px;
+  font-size: clamp(1.7rem, 2vw, 2.2rem);
+  line-height: 1;
+}
+
+.db-studio__section-head p {
+  margin: 0;
+  color: #57657a;
+  font-size: 0.82rem;
+}
+
+.db-studio__list,
+.db-studio__rail,
+.db-studio__skeleton-list {
+  display: grid;
+  gap: 16px;
+}
+
+.db-record {
+  display: grid;
+  gap: 18px;
+  padding: 22px;
+  border-radius: 24px;
+  background: #f2f4f6;
+  transition: transform 180ms ease, background-color 180ms ease, box-shadow 180ms ease;
+}
+
+.db-record:hover {
+  transform: translateY(-1px);
+  background: var(--surface);
+  box-shadow: 0 18px 34px rgba(25, 28, 30, 0.05);
+}
+
+.db-record__identity {
+  display: grid;
+  gap: 8px;
+}
+
+.db-record h3 {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.db-record__physical-name,
+.db-record__credential p,
+.db-note p,
+.db-composer__copy {
+  margin: 0;
+  color: #57657a;
+  line-height: 1.7;
+}
+
+.db-record__physical-name {
+  font-family: "Inter", "Segoe UI", sans-serif;
+  font-size: 0.94rem;
+  overflow-wrap: anywhere;
+}
+
+.db-record__meta {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.db-record__meta div {
+  display: grid;
+  gap: 6px;
+}
+
+.db-record__meta span {
+  color: #737686;
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.db-record__meta strong {
+  color: #191c1e;
+  font-size: 0.96rem;
+  overflow-wrap: anywhere;
+}
+
+.db-record__message {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 14px 16px;
+  border-radius: 16px;
+}
+
+.db-record__message--error {
+  background: rgba(255, 218, 214, 0.9);
+  color: #93000a;
+}
+
+.db-record__credential {
+  display: grid;
+  gap: 14px;
+  padding: 18px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.84);
+}
+
+.db-record h4 {
+  margin-top: 6px;
+  font-size: 1rem;
+  line-height: 1.1;
+}
+
+.db-record__credential code,
+.db-note__code {
+  display: block;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: rgba(239, 244, 255, 0.94);
+  color: #173bab;
+  font-family: "Inter", "Segoe UI", sans-serif;
+  font-size: 0.84rem;
+  font-weight: 600;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.db-signal {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #173bab;
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+.db-signal__dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: currentColor;
+}
+
+.db-signal.is-live {
+  color: #173bab;
+}
+
+.db-signal.is-pending {
+  color: #7d2d00;
+}
+
+.db-signal.is-error {
+  color: #93000a;
+}
+
+.db-note {
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.db-note--dark {
+  background: linear-gradient(135deg, #111c2d, #2b4bb9);
+}
+
+.db-note--dark h3,
+.db-note--dark p,
+.db-note--dark .db-studio__section-label {
+  color: #fff;
+}
+
+.db-note--dark .db-studio__section-label {
+  opacity: 0.68;
+}
+
+.db-note__icon {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 16px;
+  background: #eff4ff;
+  color: #173bab;
+}
+
+.db-note--dark .db-note__icon {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+}
+
+.db-note h3 {
+  margin-top: 6px;
+  font-size: 1.18rem;
+  line-height: 1.1;
+}
+
+.db-note__link {
+  width: fit-content;
+  min-height: 36px;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #173bab;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.db-studio__empty {
+  display: grid;
+  gap: 20px;
+  justify-items: start;
+  padding: 34px;
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at top right, rgba(72, 101, 211, 0.12), transparent 26%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(242, 244, 246, 0.98));
+}
+
+.db-studio__empty-mark {
+  display: grid;
+  place-items: center;
+  width: 68px;
+  height: 68px;
+  border-radius: 24px;
+  background: #eff4ff;
+  color: #173bab;
+}
+
+.db-studio__empty-copy {
+  display: grid;
+  gap: 12px;
+}
+
+.db-studio__empty-copy h2 {
+  font-size: clamp(2rem, 4vw, 3rem);
+  line-height: 0.95;
+}
+
+.db-studio__empty-copy p:last-child {
+  margin: 0;
+  max-width: 700px;
+  color: #57657a;
+  line-height: 1.8;
+}
+
+.db-studio__skeleton-card {
+  height: 184px;
+  border-radius: 24px;
+  background:
+    linear-gradient(90deg, rgba(230, 232, 234, 0.92), rgba(255, 255, 255, 0.94), rgba(230, 232, 234, 0.92));
+  background-size: 200% 100%;
+  animation: db-shimmer 1.6s linear infinite;
+}
+
+.db-studio__skeleton-card--short {
+  height: 146px;
+}
+
+.db-composer-backdrop {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 28px;
+  background: rgba(25, 28, 30, 0.24);
+  backdrop-filter: blur(18px);
+  z-index: 120;
+}
+
+.db-composer {
+  width: min(100%, 620px);
+  display: grid;
+  gap: 18px;
+  padding: 28px;
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at top right, rgba(72, 101, 211, 0.12), transparent 30%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(242, 244, 246, 0.98));
+  box-shadow: 0 32px 56px rgba(25, 28, 30, 0.12);
+}
+
+.db-composer__form,
+.db-composer__field {
+  display: grid;
+  gap: 12px;
+}
+
+.db-composer__field span,
+.db-composer__detail-card span {
+  color: #434655;
+  font-size: 0.84rem;
+  font-weight: 600;
+}
+
+.db-composer__field input {
+  min-height: 56px;
+  border: 1px solid rgba(195, 198, 215, 0.22);
+  border-radius: 16px;
+  padding: 0 16px;
+  background: rgba(242, 244, 246, 0.9);
+  color: #191c1e;
+}
+
+.db-composer__detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.db-composer__detail-card {
+  display: grid;
+  gap: 8px;
+  padding: 16px;
+  border-radius: 18px;
+  background: var(--surface);
+}
+
+.db-composer__detail-card strong {
+  color: #191c1e;
+  font-size: 1rem;
+  overflow-wrap: anywhere;
+}
+
+@keyframes db-shimmer {
+  from {
+    background-position: 200% 0;
+  }
+
+  to {
+    background-position: -200% 0;
+  }
+}
+
+@media (max-width: 1100px) {
+
+  .db-studio__workspace {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 780px) {
+
+  .db-studio,
+  .db-studio__hero,
+  .db-studio__inventory,
+  .db-note,
+  .db-composer {
+    padding: 20px;
+    border-radius: 24px;
+  }
+
+  .db-studio__metrics,
+  .db-record__meta,
+  .db-composer__detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .db-studio__hero {
+    grid-template-columns: 1fr;
+  }
+
+  .db-note {
+    grid-template-columns: 1fr;
+  }
+
+  .db-studio__hero h1,
+  .db-studio__empty-copy h2 {
+    font-size: clamp(2rem, 9vw, 3rem);
+  }
+
+  .db-composer-backdrop {
+    padding: 16px;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════
+   ARCHITECT LEDGER — Subscription Overview Design
+   ═══════════════════════════════════════════════════════ */

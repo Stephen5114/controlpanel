@@ -1,3 +1,5 @@
+import "../../styles/auth-brand.css";
+import "../../styles/auth.css";
 import { FormEvent, useState, useEffect } from "react";
 import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { AuthMarketingPanel } from "../components/AuthMarketingPanel";

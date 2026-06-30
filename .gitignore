@@ -39,6 +39,9 @@ tmp_*.js
 # Environment files (all)
 .env
 
+# Assessment records (local reference only)
+docs/assessment/
+
 # Editor / OS
 .vscode/
 .idea/

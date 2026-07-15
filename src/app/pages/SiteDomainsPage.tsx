@@ -23,7 +23,7 @@ import {
 } from "../lib/customer-api";
 import { getCustomerSession } from "../lib/customer-session";
 import type { SiteLayoutContext } from "../layout/SiteLayout";
-import { useLocalization } from "../lib/i18n";
+import { getActiveLocale, useLocalization } from "../lib/i18n";
 
 const GUIDE_STORAGE_VERSION = "domain-bind-guide:v2";
 
@@ -54,7 +54,7 @@ function formatSyncTime(value: Date | null, t?: (key: string, def: string) => st
     return t ? t("Awaiting first sync", "Awaiting first sync") : "Awaiting first sync";
   }
 
-  const time = value.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  const time = value.toLocaleTimeString(getActiveLocale(), { hour: "2-digit", minute: "2-digit" });
   return t ? t("Synced {time}", "Synced {time}").replace("{time}", time) : `Synced ${time}`;
 }
 

@@ -5,6 +5,8 @@ import {
   FileText,
   Shield,
   Headphones,
+  Rocket,
+  Plus,
 } from "lucide-react";
 import { useLocalization } from "../lib/i18n";
 
@@ -13,6 +15,7 @@ const sidebarNav = [
   { name: "Databases", path: "databases", icon: Database },
   { name: "Files", path: "files", icon: FileText },
   { name: "Security", path: "security", icon: Shield },
+  { name: "Deployments", path: "deployments", icon: Rocket },
 ];
 
 export function SubscriptionLayout() {
@@ -23,8 +26,8 @@ export function SubscriptionLayout() {
     <div className="al-shell">
       <aside className="al-sidebar">
         <div className="al-sidebar__brand">
-          <h2 className="al-sidebar__title">{t("Architect Ledger", "Architect Ledger")}</h2>
-          <p className="al-sidebar__subtitle">{t("Standard Node - US-East", "Standard Node - US-East")}</p>
+          <h2 className="al-sidebar__title">{t("Hosting workspace", "Hosting workspace")}</h2>
+          <p className="al-sidebar__subtitle">{t("Sites and resources", "Sites and resources")}</p>
         </div>
 
         <nav className="al-sidebar__nav">
@@ -53,17 +56,14 @@ export function SubscriptionLayout() {
               window.dispatchEvent(event);
             }}
           >
-            {t("Deploy Site", "Deploy Site")}
+            <Plus size={14} />
+            {t("Add Website", "Add Website")}
           </button>
 
           <div className="al-sidebar__footer-links">
             <Link to="/support" className="al-sidebar__footer-link">
               <Headphones size={16} />
               <span>{t("Support", "Support")}</span>
-            </Link>
-            <Link to="/services" className="al-sidebar__footer-link">
-              <FileText size={16} />
-              <span>{t("Logs", "Logs")}</span>
             </Link>
           </div>
         </div>

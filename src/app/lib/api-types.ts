@@ -64,9 +64,6 @@ export type HostedSite = {
   hostingPlanSlug: string;
   hostingPlanName: string;
   regionSlug: string;
-  physicalPath: string;
-  appPoolName: string;
-  port: number;
   diskLimitMb: number;
   fileLimitCount: number;
   publish: PublishCredentials;
@@ -274,7 +271,8 @@ export type HostedDatabase = {
   createdUtc: string;
   siteId: string | null;
   siteName: string | null;
-  engine: 'sqlserver' | 'mysql';
+  engine: 'mysql' | 'postgres';
+  port: number;
 };
 
 export type CustomerAlert = {
@@ -506,6 +504,8 @@ export type SubscriptionWebsite = {
   gitRepoUrl: string | null;
   gitBranch: string | null;
   gitHasPat: boolean;
+  autoDeployEnabled: boolean;
+  hasWebhook: boolean;
 };
 
 export type StackVersionOption = {
@@ -568,7 +568,6 @@ export type SubscriptionFilesSite = {
   siteId: string;
   siteName: string;
   domain: string;
-  physicalPath: string;
   diskUsedBytes: number;
   diskQuotaMb: number;
   fileCount: number;
@@ -603,7 +602,6 @@ export type SiteFileBrowserResponse = {
   siteId: string;
   siteName: string;
   domain: string;
-  physicalPath: string;
   currentPath: string;
   parentPath: string | null;
   diskUsedBytes: number;
@@ -615,6 +613,7 @@ export type SiteFileBrowserResponse = {
   scanError: string | null;
   breadcrumbs: SiteFileBreadcrumb[];
   entries: SiteFileEntry[];
+  gitManaged?: boolean;
 };
 
 export type SiteFileOperationResponse = {
@@ -625,7 +624,6 @@ export type SiteFileOperationResponse = {
 
 export type SiteFileContentResponse = {
   relativePath: string;
-  absolutePath: string;
   fileName: string;
   sizeBytes: number;
   lastModifiedUtc: string;
@@ -698,6 +696,19 @@ export type LoginResponse = {
   token: string | null;
   requiresEmailVerification: boolean;
   verificationPreviewUrl: string | null;
+};
+
+export type GoogleAuthConfig = {
+  enabled: boolean;
+  clientId: string | null;
+};
+
+export type GoogleLoginResponse = {
+  success: boolean;
+  message: string;
+  customerId: string | null;
+  token: string | null;
+  email: string | null;
 };
 
 export type ResendVerificationResponse = {
@@ -848,6 +859,14 @@ export type GitConfig = {
   repoUrl: string | null;
   branch: string | null;
   hasPat: boolean;
+  autoDeployEnabled: boolean;
+  hasWebhook: boolean;
+};
+
+export type WebhookSetup = {
+  webhookUrl: string;
+  secret: string;
+  autoDeployEnabled: boolean;
 };
 
 export type DeployLog = {
@@ -855,6 +874,52 @@ export type DeployLog = {
   jobStatus: string;
   logText: string | null;
   updatedUtc: string | null;
+  phase?: string | null;
+  deploymentId?: string | null;
+};
+
+export type Deployment = {
+  id: string;
+  hostedSiteId: string;
+  number: number;
+  method: string;
+  trigger: string;
+  status: string;
+  phase: string;
+  gitBranch: string | null;
+  gitCommitSha: string | null;
+  gitCommitMessage: string | null;
+  releasePath: string | null;
+  error: string | null;
+  createdUtc: string;
+  startedUtc: string | null;
+  completedUtc: string | null;
+  logText?: string | null;
+};
+
+export type EnvVar = {
+  name: string;
+  hasValue: boolean;
+};
+
+export type GitHubConnection = {
+  connected: boolean;
+  login: string | null;
+};
+
+export type GitHubRepo = {
+  id: number;
+  name: string;
+  fullName: string;
+  private: boolean;
+  cloneUrl: string;
+  defaultBranch: string;
+  description: string | null;
+  updatedAt: string | null;
+};
+
+export type GitHubBranch = {
+  name: string;
 };
 
 export type UpgradePreview = {

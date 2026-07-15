@@ -11,7 +11,7 @@ import {
   AlertTriangle, Trash2, KeyRound, Sparkles,
   Eye, EyeOff, X, ChevronDown, MoreHorizontal
 } from "lucide-react";
-import { useLocalization } from "../lib/i18n";
+import { getActiveLocale, useLocalization } from "../lib/i18n";
 
 type DisplayDatabase = HostedDatabase & { isOptimistic?: boolean };
 const DATABASE_PASSWORD_SYMBOLS = "!@#$%^&*()-_=+[]{}:,.?";
@@ -63,18 +63,19 @@ function statusLabel(s: string, t: (key: string, def: string) => string) {
 
 function buildConnStr(db: HostedDatabase) {
   const pw = db.dbPassword || "********";
-  if (db.engine === "mysql") {
-    return `Server=${db.serverHost};Port=3306;Database=${db.databaseName};Uid=${db.dbUser};Pwd=${pw};`;
+  const port = db.port || (db.engine === "postgres" ? 5432 : 3306);
+  if (db.engine === "postgres") {
+    return `Host=${db.serverHost};Port=${port};Database=${db.databaseName};Username=${db.dbUser};Password=${pw};`;
   }
-  return `Server=${db.serverHost};Database=${db.databaseName};User Id=${db.dbUser};Password=${pw};TrustServerCertificate=True;`;
+  return `Server=${db.serverHost};Port=${port};Database=${db.databaseName};Uid=${db.dbUser};Pwd=${pw};`;
 }
 
 function engineLabel(engine: string) {
-  return engine === "mysql" ? "MySQL" : "SQL Server";
+  return engine === "postgres" ? "PostgreSQL" : "MySQL";
 }
 
 function engineColor(engine: string) {
-  return engine === "mysql" ? "#00758f" : "#0078d4";
+  return engine === "postgres" ? "#336791" : "#00758f";
 }
 
 export function SubscriptionDatabasesPage() {
@@ -89,7 +90,7 @@ export function SubscriptionDatabasesPage() {
   const [newName, setNewName] = useState("");
   const [newPassword, setNewPassword] = useState(() => generateStrongDatabasePassword());
   const [newSpaceMb, setNewSpaceMb] = useState("512");
-  const [newEngine, setNewEngine] = useState<"sqlserver" | "mysql">("sqlserver");
+  const [newEngine, setNewEngine] = useState<"mysql" | "postgres">("mysql");
   const [submitting, setSubmitting] = useState(false);
   const [modalError, setModalError] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
@@ -138,7 +139,7 @@ export function SubscriptionDatabasesPage() {
     setModalError(null);
     setNewPassword(generateStrongDatabasePassword());
     setNewSpaceMb(String(Math.min(512, maxSpaceMb)));
-    setNewEngine("sqlserver");
+    setNewEngine("mysql");
     setNewName("");
     setShowPassword(false);
     setIsModalOpen(true);
@@ -285,7 +286,7 @@ export function SubscriptionDatabasesPage() {
       dbUser: "Allocating...", serverHost: "Waiting for node...",
       provisioningStatus: "creating", lastProvisionError: null,
       createdUtc: new Date().toISOString(), siteId: null, siteName: null,
-      engine: newEngine, isOptimistic: true,
+      engine: newEngine, port: 0, isOptimistic: true,
     };
 
     setDatabases(prev => [optDb, ...prev]);
@@ -305,7 +306,7 @@ export function SubscriptionDatabasesPage() {
         ));
       }
       setNewName(""); setNewPassword(generateStrongDatabasePassword());
-      setNewSpaceMb("512"); setNewEngine("sqlserver");
+      setNewSpaceMb("512"); setNewEngine("mysql");
       setRefreshTick(t => t + 1);
     } catch (err) {
       setDatabases(prev => prev.filter(d => d.id !== optId));
@@ -365,18 +366,18 @@ export function SubscriptionDatabasesPage() {
 
   const engineCards = [
     {
-      key: "sqlserver" as const,
-      label: "SQL Server",
-      version: "2022", port: "1433",
-      desc: t("Great for .NET / Windows apps", "Great for .NET / Windows apps"),
-      color: "#0078d4", glow: "rgba(0,120,212,0.15)", bg: "rgba(0,120,212,0.06)",
+      key: "postgres" as const,
+      label: "PostgreSQL",
+      version: "16", port: "auto",
+      desc: t("Great for Django / modern apps", "Great for Django / modern apps"),
+      color: "#336791", glow: "rgba(51,103,145,0.15)", bg: "rgba(51,103,145,0.06)",
       svg: (
         <svg viewBox="0 0 48 48" width="22" height="22">
-          <ellipse cx="24" cy="10" rx="18" ry="6" fill="#fff" stroke="#0078d4" strokeWidth="2.5" />
-          <path d="M42,10v8c0,3.3-8.1,6-18,6S6,21.3,6,18v-8" fill="none" stroke="#0078d4" strokeWidth="2.5" strokeLinecap="round" />
-          <path d="M42,20v8c0,3.3-8.1,6-18,6S6,31.3,6,28v-8" fill="none" stroke="#0078d4" strokeWidth="2.5" strokeLinecap="round" />
-          <path d="M42,30v8c0,3.3-8.1,6-18,6S6,41.3,6,38v-8" fill="none" stroke="#0078d4" strokeWidth="2.5" strokeLinecap="round" />
-          <g transform="translate(16,17)"><rect x="0" y="0" width="7" height="7" fill="#f25022"/><rect x="9" y="0" width="7" height="7" fill="#7fba00"/><rect x="0" y="9" width="7" height="7" fill="#00a4ef"/><rect x="9" y="9" width="7" height="7" fill="#ffb900"/></g>
+          <ellipse cx="24" cy="10" rx="18" ry="6" fill="#fff" stroke="#336791" strokeWidth="2.5" />
+          <path d="M42,10v8c0,3.3-8.1,6-18,6S6,21.3,6,18v-8" fill="none" stroke="#336791" strokeWidth="2.5" strokeLinecap="round" />
+          <path d="M42,20v8c0,3.3-8.1,6-18,6S6,31.3,6,28v-8" fill="none" stroke="#336791" strokeWidth="2.5" strokeLinecap="round" />
+          <path d="M42,30v8c0,3.3-8.1,6-18,6S6,41.3,6,38v-8" fill="none" stroke="#336791" strokeWidth="2.5" strokeLinecap="round" />
+          <circle cx="20" cy="21" r="3" fill="#336791"/><circle cx="28" cy="21" r="3" fill="#336791"/>
         </svg>
       )
     },
@@ -535,7 +536,7 @@ export function SubscriptionDatabasesPage() {
                   <div className="db2-meta-sep" />
                   <div className="db2-meta-item">
                     <span className="db2-meta-item__label">{t("Created", "Created")}</span>
-                    <span className="db2-meta-item__value">{new Date(db.createdUtc).toLocaleDateString()}</span>
+                    <span className="db2-meta-item__value">{new Date(db.createdUtc).toLocaleDateString(getActiveLocale())}</span>
                   </div>
                   {db.siteName && (
                     <>
@@ -621,7 +622,7 @@ export function SubscriptionDatabasesPage() {
               {/* Name */}
               <label style={{ display: "grid", gap: "6px" }}>
                 <span className="db2-form-label">{t("Database Name", "Database Name")}</span>
-                <div className="al-input-group" style={{ "--focused-color": newEngine === "sqlserver" ? "#0078d4" : "#00758f", "--focused-glow": newEngine === "sqlserver" ? "rgba(0,120,212,0.15)" : "rgba(0,117,143,0.15)" } as any}>
+                <div className="al-input-group" style={{ "--focused-color": newEngine === "postgres" ? "#336791" : "#00758f", "--focused-glow": newEngine === "postgres" ? "rgba(51,103,145,0.15)" : "rgba(0,117,143,0.15)" } as any}>
                   {guessedPrefix && <span className="al-input-prefix">{guessedPrefix}</span>}
                   <input
                     type="text" className="al-input-field" autoFocus
@@ -636,7 +637,7 @@ export function SubscriptionDatabasesPage() {
               {/* Password */}
               <label style={{ display: "grid", gap: "6px" }}>
                 <span className="db2-form-label">{t("Password", "Password")}</span>
-                <div className="al-password-wrapper" style={{ "--focused-color": newEngine === "sqlserver" ? "#0078d4" : "#00758f", "--focused-glow": newEngine === "sqlserver" ? "rgba(0,120,212,0.15)" : "rgba(0,117,143,0.15)" } as any}>
+                <div className="al-password-wrapper" style={{ "--focused-color": newEngine === "postgres" ? "#336791" : "#00758f", "--focused-glow": newEngine === "postgres" ? "rgba(51,103,145,0.15)" : "rgba(0,117,143,0.15)" } as any}>
                   <input type={showPassword ? "text" : "password"} value={newPassword} onChange={e => setNewPassword(e.target.value)} disabled={submitting} required minLength={12} className="al-password-input" />
                   <div className="al-password-actions">
                     <button type="button" className="al-password-action-btn" title={showPassword ? t("Hide", "Hide") : t("Show", "Show")} onClick={() => setShowPassword(!showPassword)} disabled={submitting}>{showPassword ? <EyeOff size={15} /> : <Eye size={15} />}</button>
@@ -651,16 +652,16 @@ export function SubscriptionDatabasesPage() {
               <div style={{ display: "grid", gap: "6px" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                   <span className="db2-form-label" style={{ margin: 0 }}>{t("Storage", "Storage")}</span>
-                  <span style={{ fontSize: "0.9rem", fontWeight: 700, color: newEngine === "sqlserver" ? "#0078d4" : "#00758f" }}>{newSpaceMb} MB</span>
+                  <span style={{ fontSize: "0.9rem", fontWeight: 700, color: newEngine === "postgres" ? "#336791" : "#00758f" }}>{newSpaceMb} MB</span>
                 </div>
                 {planDiskLimitMb > 0 && (
                   <div className="al-disk-bar">
                     <div className="al-disk-segment al-disk-segment--used" style={{ width: `${(totalAllocatedSpaceMb / planDiskLimitMb) * 100}%` }} />
-                    <div className="al-disk-segment" style={{ width: `${(Number(newSpaceMb) / planDiskLimitMb) * 100}%`, backgroundColor: newEngine === "sqlserver" ? "#0078d4" : "#00758f" }} />
+                    <div className="al-disk-segment" style={{ width: `${(Number(newSpaceMb) / planDiskLimitMb) * 100}%`, backgroundColor: newEngine === "postgres" ? "#336791" : "#00758f" }} />
                     <div className="al-disk-segment al-disk-segment--free" style={{ width: `${Math.max(0, 100 - ((totalAllocatedSpaceMb + Number(newSpaceMb)) / planDiskLimitMb) * 100)}%` }} />
                   </div>
                 )}
-                <input type="range" min={128} max={maxSpaceMb} step={128} value={Math.min(Number(newSpaceMb), maxSpaceMb)} onChange={e => setNewSpaceMb(e.target.value)} disabled={submitting} className="al-slider" style={{ "--slider-color": newEngine === "sqlserver" ? "#0078d4" : "#00758f" } as any} />
+                <input type="range" min={128} max={maxSpaceMb} step={128} value={Math.min(Number(newSpaceMb), maxSpaceMb)} onChange={e => setNewSpaceMb(e.target.value)} disabled={submitting} className="al-slider" style={{ "--slider-color": newEngine === "postgres" ? "#336791" : "#00758f" } as any} />
                 <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.75rem", color: "var(--text-muted)" }}>
                   <span>128 MB</span>
                   <span>
@@ -672,7 +673,7 @@ export function SubscriptionDatabasesPage() {
 
               <div className="db2-modal__footer">
                 <button type="button" className="al-hero__btn al-hero__btn--secondary" onClick={() => setIsModalOpen(false)} disabled={submitting}>{t("Cancel", "Cancel")}</button>
-                <button type="submit" className="primary-button" style={{ background: newEngine === "sqlserver" ? "#0078d4" : "#00758f" }} disabled={submitting}>
+                <button type="submit" className="primary-button" style={{ background: newEngine === "postgres" ? "#336791" : "#00758f" }} disabled={submitting}>
                   {submitting ? t("Creating...", "Creating...") : `${t("Create", "Create")} ${engineLabel(newEngine)}`}
                 </button>
               </div>
@@ -702,7 +703,7 @@ export function SubscriptionDatabasesPage() {
             <form className="stack-sm" onSubmit={e => void handleRotatePassword(e)}>
               <label style={{ display: "grid", gap: "6px" }}>
                 <span className="db2-form-label">{t("New Password", "New Password")}</span>
-                <div className="al-password-wrapper" style={{ "--focused-color": passwordModalDatabase.engine === "sqlserver" ? "#0078d4" : "#00758f", "--focused-glow": passwordModalDatabase.engine === "sqlserver" ? "rgba(0,120,212,0.15)" : "rgba(0,117,143,0.15)" } as any}>
+                <div className="al-password-wrapper" style={{ "--focused-color": passwordModalDatabase.engine === "postgres" ? "#336791" : "#00758f", "--focused-glow": passwordModalDatabase.engine === "postgres" ? "rgba(51,103,145,0.15)" : "rgba(0,117,143,0.15)" } as any}>
                   <input type={showRotatePassword ? "text" : "password"} value={rotatePasswordValue} onChange={e => setRotatePasswordValue(e.target.value)} disabled={rotatingPassword} required minLength={12} className="al-password-input" />
                   <div className="al-password-actions">
                     <button type="button" className="al-password-action-btn" onClick={() => setShowRotatePassword(!showRotatePassword)} disabled={rotatingPassword}>{showRotatePassword ? <EyeOff size={15} /> : <Eye size={15} />}</button>
@@ -714,7 +715,7 @@ export function SubscriptionDatabasesPage() {
               </label>
               <div className="db2-modal__footer">
                 <button type="button" className="al-hero__btn al-hero__btn--secondary" onClick={() => setPasswordModalDatabase(null)} disabled={rotatingPassword}>{t("Cancel", "Cancel")}</button>
-                <button type="submit" className="primary-button" style={{ background: passwordModalDatabase.engine === "sqlserver" ? "#0078d4" : "#00758f" }} disabled={rotatingPassword}>
+                <button type="submit" className="primary-button" style={{ background: passwordModalDatabase.engine === "postgres" ? "#336791" : "#00758f" }} disabled={rotatingPassword}>
                   {rotatingPassword ? t("Saving...", "Saving...") : t("Save Password", "Save Password")}
                 </button>
               </div>

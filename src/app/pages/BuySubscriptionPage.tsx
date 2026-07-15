@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import {
   BillingSummary,
   buildSubscriptionId,
@@ -14,11 +14,13 @@ import {
   type UpgradePreview,
 } from "../lib/customer-api";
 import { getCustomerSession } from "../lib/customer-session";
+import { getAffiliateCheckoutDiscount, type AffiliateCheckoutDiscount } from "../lib/api-affiliate";
 import {
   Globe,
   Server,
   ChevronRight,
   Check,
+  Gift,
   Tag,
   Database,
   HardDrive,
@@ -27,8 +29,9 @@ import {
   Cpu,
   Sparkles,
 } from "lucide-react";
-import { useLocalization } from "../lib/i18n";
+import { getActiveLocale, useLocalization } from "../lib/i18n";
 import { formatCurrency } from "../lib/display";
+import { VpsPage } from "./VpsPage";
 
 type AppliedCoupon = { code: string; discountAmount: number; message: string };
 
@@ -48,11 +51,13 @@ export function BuySubscriptionPage() {
   const [appliedCoupon, setAppliedCoupon] = useState<AppliedCoupon | null>(null);
   const [couponError, setCouponError] = useState<string | null>(null);
   const [couponBusy, setCouponBusy] = useState(false);
+  const [referralDiscount, setReferralDiscount] = useState<AffiliateCheckoutDiscount | null>(null);
 
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const upgradeScope = searchParams.get("upgrade"); // e.g. "basic_global"
   const isUpgradeMode = Boolean(upgradeScope);
+  const productType = !isUpgradeMode && searchParams.get("type") === "vps" ? "vps" : "hosting";
   const upgradePlanSlug = upgradeScope?.split("_")[0] ?? null;
   const upgradeRegion = upgradeScope?.includes("_") ? upgradeScope.split("_").slice(1).join("_") : null;
 
@@ -79,7 +84,13 @@ export function BuySubscriptionPage() {
   const currency = billingSummary?.currency ?? "USD";
   const availableBalance = billingSummary?.creditBalance ?? 0;
   const subtotal = isUpgradeMode && upgradePreview?.success ? upgradePreview.upgradeTotal : (selectedPlanDetails?.monthlyPrice ?? 0);
-  const discount = !isUpgradeMode && appliedCoupon ? Math.min(appliedCoupon.discountAmount, subtotal) : 0;
+  const referralDiscountActive = !isUpgradeMode && !appliedCoupon && Boolean(referralDiscount?.eligible);
+  const referralDiscountAmount = referralDiscountActive
+    ? Math.round(subtotal * (referralDiscount?.percent ?? 0)) / 100
+    : 0;
+  const discount = !isUpgradeMode && appliedCoupon
+    ? Math.min(appliedCoupon.discountAmount, subtotal)
+    : referralDiscountAmount;
   const total = Math.max(subtotal - discount, 0);
   const willPayByCard = Boolean(selectedPlanDetails) && total > 0 && availableBalance < total;
   const canPurchase = isUpgradeMode
@@ -90,13 +101,15 @@ export function BuySubscriptionPage() {
     let active = true;
     async function load() {
       try {
-        const [cat, summary] = await Promise.all([
+        const [cat, summary, refDiscount] = await Promise.all([
           getHostingCatalog(),
           session ? getBillingSummary(session) : Promise.resolve(null),
+          session ? getAffiliateCheckoutDiscount(session).catch(() => null) : Promise.resolve(null),
         ]);
         if (!active) {
           return;
         }
+        setReferralDiscount(refDiscount);
 
         setCatalog(cat);
         setBillingSummary(summary);
@@ -261,6 +274,25 @@ export function BuySubscriptionPage() {
     }
   }
 
+  const productSwitcher = !isUpgradeMode ? (
+    <ProductTypeSwitcher
+      active={productType}
+      hostingLabel={t("Web Hosting", "Web Hosting")}
+      hostingDescription={t("Managed website hosting with sites, databases, files, and domains.", "Managed website hosting with sites, databases, files, and domains.")}
+      vpsLabel={t("VPS / Cloud", "VPS / Cloud")}
+      vpsDescription={t("Unmanaged virtual servers delivered within 24 hours after payment.", "Unmanaged virtual servers delivered within 24 hours after payment.")}
+    />
+  ) : null;
+
+  if (productType === "vps") {
+    return (
+      <div className="stack" style={{ maxWidth: "1180px", margin: "0 auto" }}>
+        {productSwitcher}
+        <VpsPage />
+      </div>
+    );
+  }
+
   if (loading) {
     return <div className="empty-panel">{t("Loading available regions and plans...", "Loading available regions and plans...")}</div>;
   }
@@ -273,6 +305,7 @@ export function BuySubscriptionPage() {
 
   return (
     <div className="stack" style={{ maxWidth: "960px", margin: "0 auto" }}>
+      {productSwitcher}
       <section className="page-hero">
         <p className="eyebrow">{t("Store", "Store")}</p>
         <h1>{isUpgradeMode ? t("Upgrade Your Plan", "Upgrade Your Plan") : t("Purchase Hosting Subscription", "Purchase Hosting Subscription")}</h1>
@@ -413,6 +446,13 @@ export function BuySubscriptionPage() {
               </div>
             )}
             {couponError ? <div className="inline-message inline-message--error" style={{ marginTop: "10px" }}>{couponError}</div> : null}
+            {referralDiscountActive && selectedPlanDetails ? (
+              <div className="inline-message inline-message--success" style={{ marginTop: "10px", display: "flex", alignItems: "center", gap: "8px" }}>
+                <Gift size={16} />
+                {t("Referral reward: {percent}% off your first order will be applied automatically at checkout.", "Referral reward: {percent}% off your first order will be applied automatically at checkout.")
+                  .replace("{percent}", String(referralDiscount?.percent ?? 0))}
+              </div>
+            ) : null}
           </div>
 
           {/* Order summary */}
@@ -448,7 +488,13 @@ export function BuySubscriptionPage() {
               <div className="stack-sm" style={{ marginTop: "8px" }}>
                 <SummaryRow label={t("{name} · monthly", "{name} · monthly").replace("{name}", selectedPlanDetails.name)} value={formatCurrency(selectedPlanDetails.monthlyPrice, currency)} />
                 {discount > 0 ? (
-                  <SummaryRow label={t("Coupon {code}", "Coupon {code}").replace("{code}", appliedCoupon?.code ?? "")} value={`−${formatCurrency(discount, currency)}`} tone="positive" />
+                  <SummaryRow
+                    label={appliedCoupon
+                      ? t("Coupon {code}", "Coupon {code}").replace("{code}", appliedCoupon.code)
+                      : t("Referral discount ({percent}%)", "Referral discount ({percent}%)").replace("{percent}", String(referralDiscount?.percent ?? 0))}
+                    value={`−${formatCurrency(discount, currency)}`}
+                    tone="positive"
+                  />
                 ) : null}
                 <div style={{ height: 1, background: "var(--border)", margin: "4px 0" }} />
                 <SummaryRow label={t("Total due today", "Total due today")} value={formatCurrency(total, currency)} strong />
@@ -489,6 +535,50 @@ export function BuySubscriptionPage() {
         </form>
       )}
     </div>
+  );
+}
+
+function ProductTypeSwitcher({
+  active,
+  hostingLabel,
+  hostingDescription,
+  vpsLabel,
+  vpsDescription,
+}: {
+  active: "hosting" | "vps";
+  hostingLabel: string;
+  hostingDescription: string;
+  vpsLabel: string;
+  vpsDescription: string;
+}) {
+  const products = [
+    { id: "hosting" as const, to: "/buy", icon: Globe, label: hostingLabel, description: hostingDescription },
+    { id: "vps" as const, to: "/buy?type=vps", icon: Server, label: vpsLabel, description: vpsDescription },
+  ];
+
+  return (
+    <nav className="product-tabs" aria-label="Subscription product type">
+      <span className="product-tabs__label">Services</span>
+      <div className="product-tabs__list">
+        {products.map((product) => {
+          const Icon = product.icon;
+          const selected = active === product.id;
+          return (
+            <Link
+              key={product.id}
+              to={product.to}
+              aria-current={selected ? "page" : undefined}
+              className={`product-tab${selected ? " product-tab--active" : ""}`}
+            >
+              <span className="product-tab__icon">
+                <Icon size={21} />
+              </span>
+              <span className="product-tab__copy"><strong>{product.label}</strong><span>{product.description}</span></span>
+            </Link>
+          );
+        })}
+      </div>
+    </nav>
   );
 }
 
@@ -561,7 +651,7 @@ function PlanCard({
       <div className="stack-sm" style={{ marginTop: "12px", gap: "6px" }}>
         <SpecRow icon={<Layers size={14} />} text={t("Up to {count} site(s)", "Up to {count} site(s)").replace("{count}", String(plan.recommendedSiteLimit))} />
         <SpecRow icon={<HardDrive size={14} />} text={t("{size} disk", "{size} disk").replace("{size}", formatStorage(plan.diskLimitMb))} />
-        <SpecRow icon={<FileText size={14} />} text={t("{count} files", "{count} files").replace("{count}", plan.fileLimitCount.toLocaleString())} />
+        <SpecRow icon={<FileText size={14} />} text={t("{count} files", "{count} files").replace("{count}", plan.fileLimitCount.toLocaleString(getActiveLocale()))} />
         <SpecRow icon={<Database size={14} />} text={t("Up to {count} database(s)", "Up to {count} database(s)").replace("{count}", String(plan.recommendedDatabaseLimit))} />
         <SpecRow icon={<Cpu size={14} />} text={plan.nodeType} />
       </div>

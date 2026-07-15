@@ -1,5 +1,6 @@
 import { AlertTriangle, Wrench } from "lucide-react";
 import type { HostedDatabase, SubscriptionWebsite, StackCatalogEntry } from "../../lib/customer-api";
+import { getActiveLocale } from "../../lib/i18n";
 
 export type DisplayWebsite = SubscriptionWebsite & {
   isOptimistic?: boolean;
@@ -72,7 +73,7 @@ export function canPublishSite(site: SubscriptionWebsite, availableStacks: Stack
   if (site.hasActivePublishJob || site.hasActiveRuntimeJob) return false;
   const status = site.provisioningStatus?.toLowerCase();
   if (status === "pending" || status === "creating" || status === "deleting" || status === "failed") return false;
-  const publishableStacks = ["dotnet", "node"];
+  const publishableStacks = ["dotnet", "netcore", "node", "static", "python", "php", "springboot"];
   if (isSiteStackConfigured(site)) return publishableStacks.includes(site.stack);
   return availableStacks.some((s) => publishableStacks.includes(s.slug));
 }
@@ -81,7 +82,7 @@ export function formatDateTime(value: string | null): string {
   if (!value) return "—";
   try {
     const d = new Date(value);
-    return d.toLocaleString();
+    return d.toLocaleString(getActiveLocale());
   } catch {
     return value;
   }

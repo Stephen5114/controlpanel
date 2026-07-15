@@ -19,6 +19,14 @@ const loaders: Record<string, () => Promise<{ default: TranslationMap }>> = {
 // In-memory cache so switching back to a loaded language is instant.
 const cache = new Map<string, TranslationMap>();
 
+// Active BCP47 locale for Intl date/number formatting. Kept in sync by the
+// provider so module-level format helpers follow the app language instead of
+// the browser/OS locale.
+let activeLocale = "en";
+export function getActiveLocale(): string {
+  return activeLocale;
+}
+
 // ── Context ──────────────────────────────────────────────────────────────────
 type LocalizationContextType = {
   currentLang: string;
@@ -76,6 +84,7 @@ export function LocalizationProvider({ children }: { children: React.ReactNode }
   }
 
   const [currentLang, setCurrentLangState] = useState(initialLang.current);
+  activeLocale = LANGUAGES[currentLang]?.code ?? "en";
   const [translations, setTranslations] = useState<TranslationMap>(
     () => cache.get(initialLang.current!) ?? {}
   );

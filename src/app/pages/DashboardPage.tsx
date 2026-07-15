@@ -13,7 +13,7 @@ import {
 } from "../lib/customer-api";
 import { formatRegionLabel } from "../lib/display";
 import { getCustomerSession } from "../lib/customer-session";
-import { useLocalization } from "../lib/i18n";
+import { getActiveLocale, useLocalization } from "../lib/i18n";
 
 type DashboardState = {
   subs: HostingSubscription[];
@@ -23,7 +23,7 @@ type DashboardState = {
 
 function formatCurrency(value: number, currency = "USD") {
   try {
-    return new Intl.NumberFormat(undefined, { style: "currency", currency: currency.toUpperCase(), maximumFractionDigits: 2 }).format(value);
+    return new Intl.NumberFormat(getActiveLocale(), { style: "currency", currency: currency.toUpperCase(), maximumFractionDigits: 2 }).format(value);
   } catch {
     return `${currency} ${value.toFixed(2)}`;
   }
@@ -33,7 +33,7 @@ function formatDate(value: string | null | undefined) {
   if (!value) return "—";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "—";
-  return new Intl.DateTimeFormat(undefined, { year: "numeric", month: "short", day: "2-digit" }).format(date);
+  return new Intl.DateTimeFormat(getActiveLocale(), { year: "numeric", month: "short", day: "2-digit" }).format(date);
 }
 
 function daysUntil(value: string | null | undefined): number | null {
@@ -333,7 +333,7 @@ export function DashboardPage() {
           <div className="empty-state">
             <div style={{ padding: "40px", background: "white", borderRadius: "24px", border: "1px solid var(--border)", boxShadow: "var(--shadow)" }}>
               <h2>{t("No subscriptions yet", "No subscriptions yet")}</h2>
-              <p className="muted" style={{ marginBottom: "24px" }}>{t("Start your journey by purchasing a new hosting plan infrastructure.", "Start your journey by purchasing a new hosting plan infrastructure.")}</p>
+              <p className="muted" style={{ marginBottom: "24px" }}>{t("Choose a hosting plan to get your first site online.", "Choose a hosting plan to get your first site online.")}</p>
               <Link className="primary-button" to="/buy">
                 <Plus size={18} />
                 <span>{t("Buy Hosting Subscription", "Buy Hosting Subscription")}</span>

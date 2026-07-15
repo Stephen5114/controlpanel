@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Loader2, Rocket, Globe, ExternalLink, FolderOpen, Key, Settings, Trash2 } from "lucide-react";
+import { Loader2, Rocket, Globe, ExternalLink, FolderOpen, Key, Settings, Trash2, Clock } from "lucide-react";
 import { useLocalization } from "../../lib/i18n";
 import type { SubscriptionWebsite, StackCatalogEntry } from "../../lib/customer-api";
 import type { DisplayWebsite } from "./utils";
@@ -14,6 +14,23 @@ interface SiteCardProps {
   onOpenFtp: (site: SubscriptionWebsite) => void;
   onOpenPublish: (site: SubscriptionWebsite) => void;
   onDelete: (siteId: string, siteName: string) => void;
+}
+
+function deployStatusColor(status: string | null): string {
+  if (status === "succeeded") return "#16a34a";
+  if (status === "failed") return "#dc2626";
+  return "var(--muted)";
+}
+
+function formatRelative(utc: string | null): string {
+  if (!utc) return "";
+  const s = Math.floor((Date.now() - new Date(utc).getTime()) / 1000);
+  if (s < 60) return "just now";
+  const m = Math.floor(s / 60);
+  if (m < 60) return `${m}m ago`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h}h ago`;
+  return `${Math.floor(h / 24)}d ago`;
 }
 
 export function SiteCard({
@@ -32,6 +49,12 @@ export function SiteCard({
   const configured = isSiteStackConfigured(site);
   const publishDisabled = Boolean(site.isOptimistic) || site.hasActivePublishJob || site.hasActiveRuntimeJob || isInFlightStatus(site.provisioningStatus);
 
+  const lastDeployText = site.hasActivePublishJob
+    ? "deploying…"
+    : site.lastPublishedUtc
+      ? formatRelative(site.lastPublishedUtc)
+      : null;
+
   return (
     <div key={site.id} className="ov-site-card" onClick={() => onOpenDetails(site.id)}>
       <div className="ov-site-card__main">
@@ -47,6 +70,19 @@ export function SiteCard({
           >
             {site.domain} <ExternalLink size={11} />
           </a>
+          {lastDeployText && (
+            <Link
+              to={`/subscription/${subId}/deployments?site=${site.id}`}
+              className="ov-site-card__last-deploy"
+              style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: "0.73rem", color: deployStatusColor(site.lastPublishStatus), textDecoration: "none", marginTop: 2 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {site.hasActivePublishJob
+                ? <Loader2 size={10} className="al-spin" />
+                : <Clock size={10} />}
+              {lastDeployText}
+            </Link>
+          )}
           {(() => {
             const customDomains = (site.hostnames ?? []).filter((h: { isSystemBinding: boolean; isDefault: boolean }) => !h.isSystemBinding && !h.isDefault);
             if (customDomains.length === 0) return null;

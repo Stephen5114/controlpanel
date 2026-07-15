@@ -47,7 +47,17 @@ Write-Host 'Stopping existing IIS site to release file locks...' -ForegroundColo
 Import-Module WebAdministration
 Stop-Website -Name $SiteName -ErrorAction SilentlyContinue
 Stop-WebAppPool -Name $AppPoolName -ErrorAction SilentlyContinue
-Start-Sleep -Seconds 2
+$stopDeadline = (Get-Date).AddSeconds(30)
+while ((Test-Path "IIS:\AppPools\$AppPoolName") -and
+       (Get-WebAppPoolState -Name $AppPoolName).Value -ne 'Stopped' -and
+       (Get-Date) -lt $stopDeadline) {
+    Start-Sleep -Milliseconds 500
+}
+
+if ((Test-Path "IIS:\AppPools\$AppPoolName") -and
+    (Get-WebAppPoolState -Name $AppPoolName).Value -ne 'Stopped') {
+    throw "IIS app pool '$AppPoolName' did not stop within 30 seconds."
+}
 
 Write-Host 'Syncing dist to IIS target...' -ForegroundColor Cyan
 robocopy $distRoot $TargetRoot /MIR /NFL /NDL /NJH /NJS /NP /R:2 /W:2 | Out-Null
@@ -158,8 +168,47 @@ if (-not (Get-Website -Name $SiteName -ErrorAction SilentlyContinue)) {
 
 Start-WebAppPool $AppPoolName
 Start-Website $SiteName
-Start-Sleep -Seconds 3
 
-$response = Invoke-WebRequest ("http://localhost:{0}/" -f $Port) -UseBasicParsing
+# Existing production sites may use a host-header binding (for example
+# *:80:cp.hostvibecoding.com) rather than the fallback $Port used when this
+# script creates a new site. Probe the actual IIS binding so a successful
+# deployment is not reported as failed.
+$httpBinding = Get-WebBinding -Name $SiteName -Protocol 'http' | Select-Object -First 1
+if ($null -eq $httpBinding -or $httpBinding.bindingInformation -notmatch '^[^:]*:(\d+):(.*)$') {
+    throw "Unable to determine the HTTP binding for IIS site '$SiteName'."
+}
+
+$healthPort = [int]$Matches[1]
+$healthHost = $Matches[2]
+$healthUrl = "http://localhost:{0}/" -f $healthPort
+$healthRequest = @{
+    Uri             = $healthUrl
+    UseBasicParsing = $true
+    TimeoutSec      = 10
+}
+if (-not [string]::IsNullOrWhiteSpace($healthHost)) {
+    $healthRequest.Headers = @{ Host = $healthHost }
+}
+
+$healthDeadline = (Get-Date).AddSeconds(45)
+$response = $null
+do {
+    Start-Sleep -Seconds 2
+    try {
+        $response = Invoke-WebRequest @healthRequest
+    }
+    catch {
+        $response = $null
+    }
+} while ($null -eq $response -and (Get-Date) -lt $healthDeadline)
+
+if ($null -eq $response) {
+    throw "$SiteName did not become healthy at $healthUrl within 45 seconds."
+}
+
 Write-Host ("Deployment complete. {0} is returning {1}." -f $SiteName, $response.StatusCode) -ForegroundColor Green
-Write-Host ("URL: http://localhost:{0}/" -f $Port) -ForegroundColor Gray
+if ([string]::IsNullOrWhiteSpace($healthHost)) {
+    Write-Host ("URL: {0}" -f $healthUrl) -ForegroundColor Gray
+} else {
+    Write-Host ("URL: http://{0}:{1}/" -f $healthHost, $healthPort) -ForegroundColor Gray
+}

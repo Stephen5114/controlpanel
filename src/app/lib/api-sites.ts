@@ -10,7 +10,13 @@ import type {
   UpdateSiteStackResult,
   PublishSiteResult,
   GitConfig,
+  WebhookSetup,
   DeployLog,
+  Deployment,
+  EnvVar,
+  GitHubConnection,
+  GitHubRepo,
+  GitHubBranch,
   SubscriptionNodeHealth,
   SubscriptionFilesSite,
   SubscriptionFilesResponse,
@@ -243,8 +249,46 @@ export function getGitConfig(session: CustomerSession, subscriptionId: string, s
 }
 
 export function triggerGitDeploy(session: CustomerSession, subscriptionId: string, siteId: string) {
-  return apiRequest<{ success: boolean; message: string; data: { jobId: string; lastPublishStatus: string } | null }>(
+  return apiRequest<{ success: boolean; message: string; data: { jobId: string; lastPublishStatus: string; deploymentId?: string | null; deploymentNumber?: number | null } | null }>(
     `/api/subscriptions/${subscriptionId}/sites/${siteId}/git-deploy`,
+    { method: "POST", headers: withCustomerHeaders(session) },
+  );
+}
+
+export function setupWebhook(session: CustomerSession, subscriptionId: string, siteId: string) {
+  return apiRequest<{ success: boolean; message: string; data: WebhookSetup | null }>(
+    `/api/subscriptions/${subscriptionId}/sites/${siteId}/git-config/webhook`,
+    { method: "POST", headers: withCustomerHeaders(session) },
+  );
+}
+
+export function disableWebhook(session: CustomerSession, subscriptionId: string, siteId: string) {
+  return apiRequest<{ success: boolean; message: string }>(
+    `/api/subscriptions/${subscriptionId}/sites/${siteId}/git-config/webhook`,
+    { method: "DELETE", headers: withCustomerHeaders(session) },
+  );
+}
+
+export async function listDeployments(session: CustomerSession, subscriptionId: string, siteId: string, skip = 0, take = 20): Promise<Deployment[]> {
+  // The endpoint returns { success, data: [...] } — unwrap to the array.
+  const res = await apiRequest<{ success: boolean; data: Deployment[] }>(
+    `/api/subscriptions/${subscriptionId}/sites/${siteId}/deployments?skip=${skip}&take=${take}`,
+    { headers: withCustomerHeaders(session) },
+  );
+  return res?.data ?? [];
+}
+
+export async function getDeployment(session: CustomerSession, subscriptionId: string, siteId: string, deploymentId: string): Promise<Deployment> {
+  const res = await apiRequest<{ success: boolean; data: Deployment }>(
+    `/api/subscriptions/${subscriptionId}/sites/${siteId}/deployments/${deploymentId}`,
+    { headers: withCustomerHeaders(session) },
+  );
+  return res.data;
+}
+
+export function triggerRollback(session: CustomerSession, subscriptionId: string, siteId: string, deploymentId: string) {
+  return apiRequest<{ success: boolean; message: string; data?: { jobId: string; deploymentId?: string | null; deploymentNumber?: number | null } | null }>(
+    `/api/subscriptions/${subscriptionId}/sites/${siteId}/deployments/${deploymentId}/rollback`,
     { method: "POST", headers: withCustomerHeaders(session) },
   );
 }
@@ -253,6 +297,29 @@ export function getDeployLog(session: CustomerSession, subscriptionId: string, s
   return apiRequest<{ success: boolean; data: DeployLog | null }>(
     `/api/subscriptions/${subscriptionId}/sites/${siteId}/deploy-log`,
     { headers: withCustomerHeaders(session) },
+  );
+}
+
+export function getEnvVars(session: CustomerSession, subscriptionId: string, siteId: string) {
+  return apiRequest<{ success: boolean; data: EnvVar[] }>(
+    `/api/subscriptions/${subscriptionId}/sites/${siteId}/env-vars`,
+    { headers: withCustomerHeaders(session) },
+  );
+}
+
+export function saveEnvVars(
+  session: CustomerSession,
+  subscriptionId: string,
+  siteId: string,
+  items: { name: string; value?: string | null }[],
+) {
+  return apiRequest<{ success: boolean; message: string; requiresRedeploy?: boolean }>(
+    `/api/subscriptions/${subscriptionId}/sites/${siteId}/env-vars`,
+    {
+      method: "PUT",
+      headers: withCustomerHeaders(session),
+      body: JSON.stringify(items.map((i) => ({ Name: i.name, Value: i.value ?? null }))),
+    },
   );
 }
 
@@ -371,4 +438,41 @@ export async function downloadSiteFile(session: CustomerSession, subscriptionId:
     fileName: getResponseFileName(response),
     blob: await response.blob(),
   };
+}
+
+// ── GitHub OAuth ─────────────────────────────────────────────────────────────
+
+export function getGitHubConnection(session: CustomerSession, subscriptionId: string) {
+  return apiRequest<{ success: boolean; data: GitHubConnection }>(
+    `/api/subscriptions/${subscriptionId}/github/connection`,
+    { headers: withCustomerHeaders(session) },
+  );
+}
+
+export function disconnectGitHub(session: CustomerSession, subscriptionId: string) {
+  return apiRequest<{ success: boolean }>(
+    `/api/subscriptions/${subscriptionId}/github/connection`,
+    { method: "DELETE", headers: withCustomerHeaders(session) },
+  );
+}
+
+export function getGitHubOAuthUrl(session: CustomerSession, subscriptionId: string) {
+  return apiRequest<{ success: boolean; data: { url: string } }>(
+    `/api/subscriptions/${subscriptionId}/github/oauth/url`,
+    { headers: withCustomerHeaders(session) },
+  );
+}
+
+export function listGitHubRepos(session: CustomerSession, subscriptionId: string) {
+  return apiRequest<{ success: boolean; data: GitHubRepo[] }>(
+    `/api/subscriptions/${subscriptionId}/github/repos`,
+    { headers: withCustomerHeaders(session) },
+  );
+}
+
+export function listGitHubBranches(session: CustomerSession, subscriptionId: string, owner: string, repo: string) {
+  return apiRequest<{ success: boolean; data: GitHubBranch[] }>(
+    `/api/subscriptions/${subscriptionId}/github/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/branches`,
+    { headers: withCustomerHeaders(session) },
+  );
 }

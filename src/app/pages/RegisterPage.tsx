@@ -10,6 +10,7 @@ import { PasswordRequirements } from "../components/PasswordRequirements";
 import { TurnstileWidget } from "../components/TurnstileWidget";
 import { registerCustomer } from "../lib/customer-api";
 import { isPasswordValid } from "../lib/password-rules";
+import { getReferralCode } from "../lib/referral";
 import { useLocalization, LANGUAGES } from "../lib/i18n";
 
 const TERMS_URL = "https://hostvibecoding.com/tos";
@@ -35,6 +36,16 @@ export function RegisterPage() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [pendingEmail, setPendingEmail] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [referralCode, setReferralCode] = useState("");
+  const [referralSource, setReferralSource] = useState("manual_code");
+
+  useEffect(() => {
+    const captured = getReferralCode();
+    if (captured) {
+      setReferralCode(captured.code);
+      setReferralSource(captured.source);
+    }
+  }, []);
 
   const passwordsMatch = password.length > 0 && password === confirmPassword;
   const canSubmit =
@@ -71,7 +82,14 @@ export function RegisterPage() {
     setPendingEmail(null);
 
     try {
-      const result = await registerCustomer({ email, password, username: username.trim() || undefined, turnstileToken: turnstileToken ?? undefined });
+      const result = await registerCustomer({
+        email,
+        password,
+        username: username.trim() || undefined,
+        turnstileToken: turnstileToken ?? undefined,
+        referralCode: referralCode.trim() || undefined,
+        referralSource: referralCode.trim() ? referralSource : undefined,
+      });
       setPreviewUrl(result.verificationPreviewUrl);
 
       if (!result.success) {
@@ -185,6 +203,19 @@ export function RegisterPage() {
             {confirmPassword.length > 0 && !passwordsMatch ? (
               <p className="field-error">{t("The two passwords do not match.", "The two passwords do not match.")}</p>
             ) : null}
+
+            <label>
+              <span>{t("Referral code (optional)", "Referral code (optional)")}</span>
+              <input
+                value={referralCode}
+                onChange={(event) => {
+                  setReferralCode(event.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ""));
+                  setReferralSource("manual_code");
+                }}
+                placeholder={t("Have a friend's code? Get a discount on your first order.", "Have a friend's code? Get a discount on your first order.")}
+                maxLength={16}
+              />
+            </label>
 
             <label className="auth-terms-row">
               <input

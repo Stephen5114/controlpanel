@@ -12,6 +12,10 @@ import {
   deleteHostedSite,
   downloadPublishProfile,
   getDeployLog,
+  getEnvVars,
+  saveEnvVars,
+  setupWebhook,
+  disableWebhook,
   getStackCatalog,
   getSubscriptionOverview,
   publishSite,
@@ -77,7 +81,6 @@ export function SubscriptionOverviewPage() {
 
   // Publish
   const [publishTarget, setPublishTarget] = useState<SubscriptionWebsite | null>(null);
-  const [deployLog, setDeployLog] = useState<string | null>(null);
 
   useEffect(() => {
     const handler = () => setIsSiteModalOpen(true);
@@ -168,20 +171,6 @@ export function SubscriptionOverviewPage() {
     const intervalId = window.setInterval(() => setRefreshTick((tick) => tick + 1), 3000);
     return () => window.clearInterval(intervalId);
   }, [hasInFlightWork]);
-
-  // Sync publish target with latest site data
-  useEffect(() => {
-    if (!publishTarget?.hasActivePublishJob || !subId) return;
-    const session = getCustomerSession();
-    if (!session) return;
-    const intervalId = window.setInterval(async () => {
-      try {
-        const result = await getDeployLog(session, subId, publishTarget.id);
-        // Deploy log updates handled inside PublishDialog
-      } catch { /* swallow */ }
-    }, 3000);
-    return () => window.clearInterval(intervalId);
-  }, [publishTarget?.hasActivePublishJob, publishTarget?.id, subId]);
 
   // Keep the open publish dialog in sync with polled site data
   useEffect(() => {
@@ -306,7 +295,7 @@ export function SubscriptionOverviewPage() {
       stack: "static", stackVersion: null, runtimeStatus: null, runtimeMessage: null,
       runtimeReadyUtc: null, lastPublishedUtc: null, lastPublishStatus: null, lastPublishMessage: null,
       hasActivePublishJob: false, hasActiveRuntimeJob: false, publish: null, hostnames: null,
-      gitRepoUrl: null, gitBranch: null, gitHasPat: false, isOptimistic: true,
+      gitRepoUrl: null, gitBranch: null, gitHasPat: false, autoDeployEnabled: false, hasWebhook: false, isOptimistic: true,
     };
     setSites((current) => [optimisticSite, ...current]);
     setIsSiteModalOpen(false);
@@ -334,7 +323,7 @@ export function SubscriptionOverviewPage() {
       dbUser: "Allocating...", dbPassword: undefined, databaseSpaceMb: 512,
       serverHost: "Waiting for node...", provisioningStatus: "creating",
       lastProvisionError: null, createdUtc: new Date().toISOString(),
-      siteId: null, siteName: null, engine: "sqlserver", isOptimistic: true,
+      siteId: null, siteName: null, engine: "mysql", port: 0, isOptimistic: true,
     };
     setDatabases((current) => [optimisticDb, ...current]);
     setIsDbModalOpen(false);
@@ -388,13 +377,42 @@ export function SubscriptionOverviewPage() {
     return triggerGitDeploy(session, subId, siteId);
   }, [subId]);
 
-  const handleGetDeployLog = useCallback(async (siteId: string): Promise<{ success: boolean; data?: { logText: string } }> => {
+  const handleGetDeployLog = useCallback(async (siteId: string): Promise<{ success: boolean; data?: { logText: string | null; phase?: string | null; deploymentId?: string | null } | null }> => {
     const session = getCustomerSession();
     if (!session || !subId) return { success: false };
     try {
       const result = await getDeployLog(session, subId, siteId);
-      return { success: result.success, data: result.data?.logText ? { logText: result.data.logText } : undefined };
+      if (!result.success || !result.data) return { success: result.success };
+      return { success: true, data: { logText: result.data.logText ?? null, phase: result.data.phase ?? null, deploymentId: result.data.deploymentId ?? null } };
     } catch { return { success: false }; }
+  }, [subId]);
+
+  const handleGetEnvVars = useCallback(async (siteId: string) => {
+    const session = getCustomerSession();
+    if (!session || !subId) return { success: false };
+    try { return await getEnvVars(session, subId, siteId); }
+    catch { return { success: false }; }
+  }, [subId]);
+
+  const handleSaveEnvVars = useCallback(async (siteId: string, items: { name: string; value?: string | null }[]) => {
+    const session = getCustomerSession();
+    if (!session || !subId) return { success: false, message: "No session." };
+    try { return await saveEnvVars(session, subId, siteId, items); }
+    catch (e) { return { success: false, message: e instanceof Error ? e.message : "Save failed." }; }
+  }, [subId]);
+
+  const handleSetupWebhook = useCallback(async (siteId: string) => {
+    const session = getCustomerSession();
+    if (!session || !subId) return { success: false, message: "No session." };
+    try { return await setupWebhook(session, subId, siteId); }
+    catch (e) { return { success: false, message: e instanceof Error ? e.message : "Failed." }; }
+  }, [subId]);
+
+  const handleDisableWebhook = useCallback(async (siteId: string) => {
+    const session = getCustomerSession();
+    if (!session || !subId) return { success: false, message: "No session." };
+    try { return await disableWebhook(session, subId, siteId); }
+    catch (e) { return { success: false, message: e instanceof Error ? e.message : "Failed." }; }
   }, [subId]);
 
   // ── Render ──────────────────────────────────────────────────────
@@ -536,6 +554,7 @@ export function SubscriptionOverviewPage() {
       {publishTarget && (
         <PublishDialog
           site={publishTarget}
+          subscriptionId={subId!}
           stackCatalog={stackCatalog}
           availableStacks={availableStacks}
           onlyOneStack={onlyOneStack}
@@ -547,6 +566,10 @@ export function SubscriptionOverviewPage() {
           onSaveGitConfig={handleSaveGitConfig}
           onGitDeploy={handleGitDeploy}
           onGetDeployLog={handleGetDeployLog}
+          onGetEnvVars={handleGetEnvVars}
+          onSaveEnvVars={handleSaveEnvVars}
+          onSetupWebhook={handleSetupWebhook}
+          onDisableWebhook={handleDisableWebhook}
         />
       )}
     </>

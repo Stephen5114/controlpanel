@@ -8,14 +8,14 @@ import {
 import { getCustomerSession } from "../lib/customer-session";
 import { AuthPasswordField } from "../components/AuthPasswordField";
 import { PasswordRequirements } from "../components/PasswordRequirements";
-import { useLocalization } from "../lib/i18n";
+import { getActiveLocale, useLocalization } from "../lib/i18n";
 
 function formatDate(value: string | null | undefined, t?: (key: string, def: string) => string) {
   const dash = t?.("-", "-");
   if (!value) return dash;
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return dash;
-  return new Intl.DateTimeFormat(undefined, { year: "numeric", month: "long", day: "numeric" }).format(date);
+  return new Intl.DateTimeFormat(getActiveLocale(), { year: "numeric", month: "long", day: "numeric" }).format(date);
 }
 
 export function SettingsPage() {

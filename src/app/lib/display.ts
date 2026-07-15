@@ -1,3 +1,5 @@
+import { getActiveLocale } from "./i18n";
+
 export function formatRegionLabel(regionSlug: string | null | undefined) {
   if (!regionSlug) {
     return "Unassigned";
@@ -23,18 +25,18 @@ export function formatCompactDate(value: string | null | undefined) {
   if (!value) return "-";
   const parsed = new Date(value);
   if (Number.isNaN(parsed.getTime())) return "-";
-  return parsed.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+  return parsed.toLocaleDateString(getActiveLocale(), { month: "short", day: "numeric" });
 }
 
 export function formatDateTime(value: string | null | undefined) {
   if (!value) return "-";
   const parsed = new Date(value);
   if (Number.isNaN(parsed.getTime())) return "-";
-  return parsed.toLocaleString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+  return parsed.toLocaleString(getActiveLocale(), { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
 }
 
 export function formatCurrency(value: number, currency = "USD") {
-  return new Intl.NumberFormat(undefined, {
+  return new Intl.NumberFormat(getActiveLocale(), {
     style: "currency",
     currency: currency.toUpperCase(),
     maximumFractionDigits: 2,

@@ -1,25 +1,31 @@
-import { CreditCard, Globe2, Headphones, LayoutDashboard, Menu, Package, Settings, User, X, Zap, Sun, Moon, Palette } from "lucide-react";
+import { ChevronDown, CreditCard, Gift, Globe2, Headphones, LayoutDashboard, Menu, Package, Server, Settings, User, X, Zap, Sun, Moon, Palette } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
 import { getBillingSummary, getCustomerProfile } from "../lib/customer-api";
 import { clearCustomerSession, getCustomerSession } from "../lib/customer-session";
-import { useLocalization, LANGUAGES } from "../lib/i18n";
+import { getActiveLocale, useLocalization, LANGUAGES } from "../lib/i18n";
 import { useTheme } from "../lib/theme";
 
 const navigation = [
   { name: "Dashboard", path: "/", icon: LayoutDashboard, end: true },
   { name: "Addons", path: "/addons", icon: Package },
   { name: "Domains", path: "/domains", icon: Globe2 },
+  { name: "VPS", path: "/vps", icon: Server },
   { name: "Billing", path: "/billing", icon: CreditCard },
+  { name: "Affiliate", path: "/affiliate", icon: Gift },
   { name: "Support", path: "/support", icon: Headphones },
   { name: "Settings", path: "/settings", icon: Settings },
 ];
+
+// Default 20% first-year commission on the current $339.95/mo top VPS plan.
+const MAX_AFFILIATE_MONTHLY_REWARD_USD = 68;
 
 export function RootLayout() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [accountBalance, setAccountBalance] = useState<{ amount: number; currency: string } | null>(null);
   const [username, setUsername] = useState<string | null>(null);
   const [avatarDropdownOpen, setAvatarDropdownOpen] = useState(false);
+  const [themeMenuOpen, setThemeMenuOpen] = useState(false);
   const navigate = useNavigate();
   const session = getCustomerSession();
   
@@ -29,21 +35,17 @@ export function RootLayout() {
 
   const { theme, setTheme } = useTheme();
 
-  const cycleTheme = () => {
-    if (theme === "day") {
-      setTheme("dark");
-    } else if (theme === "dark") {
-      setTheme("classic");
-    } else {
-      setTheme("day");
-    }
-  };
-
   const ThemeIcon = useMemo(() => {
     if (theme === "dark") return Moon;
     if (theme === "classic") return Palette;
     return Sun;
   }, [theme]);
+
+  const themeOptions = [
+    { value: "day" as const, label: t("Day", "Day"), description: t("Bright cream and orange", "Bright cream and orange"), icon: Sun },
+    { value: "dark" as const, label: t("Dark", "Dark"), description: t("Warm charcoal with soft contrast", "Warm charcoal with soft contrast"), icon: Moon },
+    { value: "classic" as const, label: t("Classic", "Classic"), description: t("Oatmeal and terracotta", "Oatmeal and terracotta"), icon: Palette },
+  ];
 
   useEffect(() => {
     setTempLang(currentLang);
@@ -61,6 +63,16 @@ export function RootLayout() {
     document.addEventListener("click", handleClick);
     return () => document.removeEventListener("click", handleClick);
   }, [avatarDropdownOpen]);
+
+  useEffect(() => {
+    if (!themeMenuOpen) return;
+    function handleThemeClick(e: MouseEvent) {
+      const target = e.target as HTMLElement;
+      if (!target.closest(".theme-selector")) setThemeMenuOpen(false);
+    }
+    document.addEventListener("click", handleThemeClick);
+    return () => document.removeEventListener("click", handleThemeClick);
+  }, [themeMenuOpen]);
 
   const handleSaveLangSettings = () => {
     setLang(tempLang);
@@ -162,10 +174,55 @@ export function RootLayout() {
             {mobileOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
 
-          <button className="theme-toggle-btn" onClick={cycleTheme} type="button" title={t("Switch Theme", "Switch Theme")}>
-            <ThemeIcon size={15} />
-            <span>{t(theme === "day" ? "Day" : theme === "dark" ? "Dark" : "Classic", theme === "day" ? "Day" : theme === "dark" ? "Dark" : "Classic")}</span>
-          </button>
+          <Link
+            className="affiliate-nav-promo"
+            to="/affiliate"
+            title={t("Open Refer & Earn", "Open Refer & Earn")}
+          >
+            <span className="affiliate-nav-promo__icon"><Gift size={16} /></span>
+            <span>{t("Refer & earn up to ${amount}/mo", "Refer & earn up to ${amount}/mo").replace("{amount}", String(MAX_AFFILIATE_MONTHLY_REWARD_USD))}</span>
+          </Link>
+
+          <div className="theme-selector">
+            <button
+              className="theme-toggle-btn"
+              onClick={() => setThemeMenuOpen((open) => !open)}
+              type="button"
+              aria-haspopup="menu"
+              aria-expanded={themeMenuOpen}
+              title={t("Choose theme", "Choose theme")}
+            >
+              <span className={`theme-toggle-btn__preview theme-toggle-btn__preview--${theme}`}><ThemeIcon size={14} /></span>
+              <span>{t(theme === "day" ? "Day" : theme === "dark" ? "Dark" : "Classic", theme === "day" ? "Day" : theme === "dark" ? "Dark" : "Classic")}</span>
+              <ChevronDown className="theme-toggle-btn__chevron" size={14} />
+            </button>
+
+            {themeMenuOpen ? (
+              <div className="theme-menu" role="menu">
+                <div className="theme-menu__heading">
+                  <strong>{t("Appearance", "Appearance")}</strong>
+                  <span>{t("Choose how your panel looks", "Choose how your panel looks")}</span>
+                </div>
+                {themeOptions.map((option) => {
+                  const Icon = option.icon;
+                  return (
+                    <button
+                      key={option.value}
+                      className={`theme-menu__option${theme === option.value ? " is-active" : ""}`}
+                      type="button"
+                      role="menuitemradio"
+                      aria-checked={theme === option.value}
+                      onClick={() => { setTheme(option.value); setThemeMenuOpen(false); }}
+                    >
+                      <span className={`theme-menu__swatch theme-menu__swatch--${option.value}`}><Icon size={15} /></span>
+                      <span className="theme-menu__copy"><strong>{option.label}</strong><small>{option.description}</small></span>
+                      <span className="theme-menu__check" aria-hidden="true">{theme === option.value ? "✓" : ""}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            ) : null}
+          </div>
 
           <button className="nav-lang-selector" onClick={() => setIsLangModalOpen(true)} type="button">
             <Globe2 size={15} />
@@ -261,7 +318,7 @@ export function RootLayout() {
 
 function formatCurrency(value: number, currency = "USD") {
   try {
-    return new Intl.NumberFormat(undefined, {
+    return new Intl.NumberFormat(getActiveLocale(), {
       style: "currency",
       currency,
       minimumFractionDigits: 2,

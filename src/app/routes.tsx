@@ -9,6 +9,7 @@ import { SiteLayout } from "./layout/SiteLayout";
 const DashboardPage = lazy(() => import("./pages/DashboardPage").then(m => ({ default: m.DashboardPage })));
 const AddonsPage = lazy(() => import("./pages/AddonsPage").then(m => ({ default: m.AddonsPage })));
 const BillingPage = lazy(() => import("./pages/BillingPage").then(m => ({ default: m.BillingPage })));
+const AffiliatePage = lazy(() => import("./pages/AffiliatePage").then(m => ({ default: m.AffiliatePage })));
 const SupportPage = lazy(() => import("./pages/SupportPage").then(m => ({ default: m.SupportPage })));
 const SettingsPage = lazy(() => import("./pages/SettingsPage").then(m => ({ default: m.SettingsPage })));
 const NotFoundPage = lazy(() => import("./pages/NotFoundPage").then(m => ({ default: m.NotFoundPage })));
@@ -27,6 +28,9 @@ const SubscriptionFilesPage = lazy(() => import("./pages/SubscriptionFilesPage")
 const SubscriptionSecurityPage = lazy(() => import("./pages/SubscriptionSecurityPage").then(m => ({ default: m.SubscriptionSecurityPage })));
 const SiteDomainsPage = lazy(() => import("./pages/SiteDomainsPage").then(m => ({ default: m.SiteDomainsPage })));
 const SiteSettingsPage = lazy(() => import("./pages/SiteSettingsPage").then(m => ({ default: m.SiteSettingsPage })));
+const DeploymentsPage = lazy(() => import("./pages/DeploymentsPage").then(m => ({ default: m.DeploymentsPage })));
+const GitHubConnectedPage = lazy(() => import("./pages/GitHubConnectedPage").then(m => ({ default: m.GitHubConnectedPage })));
+const VpsPage = lazy(() => import("./pages/VpsPage").then(m => ({ default: m.VpsPage })));
 
 function SiteSettingsRedirect() {
   const { subId, siteId } = useParams();
@@ -60,6 +64,8 @@ export const router = createBrowserRouter([
           { path: "buy", element: <BuySubscriptionPage /> },
           { path: "topup", element: <TopupPage /> },
           { path: "domains", element: <DomainsPage /> },
+          { path: "vps", element: <VpsPage /> },
+          { path: "vps/:serviceId", element: <VpsPage /> },
           {
             path: "subscription/:subId",
             element: <SubscriptionLayout />,
@@ -69,6 +75,7 @@ export const router = createBrowserRouter([
               { path: "databases", element: <SubscriptionDatabasesPage /> },
               { path: "files", element: <SubscriptionFilesPage /> },
               { path: "security", element: <SubscriptionSecurityPage /> },
+              { path: "deployments", element: <DeploymentsPage /> },
               { path: "settings", element: <div className="empty-panel stack"><h2>Subscription Settings</h2><p>Change billing and limits here.</p></div> }
             ]
           },
@@ -83,9 +90,11 @@ export const router = createBrowserRouter([
               { path: "settings", element: <SiteSettingsPage /> },
             ]
           },
+          { path: "github/connected", element: <GitHubConnectedPage /> },
           { path: "addons", element: <AddonsPage /> },
           { path: "services", element: <Navigate to="/addons" replace /> },
           { path: "billing", element: <BillingPage /> },
+          { path: "affiliate", element: <AffiliatePage /> },
           { path: "support", element: <SupportPage /> },
           { path: "settings", element: <SettingsPage /> },
           { path: "*", element: <NotFoundPage /> },

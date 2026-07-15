@@ -5,7 +5,9 @@ import { Link, useLocation, useNavigate, useSearchParams } from "react-router-do
 import { AuthMarketingPanel } from "../components/AuthMarketingPanel";
 import { AuthPasswordField } from "../components/AuthPasswordField";
 import { EmailVerificationCodePanel } from "../components/EmailVerificationCodePanel";
+import { GoogleSignInButton } from "../components/GoogleSignInButton";
 import { loginCustomer, resendVerificationEmail } from "../lib/customer-api";
+import { loginCustomerWithGoogle } from "../lib/api-auth";
 import { saveCustomerSession } from "../lib/customer-session";
 import { useLocalization, LANGUAGES } from "../lib/i18n";
 import { Globe2 } from "lucide-react";
@@ -19,6 +21,7 @@ export function LoginPage() {
   const [email, setEmail] = useState(() => searchParams.get("email") ?? "");
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [googleSubmitting, setGoogleSubmitting] = useState(false);
   const [resending, setResending] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [verificationEmail, setVerificationEmail] = useState<string | null>(() =>
@@ -121,6 +124,31 @@ export function LoginPage() {
     }
   }
 
+  async function handleGoogleCredential(credential: string) {
+    setGoogleSubmitting(true);
+    setError(null);
+    setNotice(null);
+
+    try {
+      const result = await loginCustomerWithGoogle(credential);
+      if (!result.success || !result.customerId || !result.token || !result.email) {
+        setError(result.message);
+        return;
+      }
+
+      saveCustomerSession({
+        customerId: result.customerId,
+        email: result.email,
+        token: result.token,
+      });
+      navigate(target, { replace: true });
+    } catch (requestError) {
+      setError(requestError instanceof Error ? requestError.message : t("Cannot connect to backend.", "Cannot connect to backend."));
+    } finally {
+      setGoogleSubmitting(false);
+    }
+  }
+
   function handleVerified(verifiedEmail: string) {
     setVerificationEmail(null);
     setNotice(t("Email verified. Sign in to continue.", "Email verified. Sign in to continue."));
@@ -145,6 +173,18 @@ export function LoginPage() {
         <p className="page-copy">
           {t("Sign in after you confirm your email. If you still need the verification code, we can send it again.", "Sign in after you confirm your email. If you still need the verification code, we can send it again.")}
         </p>
+
+        {!verificationEmail ? (
+          <>
+            <GoogleSignInButton
+              locale={currentLang}
+              dividerLabel={t("or sign in with email", "or sign in with email")}
+              onCredential={handleGoogleCredential}
+              onError={setError}
+            />
+            {googleSubmitting ? <p className="google-sign-in__status">{t("Signing in with Google...", "Signing in with Google...")}</p> : null}
+          </>
+        ) : null}
 
         <form className="auth-form" onSubmit={handleSubmit}>
           <label>

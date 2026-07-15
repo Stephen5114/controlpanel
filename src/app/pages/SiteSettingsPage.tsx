@@ -4,7 +4,7 @@ import { deleteHostedSite, getSubscriptionSites, type HostedSite } from "../lib/
 import { getCustomerSession } from "../lib/customer-session";
 import { CheckCircle2, Copy, ExternalLink, Server, Trash2, UploadCloud } from "lucide-react";
 import { formatRegionLabel } from "../lib/display";
-import { useLocalization } from "../lib/i18n";
+import { getActiveLocale, useLocalization } from "../lib/i18n";
 
 function getVisitHostname(site: HostedSite) {
   const sortedHostnames = [...site.hostnames].sort((left, right) => {
@@ -147,7 +147,7 @@ export function SiteSettingsPage() {
               {t(site.provisioningStatus, site.provisioningStatus)}
             </span>
             <span>{primaryHostname}</span>
-            <span>{t("Created {date}", "Created {date}").replace("{date}", new Date(site.createdUtc).toLocaleDateString())}</span>
+            <span>{t("Created {date}", "Created {date}").replace("{date}", new Date(site.createdUtc).toLocaleDateString(getActiveLocale()))}</span>
           </p>
         </div>
         <a href={`http://${visitHostname}`} target="_blank" rel="noreferrer" className="secondary-button" style={{ height: "40px" }}>
@@ -167,28 +167,16 @@ export function SiteSettingsPage() {
               <dd>{t("Web Application Container", "Web Application Container")}</dd>
             </div>
             <div>
-              <dt>{t("Container Instance", "Container Instance")}</dt>
-              <dd>{site.appPoolName}</dd>
-            </div>
-            <div>
-              <dt>{t("Internal Port", "Internal Port")}</dt>
-              <dd>{site.port}</dd>
-            </div>
-            <div>
               <dt>{t("Region", "Region")}</dt>
               <dd>{site.regionSlug}</dd>
             </div>
             <div>
               <dt>{t("Disk Limit", "Disk Limit")}</dt>
-              <dd>{site.diskLimitMb.toLocaleString()} {t("MB", "MB")}</dd>
+              <dd>{site.diskLimitMb.toLocaleString(getActiveLocale())} {t("MB", "MB")}</dd>
             </div>
             <div>
               <dt>{t("File Limit", "File Limit")}</dt>
-              <dd>{t("{count} files", "{count} files").replace("{count}", site.fileLimitCount.toLocaleString())}</dd>
-            </div>
-            <div className="form-grid__wide">
-              <dt>{t("Physical Path", "Physical Path")}</dt>
-              <dd style={{ fontFamily: "monospace", fontSize: "0.85rem", overflowWrap: "anywhere" }}>{site.physicalPath}</dd>
+              <dd>{t("{count} files", "{count} files").replace("{count}", site.fileLimitCount.toLocaleString(getActiveLocale()))}</dd>
             </div>
           </div>
         </div>

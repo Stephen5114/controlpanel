@@ -36,7 +36,7 @@ import {
   type DomainSearchResult,
   type HostedSite,
 } from "../lib/customer-api";
-import { useLocalization } from "../lib/i18n";
+import { getActiveLocale, useLocalization } from "../lib/i18n";
 
 const suggestedTlds = ["com", "net", "org", "shop", "io", "app"];
 
@@ -59,13 +59,13 @@ function formatDate(value: string | null | undefined, t?: (key: string, def: str
   if (!value) return unknown;
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return unknown;
-  return new Intl.DateTimeFormat(undefined, { year: "numeric", month: "2-digit", day: "2-digit" }).format(date);
+  return new Intl.DateTimeFormat(getActiveLocale(), { year: "numeric", month: "2-digit", day: "2-digit" }).format(date);
 }
 
 function formatPrice(value: number | null | undefined, t?: (key: string, def: string) => string) {
   const unavailable = t?.("Price unavailable", "Price unavailable") ?? "Price unavailable";
   if (value === null || value === undefined) return unavailable;
-  return new Intl.NumberFormat(undefined, { style: "currency", currency: "USD", maximumFractionDigits: 2 }).format(value);
+  return new Intl.NumberFormat(getActiveLocale(), { style: "currency", currency: "USD", maximumFractionDigits: 2 }).format(value);
 }
 
 function daysUntil(value: string | null) {

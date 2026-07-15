@@ -10,10 +10,10 @@ import {
   type BillingSubscriptionView,
 } from "../lib/customer-api";
 import { getCustomerSession } from "../lib/customer-session";
-import { useLocalization } from "../lib/i18n";
+import { getActiveLocale, useLocalization } from "../lib/i18n";
 
 function formatCurrency(value: number, currency = "USD") {
-  return new Intl.NumberFormat(undefined, {
+  return new Intl.NumberFormat(getActiveLocale(), {
     style: "currency",
     currency: currency.toUpperCase(),
     maximumFractionDigits: 2,
@@ -24,7 +24,7 @@ function formatDate(value: string | null | undefined) {
   if (!value) return "—";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "—";
-  return new Intl.DateTimeFormat(undefined, {
+  return new Intl.DateTimeFormat(getActiveLocale(), {
     year: "numeric",
     month: "short",
     day: "2-digit",

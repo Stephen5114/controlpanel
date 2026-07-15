@@ -3,14 +3,14 @@ import { Link, useParams } from "react-router-dom";
 import { AlertTriangle, RefreshCw, Shield, ShieldCheck } from "lucide-react";
 import { getSubscriptionSecurity, type SubscriptionSecurityResponse } from "../lib/customer-api";
 import { getCustomerSession } from "../lib/customer-session";
-import { useLocalization } from "../lib/i18n";
+import { getActiveLocale, useLocalization } from "../lib/i18n";
 
 function normalizeState(value: string) {
   return value.trim().toLowerCase();
 }
 
 function formatDate(value: string | null, t?: (key: string, def: string) => string) {
-  return value ? new Date(value).toLocaleDateString() : (t ? t("Unknown", "Unknown") : "Unknown");
+  return value ? new Date(value).toLocaleDateString(getActiveLocale()) : (t ? t("Unknown", "Unknown") : "Unknown");
 }
 
 export function SubscriptionSecurityPage() {

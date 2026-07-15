@@ -1,5 +1,5 @@
 import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
-import { useLocalization } from "../lib/i18n";
+import { getActiveLocale, useLocalization } from "../lib/i18n";
 import { useParams, useSearchParams } from "react-router-dom";
 import {
   AlertTriangle,
@@ -112,11 +112,11 @@ function formatBytes(value: number) {
   if (value >= 1024 ** 3) return `${(value / (1024 ** 3)).toFixed(2)} GB`;
   if (value >= 1024 ** 2) return `${(value / (1024 ** 2)).toFixed(1)} MB`;
   if (value >= 1024) return `${(value / 1024).toFixed(1)} KB`;
-  return `${value.toLocaleString()} B`;
+  return `${value.toLocaleString(getActiveLocale())} B`;
 }
 
 function formatDate(value: string | null, t?: (key: string, def: string) => string) {
-  return value ? new Date(value).toLocaleString() : (t ? t("Not scanned yet", "Not scanned yet") : "Not scanned yet");
+  return value ? new Date(value).toLocaleString(getActiveLocale()) : (t ? t("Not scanned yet", "Not scanned yet") : "Not scanned yet");
 }
 
 function formatDateCompact(value: string | null, t?: (key: string, def: string) => string) {
@@ -124,7 +124,7 @@ function formatDateCompact(value: string | null, t?: (key: string, def: string) 
     return t ? t("No timestamp", "No timestamp") : "No timestamp";
   }
 
-  return new Date(value).toLocaleString([], {
+  return new Date(value).toLocaleString(getActiveLocale(), {
     month: "short",
     day: "numeric",
     hour: "2-digit",
@@ -147,121 +147,13 @@ function getPathSegments(path: string) {
   return path.split("/").filter(Boolean);
 }
 
-function extractRootLabel(physicalPath: string | null | undefined, fallback: string) {
-  if (!physicalPath) {
-    return fallback;
-  }
-
-  const normalized = physicalPath.replace(/\\/g, "/").replace(/\/+$/, "");
-  const parts = normalized.split("/").filter(Boolean);
-  return parts.length > 0 ? parts[parts.length - 1] : fallback;
-}
-
-function normalizeWindowsPath(path: string | null | undefined) {
-  return (path ?? "").replace(/\//g, "\\").replace(/\\+$/, "");
-}
-
-function getParentWindowsPath(path: string | null | undefined) {
-  const normalized = normalizeWindowsPath(path);
-  if (!normalized) {
-    return "";
-  }
-
-  const lastSlash = normalized.lastIndexOf("\\");
-  if (lastSlash <= 2) {
-    return normalized;
-  }
-
-  return normalized.slice(0, lastSlash);
-}
-
-function splitWindowsPath(path: string) {
-  const normalized = normalizeWindowsPath(path);
-  if (!normalized) {
-    return [];
-  }
-
-  const driveMatch = normalized.match(/^[A-Za-z]:/);
-  if (!driveMatch) {
-    return normalized.split("\\").filter(Boolean);
-  }
-
-  const drive = driveMatch[0];
-  const remainder = normalized.slice(drive.length).replace(/^\\+/, "");
-  return [drive, ...remainder.split("\\").filter(Boolean)];
-}
-
-function joinWindowsPath(parts: string[]) {
-  if (parts.length === 0) {
-    return "";
-  }
-
-  if (/^[A-Za-z]:$/i.test(parts[0])) {
-    return parts.length === 1 ? `${parts[0]}\\` : `${parts[0]}\\${parts.slice(1).join("\\")}`;
-  }
-
-  return parts.join("\\");
-}
-
-function deriveSubscriptionRootPath(sites: SubscriptionFilesSite[]) {
-  const parentPaths = sites
-    .map((site) => getParentWindowsPath(site.physicalPath))
-    .filter(Boolean);
-
-  if (parentPaths.length === 0) {
-    return "";
-  }
-
-  let commonParts = splitWindowsPath(parentPaths[0]);
-  for (const candidate of parentPaths.slice(1)) {
-    const candidateParts = splitWindowsPath(candidate);
-    let nextLength = 0;
-    while (
-      nextLength < commonParts.length &&
-      nextLength < candidateParts.length &&
-      commonParts[nextLength].toLowerCase() === candidateParts[nextLength].toLowerCase()
-    ) {
-      nextLength += 1;
-    }
-    commonParts = commonParts.slice(0, nextLength);
-  }
-
-  return joinWindowsPath(commonParts) || parentPaths[0];
-}
-
-function ensureTrailingBackslash(path: string) {
-  if (!path) {
-    return "";
-  }
-
-  return path.endsWith("\\") ? path : `${path}\\`;
-}
-
-function buildAbsoluteFilePath(browser: SiteFileBrowserResponse | null) {
-  if (!browser) {
-    return "";
-  }
-
-  const basePath = browser.physicalPath.replace(/[\\/]+$/, "");
-  if (basePath.startsWith('/')) {
-    const rel = browser.currentPath.replace(/^\/+/, "");
-    return rel ? `${basePath}/${rel}` : basePath;
-  }
-  const relativePath = browser.currentPath.replace(/\//g, "\\").replace(/^\\+/, "");
-  return relativePath ? `${basePath}\\${relativePath}` : basePath;
-}
-
-function formatRelativeFilePath(path: string) {
-  return path ? `/${path}` : "/";
-}
-
+// Customer-facing logical path — rooted at the site name, never the host path.
 function buildSubscriptionRelativePath(selectedSite: SubscriptionFilesSite | null, currentPath: string) {
   if (!selectedSite) {
     return "/";
   }
 
-  const rootFolder = extractRootLabel(selectedSite.physicalPath, selectedSite.siteName);
-  return currentPath ? `/${rootFolder}/${currentPath}` : `/${rootFolder}`;
+  return currentPath ? `/${selectedSite.siteName}/${currentPath}` : `/${selectedSite.siteName}`;
 }
 
 function isEditableFileEntry(entry: SiteFileEntry) {
@@ -551,11 +443,10 @@ export function SubscriptionFilesPage() {
       return null;
     }
 
-    const rootPath = deriveSubscriptionRootPath(summary.sites);
     const folderEntries = summary.sites
       .map((site) => ({
         siteId: site.siteId,
-        folderName: extractRootLabel(site.physicalPath, site.siteName),
+        folderName: site.siteName,
         lastScannedUtc: site.lastScannedUtc,
       }))
       .sort((left, right) => left.folderName.localeCompare(right.folderName));
@@ -565,7 +456,6 @@ export function SubscriptionFilesPage() {
       siteId: "",
       siteName: summary.subscription.name,
       domain: "",
-      physicalPath: rootPath,
       currentPath: "",
       parentPath: null,
       diskUsedBytes: summary.totalDiskUsedBytes,
@@ -624,38 +514,26 @@ export function SubscriptionFilesPage() {
     [browser],
   );
 
-  const subscriptionRootPath = useMemo(
-    () => deriveSubscriptionRootPath(summary?.sites ?? []),
-    [summary?.sites],
-  );
-
   const siteFolders = useMemo(
     () =>
       (summary?.sites ?? [])
         .map((site) => ({
           site,
-          folderName: extractRootLabel(site.physicalPath, site.siteName),
+          folderName: site.siteName,
         }))
         .sort((left, right) => left.folderName.localeCompare(right.folderName)),
     [summary?.sites],
   );
 
-  const rootLabel = useMemo(
-    () => extractRootLabel(subscriptionRootPath, summary?.subscription.name ?? "subscription-root"),
-    [subscriptionRootPath, summary?.subscription.name],
-  );
+  const rootLabel = summary?.subscription.name ?? "subscription-root";
 
   const currentSegments = useMemo(() => getPathSegments(currentPath), [currentPath]);
-  const absoluteCurrentPath = useMemo(() => buildAbsoluteFilePath(browser), [browser]);
   const displayRelativePath = useMemo(
     () => buildSubscriptionRelativePath(selectedSite, browser?.currentPath ?? currentPath),
     [browser?.currentPath, currentPath, selectedSite],
   );
-  const displayedAbsolutePath = useMemo(() => {
-    if (selectedSiteId) return absoluteCurrentPath;
-    if (subscriptionRootPath.startsWith('/')) return subscriptionRootPath.replace(/\/+$/, '') + '/';
-    return ensureTrailingBackslash(subscriptionRootPath);
-  }, [absoluteCurrentPath, selectedSiteId, subscriptionRootPath]);
+  // Customer-facing path label: friendly site-name path for a selected site, "/" at the subscription root.
+  const displayedAbsolutePath = selectedSiteId ? displayRelativePath : "/";
   const rootEntrySiteMap = useMemo(
     () => new Map(siteFolders.map(({ site }) => [site.siteId, site])),
     [siteFolders],
@@ -1208,7 +1086,7 @@ export function SubscriptionFilesPage() {
                   onClick={() => openSiteRoot(selectedSiteId)}
                   disabled={busyAction !== null}
                 >
-                  {extractRootLabel(selectedSite?.physicalPath, selectedSite?.siteName ?? "site")}
+                  {selectedSite?.siteName ?? "site"}
                 </button>
                 {browser.breadcrumbs.slice(1).map((crumb) => (
                   <button
@@ -1271,6 +1149,11 @@ export function SubscriptionFilesPage() {
               {t("This site is currently quota-blocked. Remove files before uploading or creating new content.", "This site is currently quota-blocked. Remove files before uploading or creating new content.")}
             </div>
           ) : null}
+          {browser?.gitManaged ? (
+            <div className="inline-message inline-message--warn files-workbench__notice">
+              {t("This site is deployed from Git. You are viewing the files of the currently running release — manual changes here will be overwritten by the next deployment. Commit to your repository for permanent changes.", "This site is deployed from Git. You are viewing the files of the currently running release — manual changes here will be overwritten by the next deployment. Commit to your repository for permanent changes.")}
+            </div>
+          ) : null}
 
           {loadingBrowser ? (
             <div className="files-workbench__empty-state">
@@ -1280,7 +1163,7 @@ export function SubscriptionFilesPage() {
           ) : !activeBrowser ? (
             <div className="files-workbench__empty-state">
               <h2>{t("Choose a site folder to open its files.", "Choose a site folder to open its files.")}</h2>
-              <p>{t("The shared hosting root appears first, then each site opens inside its own physical path.", "The shared hosting root appears first, then each site opens inside its own physical path.")}</p>
+              <p>{t("The subscription root appears first, then each site opens inside its own folder.", "The subscription root appears first, then each site opens inside its own folder.")}</p>
             </div>
           ) : filteredEntries.length === 0 ? (
             <div className="files-workbench__empty-state">
@@ -1407,7 +1290,7 @@ export function SubscriptionFilesPage() {
                         ) : (
                           <strong>{entry.name}</strong>
                         )}
-                        <span>{showSubscriptionRoot ? rootSite?.physicalPath ?? displayedAbsolutePath : entry.relativePath}</span>
+                        <span>{showSubscriptionRoot ? `/${rootSite?.siteName ?? entry.name}` : entry.relativePath}</span>
                       </div>
                     </button>
                     <span>{showSubscriptionRoot ? `${rootSite?.siteName ?? ""} - ${rootSite?.domain ?? ""}`.replace(/\s-\s$/, "") : formatDate(entry.lastModifiedUtc, t)}</span>
@@ -1491,7 +1374,7 @@ export function SubscriptionFilesPage() {
               <div className="files-workbench__editor-copy">
                 <span className="files-workbench__editor-eyebrow">{t("Text editor", "Text editor")}</span>
                 <h2 id="file-editor-title">{editorFile?.fileName ?? t("Opening file...", "Opening file...")}</h2>
-                <p>{editorFile?.absolutePath ?? t("Fetching the latest text content from the hosting node.", "Fetching the latest text content from the hosting node.")}</p>
+                <p>{editorFile ? buildSubscriptionRelativePath(selectedSite, editorFile.relativePath) : t("Fetching the latest text content from the hosting node.", "Fetching the latest text content from the hosting node.")}</p>
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                 {editorFile && (
@@ -1657,7 +1540,7 @@ export function SubscriptionFilesPage() {
         <div className="files-workbench__footer-copy">
           <HardDrive size={16} />
           <span>
-            {t("Storage", "Storage")}: {selectedSiteId && browser ? t("{used} of {total} MB used", "{used} of {total} MB used").replace("{used}", formatBytes(browser.diskUsedBytes)).replace("{total}", browser.diskQuotaMb.toLocaleString()) : t("{used} across subscription", "{used} across subscription").replace("{used}", formatBytes(summary.totalDiskUsedBytes))}
+            {t("Storage", "Storage")}: {selectedSiteId && browser ? t("{used} of {total} MB used", "{used} of {total} MB used").replace("{used}", formatBytes(browser.diskUsedBytes)).replace("{total}", browser.diskQuotaMb.toLocaleString(getActiveLocale())) : t("{used} across subscription", "{used} across subscription").replace("{used}", formatBytes(summary.totalDiskUsedBytes))}
           </span>
         </div>
 

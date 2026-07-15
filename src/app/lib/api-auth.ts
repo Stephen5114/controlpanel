@@ -2,13 +2,15 @@ import { apiRequest } from "./api-core";
 import type {
   RegisterCustomerResponse,
   LoginResponse,
+  GoogleAuthConfig,
+  GoogleLoginResponse,
   ResendVerificationResponse,
   VerifyEmailResponse,
   ForgotPasswordResponse,
   ResetPasswordResponse,
 } from "./api-types";
 
-export function registerCustomer(payload: { email: string; password: string; username?: string; turnstileToken?: string }) {
+export function registerCustomer(payload: { email: string; password: string; username?: string; turnstileToken?: string; referralCode?: string; referralSource?: string }) {
   return apiRequest<RegisterCustomerResponse>("/api/auth/register", {
     method: "POST",
     body: JSON.stringify(payload),
@@ -19,6 +21,17 @@ export function loginCustomer(payload: { email: string; password: string }) {
   return apiRequest<LoginResponse>("/api/auth/login", {
     method: "POST",
     body: JSON.stringify(payload),
+  });
+}
+
+export function getGoogleAuthConfig() {
+  return apiRequest<GoogleAuthConfig>("/api/auth/google/config");
+}
+
+export function loginCustomerWithGoogle(credential: string) {
+  return apiRequest<GoogleLoginResponse>("/api/auth/google", {
+    method: "POST",
+    body: JSON.stringify({ credential }),
   });
 }
 

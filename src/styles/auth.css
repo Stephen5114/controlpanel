@@ -1106,7 +1106,6 @@
   .auth-brand-badges { gap: 8px; bottom: 20px; }
   .auth-brand-badge { font-size: 0.65rem; padding: 4px 10px; }
   .auth-brand-inner { transform: scale(0.92); transform-origin: top center; }
-  .nav-lang-selector { margin-top: 20px; }
 
   .auth-brand-tagline { font-size: 1.4rem; }
   .auth-card { padding: 40px 32px; }
@@ -1140,7 +1139,6 @@
   .auth-brand-dataflow,
   .auth-brand-circuits,
   .auth-brand-orb { display: none; }
-  .nav-lang-selector { margin-top: 12px; }
 
   .auth-brand-tagline { font-size: 1.2rem; margin-bottom: 24px; }
   .auth-card { padding: 32px 24px; }

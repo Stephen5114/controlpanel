@@ -120,7 +120,7 @@ h1, h2,
 .topnav__link { border-radius: 3px; }
 .topnav__link:hover { color: var(--text); background: var(--surface-soft); }
 .topnav__link.is-active { color: var(--text); background: var(--primary); box-shadow: inset 0 -2px 0 var(--border); }
-.theme-toggle-btn, .nav-lang-selector, .mobile-toggle {
+.mobile-toggle {
   min-height: 34px;
   border: none;
   border-radius: 8px;
@@ -129,7 +129,7 @@ h1, h2,
   cursor: pointer;
   transition: background 150ms ease, color 150ms ease;
 }
-.theme-toggle-btn:hover, .nav-lang-selector:hover, .mobile-toggle:hover {
+.mobile-toggle:hover {
   background: var(--surface-soft);
   color: var(--text);
 }

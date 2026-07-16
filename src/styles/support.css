@@ -116,7 +116,7 @@
   animation: support-skeleton-shimmer 1.3s ease infinite;
 }
 
-.support-skeleton__pill { width: 84px; height: 18px; border-radius: 999px; }
+.support-skeleton__pill { width: 84px; height: 18px; border-radius: var(--radius-full); }
 .support-skeleton__line { width: 100%; }
 .support-skeleton__line--short { width: 55%; }
 

@@ -312,7 +312,7 @@
   color: var(--affiliate-ink);
   background: transparent;
   border: 1.5px solid var(--affiliate-ink);
-  border-radius: 999px;
+  border-radius: var(--radius-full);
 }
 
 .affiliate-share-row a:hover,

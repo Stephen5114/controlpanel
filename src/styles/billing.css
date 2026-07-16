@@ -36,8 +36,8 @@
   gap: 16px;
   padding: 16px 20px;
   border-radius: 18px;
-  border: 1px solid #fcd9b6;
-  background: linear-gradient(180deg, #fff7ec, #fffaf3);
+  border: 1px solid var(--warning);
+  background: var(--warning-soft);
 }
 
 .dashboard-alert__icon {
@@ -46,8 +46,8 @@
   width: 40px;
   height: 40px;
   border-radius: 12px;
-  background: #fdebd2;
-  color: #b45309;
+  background: var(--warning-soft);
+  color: var(--warning);
   flex-shrink: 0;
 }
 
@@ -58,14 +58,14 @@
 
 .dashboard-alert__body strong {
   display: block;
-  color: #92400e;
+  color: var(--warning);
   margin-bottom: 2px;
 }
 
 .dashboard-alert__body ul {
   margin: 0;
   padding-left: 18px;
-  color: #9a5b1c;
+  color: var(--warning);
   font-size: 0.9rem;
 }
 
@@ -89,7 +89,7 @@
 }
 
 .dashboard-renew--warn {
-  color: #b45309;
+  color: var(--warning);
 }
 
 .dashboard-renew--danger {
@@ -102,8 +102,8 @@
   gap: 10px;
   padding: 12px;
   border-radius: 14px;
-  border: 1px dashed #fcd9b6;
-  background: #fffaf3;
+  border: 1px dashed var(--warning);
+  background: var(--warning-soft);
 }
 
 .dashboard-pending__note {
@@ -111,7 +111,7 @@
   align-items: center;
   gap: 8px;
   font-size: 0.85rem;
-  color: #9a5b1c;
+  color: var(--warning);
 }
 
 .dashboard-pending__actions {

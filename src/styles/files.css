@@ -256,7 +256,7 @@
   min-height: 30px;
   padding: 0 10px;
   border: 1px solid var(--border);
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   background: var(--surface-soft);
 }
 
@@ -355,7 +355,7 @@
 .files-workbench__storage-bar {
   width: min(100%, 240px);
   height: 8px;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   background: var(--surface-soft);
   overflow: hidden;
 }

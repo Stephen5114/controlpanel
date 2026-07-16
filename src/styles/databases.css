@@ -1,3 +1,5 @@
+@import "./variables.css";
+
 /* Site databases studio */
 .site-content {
   min-width: 0;
@@ -102,7 +104,7 @@
   align-items: center;
   min-height: 30px;
   padding: 0 12px;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   background: #d5e3fc;
   color: #57657a;
   font-size: 0.82rem;
@@ -387,7 +389,7 @@
 .db-signal__dot {
   width: 7px;
   height: 7px;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   background: currentColor;
 }
 
@@ -626,3 +628,507 @@
 /* ═══════════════════════════════════════════════════════
    ARCHITECT LEDGER — Subscription Overview Design
    ═══════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════
+   Database page v2 (db2-*) — merged from databases-v2.css
+   ═══════════════════════════════════════════════════════ */
+
+/* ── Page header ── */
+.db2-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+}
+
+.db2-header__left {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.db2-header__title {
+  margin: 0;
+  font-size: clamp(1.5rem, 2.5vw, 2rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+
+.db2-header__stats {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.db2-header__actions {
+  display: flex;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+/* ── Inline stats ── */
+.db2-stat {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+  border: 1px solid transparent;
+}
+
+.db2-stat--green {
+  background: var(--success-soft);
+  color: var(--success);
+  border-color: var(--success-soft);
+}
+
+.db2-stat--amber {
+  background: var(--warning-soft);
+  color: var(--warning);
+  border-color: var(--warning-soft);
+}
+
+.db2-stat--muted {
+  background: var(--surface-soft, #f1f5f9);
+  color: var(--muted);
+  border-color: var(--border);
+}
+
+.db2-stat__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+.db2-stat__spin {
+  animation: spin 1.4s linear infinite;
+}
+
+/* ── List ── */
+.db2-list {
+  display: grid;
+  gap: 14px;
+}
+
+/* ── Database card ── */
+.db2-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  overflow: hidden;
+  transition: box-shadow 0.18s, border-color 0.18s;
+}
+
+.db2-card:hover {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.07);
+  border-color: var(--primary-soft, #dce3ff);
+}
+
+/* Card header */
+.db2-card__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 18px 20px 14px;
+}
+
+.db2-card__identity {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.db2-card__db-icon {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+
+.db2-card__name-block {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  flex-wrap: wrap;
+}
+
+.db2-card__name {
+  font-size: 1rem;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.db2-card__engine-tag {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.db2-card__head-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* Status badge */
+.db2-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  white-space: nowrap;
+}
+
+.db2-badge--live {
+  background: var(--success-soft);
+  color: var(--success);
+}
+
+.db2-badge--pending {
+  background: var(--warning-soft);
+  color: var(--warning);
+}
+
+.db2-badge--error {
+  background: var(--error-soft, #fff0f0);
+  color: var(--error, #e53e3e);
+}
+
+.db2-badge__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+.db2-badge__spin {
+  animation: spin 1.4s linear infinite;
+}
+
+/* Actions menu */
+.db2-menu-wrap {
+  position: relative;
+}
+
+.db2-menu-btn {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.db2-menu-btn:hover {
+  background: var(--surface-soft, #f1f5f9);
+  color: var(--text);
+}
+
+.db2-menu-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.db2-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  padding: 6px;
+  min-width: 180px;
+  z-index: 100;
+  animation: slide-up 0.14s ease-out;
+}
+
+.db2-menu__item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  padding: 9px 12px;
+  border-radius: 8px;
+  background: transparent;
+  border: none;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text);
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.12s;
+}
+
+.db2-menu__item:hover:not(:disabled) {
+  background: var(--surface-soft, #f1f5f9);
+}
+
+.db2-menu__item:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.db2-menu__item--danger {
+  color: var(--error, #e53e3e);
+}
+
+.db2-menu__item--danger:hover:not(:disabled) {
+  background: var(--error-soft, #fff0f0);
+}
+
+.db2-menu__divider {
+  height: 1px;
+  background: var(--border);
+  margin: 4px 0;
+}
+
+/* Meta row */
+.db2-card__meta {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  padding: 10px 20px 14px;
+  flex-wrap: wrap;
+  row-gap: 8px;
+}
+
+.db2-meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 0 14px;
+}
+
+.db2-meta-item:first-child {
+  padding-left: 0;
+}
+
+.db2-meta-item__label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+}
+
+.db2-meta-item__value {
+  font-size: 0.84rem;
+  font-weight: 500;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+}
+
+.db2-meta-sep {
+  width: 1px;
+  height: 28px;
+  background: var(--border);
+  flex-shrink: 0;
+}
+
+.db2-muted-italic {
+  color: var(--muted);
+  font-style: italic;
+  font-size: 0.82rem;
+}
+
+/* Error */
+.db2-card__error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 20px 12px;
+  padding: 10px 14px;
+  background: var(--error-soft, #fff0f0);
+  color: var(--error, #c53030);
+  border-radius: 10px;
+  font-size: 0.82rem;
+  line-height: 1.4;
+}
+
+/* Connection string */
+.db2-card__conn {
+  margin: 0 20px 18px;
+  background: var(--surface-soft, #f8fafc);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.db2-card__conn-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+.db2-card__conn-label > span {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+
+.db2-card__conn-code {
+  display: block;
+  padding: 10px 14px;
+  font-family: "JetBrains Mono", "Fira Code", "Cascadia Code", ui-monospace, monospace;
+  font-size: 0.78rem;
+  color: var(--text);
+  word-break: break-all;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+.db2-copy-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.db2-copy-btn:hover {
+  background: var(--primary-soft);
+  color: var(--primary);
+  border-color: var(--primary-soft);
+}
+
+.db2-copy-btn--copied {
+  background: var(--success-soft);
+  color: var(--success);
+  border-color: var(--success-soft);
+}
+
+/* ── Modal ── */
+.db2-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 16px;
+}
+
+.db2-modal {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 28px;
+  width: 100%;
+  max-width: 520px;
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: slide-up 0.18s ease-out;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+}
+
+.db2-modal__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.db2-modal__title {
+  margin: 0 0 4px;
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.db2-modal__sub {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.db2-modal__footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+/* ── Form helpers ── */
+.db2-form-label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+
+.db2-form-hint {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--text-muted, var(--muted));
+  line-height: 1.4;
+}
+
+/* ── Responsive ── */
+@media (max-width: 640px) {
+  .db2-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .db2-card__head {
+    flex-wrap: wrap;
+  }
+
+  .db2-card__meta {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .db2-meta-sep {
+    display: none;
+  }
+
+  .db2-meta-item {
+    padding-left: 0;
+  }
+}

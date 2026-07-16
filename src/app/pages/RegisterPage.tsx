@@ -1,4 +1,4 @@
-import "../../styles/auth-brand.css";
+import "../../styles/auth.css";
 import "../../styles/auth.css";
 import { FormEvent, useCallback, useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";

@@ -68,7 +68,7 @@
   gap: 8px;
   min-height: 32px;
   padding: 0 12px;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   border: 1px solid transparent;
   background: var(--surface-soft);
   color: var(--muted);
@@ -84,7 +84,7 @@
   font-size: 0.75rem;
   background: rgba(0, 0, 0, 0.05);
   padding: 2px 6px;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
 }
 
 .domain-filter-chip:hover {
@@ -240,8 +240,8 @@
   padding: 14px 16px;
   border-radius: 16px;
   border: 1px solid rgba(192, 122, 19, 0.2);
-  background: #fff9ef;
-  color: #8a5a12;
+  background: var(--warning-soft);
+  color: var(--warning);
 }
 
 .hostname-monitoring-note {
@@ -251,8 +251,8 @@
 
 .hostname-attention--error {
   border-color: rgba(220, 38, 38, 0.2);
-  background: #fff5f5;
-  color: #b64755;
+  background: var(--error-soft);
+  color: var(--error);
 }
 
 .hostname-attention__title {
@@ -561,7 +561,7 @@
 
 .support-filters button {
   padding: 7px 10px;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   background: var(--surface-soft);
   color: var(--muted);
   font-size: 0.78rem;
@@ -583,10 +583,6 @@
   padding: 16px;
   border-top: 1px solid var(--border);
   color: var(--text);
-}
-
-body, .card, .topbar, input, select, textarea {
-  transition: background 250ms ease, background-color 250ms ease, border-color 250ms ease, color 250ms ease, box-shadow 250ms ease;
 }
 
 .support-ticket-row.is-active,
@@ -698,7 +694,7 @@ body, .card, .topbar, input, select, textarea {
   letter-spacing: 0.04em;
   color: var(--primary);
   background: var(--primary-soft);
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   text-transform: uppercase;
 }
 
@@ -797,7 +793,7 @@ body, .card, .topbar, input, select, textarea {
   align-items: center;
   gap: 6px;
   padding: 7px 10px;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   font-size: 0.8rem;
   font-weight: 800;
   text-transform: capitalize;
@@ -1096,21 +1092,21 @@ body, .card, .topbar, input, select, textarea {
 }
 
 .dm-status--active {
-  border: 1px solid #a7f3c5;
-  background: #eafff2;
-  color: #02a84f;
+  border: 1px solid var(--success-soft);
+  background: var(--success-soft);
+  color: var(--success);
 }
 
 .dm-status--warning {
-  border: 1px solid #fed7aa;
-  background: #fff2e8;
-  color: #ff5c19;
+  border: 1px solid var(--warning);
+  background: var(--warning-soft);
+  color: var(--warning);
 }
 
 .dm-status--expired {
-  border: 1px solid #fecaca;
-  background: #fff0f2;
-  color: #e11d48;
+  border: 1px solid var(--error-soft);
+  background: var(--error-soft);
+  color: var(--error);
 }
 
 .dm-domain-card__dates {
@@ -1169,7 +1165,7 @@ body, .card, .topbar, input, select, textarea {
   width: 46px;
   height: 26px;
   border: 1px solid #d2d6de;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   background: #e5e7eb;
   cursor: pointer;
 }
@@ -1180,7 +1176,7 @@ body, .card, .topbar, input, select, textarea {
   left: 3px;
   width: 18px;
   height: 18px;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   background: var(--surface);
   box-shadow: 0 2px 5px rgba(15, 23, 42, 0.18);
   transition: transform 160ms ease;
@@ -1535,7 +1531,7 @@ body, .card, .topbar, input, select, textarea {
   align-items: center;
   min-height: 34px;
   padding: 0 14px;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   background: rgba(255, 255, 255, 0.12);
   border: 1px solid rgba(255, 255, 255, 0.16);
   color: #dbeafe;
@@ -1544,7 +1540,7 @@ body, .card, .topbar, input, select, textarea {
 
 .domain-make-hero__orb {
   position: absolute;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   filter: blur(8px);
   opacity: 0.7;
 }
@@ -1724,7 +1720,7 @@ body, .card, .topbar, input, select, textarea {
   gap: 8px;
   min-height: 38px;
   padding: 0 14px;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   border: 1px solid rgba(203, 213, 225, 0.78);
   background: var(--surface);
   color: var(--domain-make-ink);
@@ -1776,7 +1772,7 @@ body, .card, .topbar, input, select, textarea {
   justify-content: center;
   min-height: 34px;
   padding: 0 12px;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   background: rgba(37, 99, 235, 0.1);
   color: var(--domain-make-blue);
   font-weight: 900;
@@ -1812,7 +1808,7 @@ body, .card, .topbar, input, select, textarea {
 .domain-make-buy {
   min-height: 40px;
   padding: 0 18px;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   box-shadow: none;
 }
 
@@ -1998,7 +1994,7 @@ body, .card, .topbar, input, select, textarea {
   align-items: center;
   min-height: 26px;
   padding: 0 10px;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   background: var(--surface);
   color: var(--muted);
   font-size: 0.76rem;
@@ -2088,7 +2084,7 @@ body, .card, .topbar, input, select, textarea {
   align-items: center;
   gap: 6px;
   padding: 4px 10px;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   font-size: 0.8rem;
   font-weight: 600;
 }
@@ -2236,7 +2232,7 @@ body, .card, .topbar, input, select, textarea {
   justify-content: center;
   width: 28px;
   height: 28px;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   background: var(--primary-soft);
   color: var(--primary);
   font-size: 0.9rem;
@@ -2432,7 +2428,7 @@ body, .card, .topbar, input, select, textarea {
   align-items: center;
   min-height: 28px;
   padding: 0 11px;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   background: var(--site-domain-panel-soft);
   color: var(--site-domain-muted);
   font-size: 0.8rem;
@@ -3222,7 +3218,7 @@ body, .card, .topbar, input, select, textarea {
   display: inline-flex;
   align-items: center;
   padding: 6px 10px;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   background: rgba(17, 28, 45, 0.06);
   color: var(--domain-muted);
   font-size: 0.78rem;
@@ -3389,7 +3385,7 @@ body, .card, .topbar, input, select, textarea {
   justify-content: center;
   width: 30px;
   height: 30px;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   background: rgba(223, 233, 255, 0.94);
   color: var(--domain-blue);
   font-size: 0.88rem;
@@ -3631,7 +3627,7 @@ body, .card, .topbar, input, select, textarea {
   width: 36px;
   height: 36px;
   border: 0;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   background: transparent;
   color: #64748b;
   cursor: pointer;
@@ -3791,7 +3787,7 @@ body, .card, .topbar, input, select, textarea {
   align-items: center;
   gap: 8px;
   padding: 8px 12px;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   background: rgba(255, 255, 255, 0.08);
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -3803,7 +3799,7 @@ body, .card, .topbar, input, select, textarea {
 .domain-status-pill__dot {
   width: 8px;
   height: 8px;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   background: #6ffbbe;
   box-shadow: 0 0 10px rgba(111, 251, 190, 0.9);
 }
@@ -3999,7 +3995,7 @@ body, .card, .topbar, input, select, textarea {
   align-items: center;
   gap: 8px;
   padding: 6px 12px;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   font-size: 0.7rem;
   font-weight: 800;
   text-transform: uppercase;
@@ -4008,7 +4004,7 @@ body, .card, .topbar, input, select, textarea {
 .domain-status__dot {
   width: 6px;
   height: 6px;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   background: #009668;
 }
 
@@ -4033,7 +4029,7 @@ body, .card, .topbar, input, select, textarea {
   width: 40px;
   height: 20px;
   border: 0;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   background: rgba(198, 198, 205, 0.5);
   cursor: pointer;
 }
@@ -4044,7 +4040,7 @@ body, .card, .topbar, input, select, textarea {
   left: 2px;
   width: 16px;
   height: 16px;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   background: var(--surface);
   box-shadow: 0 2px 6px rgba(11, 28, 48, 0.12);
   transition: transform 150ms ease;
@@ -4136,7 +4132,7 @@ body, .card, .topbar, input, select, textarea {
   gap: 6px;
   min-height: 28px;
   padding: 0 10px;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   background: var(--surface-soft);
   color: #64748b;
   font-size: 0.7rem;
@@ -4397,7 +4393,7 @@ body, .card, .topbar, input, select, textarea {
   align-items: center;
   min-height: 32px;
   padding: 0 12px;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   background: #eff6ff;
   color: #2563eb;
   font-size: 0.76rem;
@@ -4776,7 +4772,7 @@ body, .card, .topbar, input, select, textarea {
   min-width: 26px;
   height: 26px;
   padding: 0 8px;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   background: #6ffbbe;
   color: #005236;
   font-size: 0.65rem;
@@ -4853,7 +4849,7 @@ body, .card, .topbar, input, select, textarea {
 .dns-mode-toggle__indicator {
   width: 14px;
   height: 14px;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   border: 2px solid rgba(100, 116, 139, 0.45);
 }
 
@@ -4944,7 +4940,7 @@ body, .card, .topbar, input, select, textarea {
   align-items: center;
   min-height: 28px;
   padding: 0 10px;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   background: #eff4ff;
   color: #45464d;
   font-size: 0.68rem;
@@ -5102,7 +5098,7 @@ body, .card, .topbar, input, select, textarea {
   place-items: center;
   width: 132px;
   height: 132px;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   background: rgba(255, 255, 255, 0.1);
   color: #fff;
 }

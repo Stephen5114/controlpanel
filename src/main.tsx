@@ -7,13 +7,10 @@ import { ThemeProvider } from "./app/lib/theme";
 
 import "./styles/index.css";
 import "./styles/auth.css";
-import "./styles/auth-brand.css";
-import "./styles/auth-loading.css";
 import "./styles/ui-controls.css";
 import "./styles/dashboard.css";
 import "./styles/billing.css";
 import "./styles/databases.css";
-import "./styles/databases-v2.css";
 import "./styles/domains.css";
 import "./styles/domain-bind.css";
 import "./styles/files.css";

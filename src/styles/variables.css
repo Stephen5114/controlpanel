@@ -1,0 +1,90 @@
+:root {
+  color-scheme: light;
+  --bg: #f4f7fb;
+  --surface: #ffffff;
+  --surface-soft: #f8fbff;
+  --border: #dfe7f3;
+  --text: #162033;
+  --muted: #637089;
+  --primary: #2563eb;
+  --primary-soft: #e8f0ff;
+  --success: #169b62;
+  --warning: #c07a13;
+  --error: #dc2626;
+  --error-soft: #fef2f2;
+  --shadow: 0 24px 60px rgba(43, 73, 125, 0.08);
+  --radius: 24px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+  --radius-full: 9999px;
+
+  /* Theme-specific custom styles */
+  --bg-gradient-top: #f9fbff;
+  --bg-gradient-radial: rgba(37, 99, 235, 0.08);
+  --topbar-bg: rgba(255, 255, 255, 0.88);
+  --topbar-border: rgba(223, 231, 243, 0.9);
+  --card-bg-top: rgba(255, 255, 255, 0.98);
+  --card-bg-bottom: rgba(247, 250, 255, 0.98);
+  --input-bg: #ffffff;
+  --input-border: #dfe7f3;
+  --warning-soft: #fffbeb;
+  --success-soft: #f0fdf4;
+}
+
+:root.theme-dark {
+  color-scheme: dark;
+  --bg: #0b0f19;
+  --surface: #151b2c;
+  --surface-soft: #1e263d;
+  --border: #24304f;
+  --text: #f3f4f6;
+  --muted: #9ca3af;
+  --primary: #3b82f6;
+  --primary-soft: #1e293b;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --error: #ef4444;
+  --error-soft: #451a1a;
+  --shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+
+  --bg-gradient-top: #0e1322;
+  --bg-gradient-radial: rgba(59, 130, 246, 0.15);
+  --topbar-bg: rgba(21, 27, 44, 0.88);
+  --topbar-border: rgba(36, 48, 79, 0.9);
+  --card-bg-top: rgba(21, 27, 44, 0.98);
+  --card-bg-bottom: rgba(15, 20, 35, 0.98);
+  --input-bg: #151b2c;
+  --input-border: #24304f;
+  --warning-soft: #2e220f;
+  --success-soft: #0d261e;
+}
+
+:root.theme-classic {
+  color-scheme: light;
+  --bg: #f4eae1;
+  --surface: #fffdfa;
+  --surface-soft: #faf3ea;
+  --border: #e6d3c0;
+  --text: #2c2520;
+  --muted: #7d6b5e;
+  --primary: #8b5a2b;
+  --primary-soft: #f4eae1;
+  --success: #3f6844;
+  --warning: #aa7a1e;
+  --error: #a83232;
+  --error-soft: #fbebeb;
+  --shadow: 0 24px 60px rgba(139, 90, 43, 0.08);
+
+  --bg-gradient-top: #fbf6f0;
+  --bg-gradient-radial: rgba(139, 90, 43, 0.06);
+  --topbar-bg: rgba(255, 253, 250, 0.88);
+  --topbar-border: rgba(230, 211, 192, 0.9);
+  --card-bg-top: rgba(255, 253, 250, 0.98);
+  --card-bg-bottom: rgba(250, 243, 234, 0.98);
+  --input-bg: #fffdfa;
+  --input-border: #e6d3c0;
+  --warning-soft: #fdf5e8;
+  --success-soft: #f1f8f3;
+}

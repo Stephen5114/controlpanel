@@ -136,7 +136,7 @@ h1, h2,
   color: var(--text);
   background: var(--primary-soft);
   border: 1px solid color-mix(in srgb, var(--primary) 52%, var(--border));
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   font-size: .78rem;
   font-weight: 750;
   white-space: nowrap;
@@ -305,7 +305,7 @@ input, select, textarea,
 input:focus, select:focus, textarea:focus { box-shadow: 3px 3px 0 var(--primary); }
 .badge, .count-pill, .billing-chip, .vps-status, .dm-status {
   border: 1px solid currentColor;
-  border-radius: 999px;
+  border-radius: var(--radius-full);
   box-shadow: none;
 }
 .inline-message, .dashboard-alert {

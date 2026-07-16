@@ -17,6 +17,52 @@ const navigation = [
   { name: "Settings", path: "/settings", icon: Settings },
 ];
 
+function Sidebar({ navigation, mobileOpen, onNavClick, theme, ThemeIcon, setThemeMenuOpen }: any) {
+  return (
+    <aside className={`sidebar${mobileOpen ? " sidebar--open" : ""}`}>
+      <div className="sidebar__header">
+        <div className="sidebar__brand">
+          <Zap size={16} fill="currentColor" />
+        </div>
+        <div>
+          <div className="sidebar__brand-name">Vibe Hosting</div>
+          <div className="sidebar__brand-sub">Control Panel</div>
+        </div>
+      </div>
+
+      <nav className="sidebar__nav">
+        {navigation.map((item: any) => {
+          const Icon = item.icon;
+          return (
+            <NavLink
+              key={item.path}
+              to={item.path}
+              end={item.end}
+              className={({ isActive }) => `sidebar__link${isActive ? " is-active" : ""}`}
+              onClick={onNavClick}
+            >
+              <Icon size={18} />
+              <span>{item.name}</span>
+            </NavLink>
+          );
+        })}
+      </nav>
+
+      <div className="sidebar__footer">
+        <button
+          className="sidebar__theme-btn"
+          onClick={() => setThemeMenuOpen((o: boolean) => !o)}
+          type="button"
+          title="Choose theme"
+        >
+          <ThemeIcon size={16} />
+          <span>{theme === "day" ? "Day" : theme === "dark" ? "Dark" : "Classic"}</span>
+        </button>
+      </div>
+    </aside>
+  );
+}
+
 // Default 20% first-year commission on the current $339.95/mo top VPS plan.
 const MAX_AFFILIATE_MONTHLY_REWARD_USD = 68;
 
@@ -141,140 +187,120 @@ export function RootLayout() {
           {t("You are viewing this customer as staff", "You are viewing this customer as staff")}{session.staffEmail ? ` (${session.staffEmail})` : ""}. {t("Actions are audited.", "Actions are audited.")}
         </div>
       ) : null}
-      <header className="topbar">
-        <div className="brand">
-          <div className="brand__mark">
-            <Zap size={16} fill="currentColor" />
-          </div>
-          <div>
-            <div className="brand__title">Vibe Hosting</div>
-            <div className="brand__subtitle">{t("Control Panel", "Control Panel")}</div>
-          </div>
-        </div>
 
-        <nav className="topnav">
-          {navigation.map((item) => {
-            const Icon = item.icon;
-            return (
-              <NavLink
-                key={item.path}
-                to={item.path}
-                end={item.end}
-                className={({ isActive }) => `topnav__link${isActive ? " is-active" : ""}`}
-              >
-                <Icon size={16} />
-                <span>{t(item.name, item.name)}</span>
-              </NavLink>
-            );
-          })}
-        </nav>
+      <div className="app-layout">
+        {/* Mobile overlay */}
+        {mobileOpen ? (
+          <div className="sidebar-overlay" onClick={() => setMobileOpen(false)} />
+        ) : null}
 
-        <div className="account">
-          <button className="mobile-toggle" onClick={() => setMobileOpen((value) => !value)} type="button">
-            {mobileOpen ? <X size={20} /> : <Menu size={20} />}
-          </button>
+        {/* Sidebar */}
+        <Sidebar
+          navigation={navigation}
+          mobileOpen={mobileOpen}
+          onNavClick={() => setMobileOpen(false)}
+          theme={theme}
+          ThemeIcon={ThemeIcon}
+          setThemeMenuOpen={setThemeMenuOpen}
+        />
 
-          <Link
-            className="affiliate-nav-promo"
-            to="/affiliate"
-            title={t("Open Refer & Earn", "Open Refer & Earn")}
-          >
-            <span className="affiliate-nav-promo__icon"><Gift size={16} /></span>
-            <span>{t("Refer & earn up to ${amount}/mo", "Refer & earn up to ${amount}/mo").replace("{amount}", String(MAX_AFFILIATE_MONTHLY_REWARD_USD))}</span>
-          </Link>
-
-          <div className="theme-selector">
-            <button
-              className="theme-toggle-btn"
-              onClick={() => setThemeMenuOpen((open) => !open)}
-              type="button"
-              aria-haspopup="menu"
-              aria-expanded={themeMenuOpen}
-              title={t("Choose theme", "Choose theme")}
-            >
-              <span className={`theme-toggle-btn__preview theme-toggle-btn__preview--${theme}`}><ThemeIcon size={14} /></span>
-              <span>{t(theme === "day" ? "Day" : theme === "dark" ? "Dark" : "Classic", theme === "day" ? "Day" : theme === "dark" ? "Dark" : "Classic")}</span>
-              <ChevronDown className="theme-toggle-btn__chevron" size={14} />
-            </button>
-
-            {themeMenuOpen ? (
-              <div className="theme-menu" role="menu">
-                <div className="theme-menu__heading">
-                  <strong>{t("Appearance", "Appearance")}</strong>
-                  <span>{t("Choose how your panel looks", "Choose how your panel looks")}</span>
-                </div>
-                {themeOptions.map((option) => {
-                  const Icon = option.icon;
-                  return (
-                    <button
-                      key={option.value}
-                      className={`theme-menu__option${theme === option.value ? " is-active" : ""}`}
-                      type="button"
-                      role="menuitemradio"
-                      aria-checked={theme === option.value}
-                      onClick={() => { setTheme(option.value); setThemeMenuOpen(false); }}
-                    >
-                      <span className={`theme-menu__swatch theme-menu__swatch--${option.value}`}><Icon size={15} /></span>
-                      <span className="theme-menu__copy"><strong>{option.label}</strong><small>{option.description}</small></span>
-                      <span className="theme-menu__check" aria-hidden="true">{theme === option.value ? "✓" : ""}</span>
-                    </button>
-                  );
-                })}
+        {/* Main area: topbar + content */}
+        <div className="main-area">
+          <header className="topbar">
+            <div className="brand">
+              <button className="mobile-toggle" onClick={() => setMobileOpen((v) => !v)} type="button" aria-label={t("Toggle navigation", "Toggle navigation")}>
+                {mobileOpen ? <X size={20} /> : <Menu size={20} />}
+              </button>
+              <div className="brand__mark">
+                <Zap size={16} fill="currentColor" />
               </div>
-            ) : null}
-          </div>
+              <div className="brand__title">Vibe Hosting</div>
+            </div>
 
-          <button className="nav-lang-selector" onClick={() => setIsLangModalOpen(true)} type="button">
-            <Globe2 size={15} />
-            <span>{currentLang}</span>
-          </button>
+            <div className="account">
+              <Link
+                className="affiliate-nav-promo"
+                to="/affiliate"
+                title={t("Open Refer & Earn", "Open Refer & Earn")}
+              >
+                <span className="affiliate-nav-promo__icon"><Gift size={16} /></span>
+                <span>{t("Refer & earn up to ${amount}/mo", "Refer & earn up to ${amount}/mo").replace("{amount}", String(MAX_AFFILIATE_MONTHLY_REWARD_USD))}</span>
+              </Link>
 
-          <div className="account__avatar-wrapper" style={{ position: "relative" }}>
-            <button className="avatar" onClick={() => setAvatarDropdownOpen((v) => !v)} type="button" aria-label={t("Account menu", "Account menu")}>
-              <User size={18} />
-            </button>
-            {avatarDropdownOpen && (
-              <div className="account__dropdown">
-                <div className="account__dropdown-header">
-                  <div className="account__dropdown-name">{username ?? session?.email ?? "Signed in"}</div>
-                </div>
-                <div className={`account__dropdown-balance ${accountBalanceTone}`}>
-                  <span>{t("Balance", "Balance")}</span>
-                  <strong>{accountBalance ? formatCurrency(accountBalance.amount, accountBalance.currency) : "..."}</strong>
-                </div>
-                <div className="account__dropdown-divider" />
-                <button className="account__dropdown-item" onClick={() => { handleSignOut(); setAvatarDropdownOpen(false); }} type="button">
-                  {t("Sign out", "Sign out")}
+              <div className="theme-selector">
+                <button
+                  className="theme-toggle-btn"
+                  onClick={() => setThemeMenuOpen((open) => !open)}
+                  type="button"
+                  aria-haspopup="menu"
+                  aria-expanded={themeMenuOpen}
+                  title={t("Choose theme", "Choose theme")}
+                >
+                  <span className={`theme-toggle-btn__preview theme-toggle-btn__preview--${theme}`}><ThemeIcon size={14} /></span>
+                  <span>{theme === "day" ? "Day" : theme === "dark" ? "Dark" : "Classic"}</span>
+                  <ChevronDown className="theme-toggle-btn__chevron" size={14} />
                 </button>
+
+                {themeMenuOpen ? (
+                  <div className="theme-menu" role="menu">
+                    <div className="theme-menu__heading">
+                      <strong>{t("Appearance", "Appearance")}</strong>
+                      <span>{t("Choose how your panel looks", "Choose how your panel looks")}</span>
+                    </div>
+                    {themeOptions.map((option) => {
+                      const Icon = option.icon;
+                      return (
+                        <button
+                          key={option.value}
+                          className={`theme-menu__option${theme === option.value ? " is-active" : ""}`}
+                          type="button"
+                          role="menuitemradio"
+                          aria-checked={theme === option.value}
+                          onClick={() => { setTheme(option.value); setThemeMenuOpen(false); }}
+                        >
+                          <span className={`theme-menu__swatch theme-menu__swatch--${option.value}`}><Icon size={15} /></span>
+                          <span className="theme-menu__copy"><strong>{option.label}</strong><small>{option.description}</small></span>
+                          <span className="theme-menu__check" aria-hidden="true">{theme === option.value ? "✓" : ""}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                ) : null}
               </div>
-            )}
-          </div>
+
+              <button className="nav-lang-selector" onClick={() => setIsLangModalOpen(true)} type="button" title={t("Language", "Language")}>
+                <Globe2 size={15} />
+                <span>{currentLang}</span>
+              </button>
+
+              <div className="account__avatar-wrapper" style={{ position: "relative" }}>
+                <button className="avatar" onClick={() => setAvatarDropdownOpen((v) => !v)} type="button" aria-label={t("Account menu", "Account menu")}>
+                  <User size={18} />
+                </button>
+                {avatarDropdownOpen && (
+                  <div className="account__dropdown">
+                    <div className="account__dropdown-header">
+                      <div className="account__dropdown-name">{username ?? session?.email ?? "Signed in"}</div>
+                    </div>
+                    <div className={`account__dropdown-balance ${accountBalanceTone}`}>
+                      <span>{t("Balance", "Balance")}</span>
+                      <strong>{accountBalance ? formatCurrency(accountBalance.amount, accountBalance.currency) : "..."}</strong>
+                    </div>
+                    <div className="account__dropdown-divider" />
+                    <button className="account__dropdown-item" onClick={() => { handleSignOut(); setAvatarDropdownOpen(false); }} type="button">
+                      {t("Sign out", "Sign out")}
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          </header>
+
+          <main className="page">
+            <Outlet />
+          </main>
         </div>
-      </header>
-
-      {mobileOpen ? (
-        <nav className="mobile-nav">
-          {navigation.map((item) => {
-            const Icon = item.icon;
-            return (
-              <NavLink
-                key={item.path}
-                to={item.path}
-                end={item.end}
-                onClick={() => setMobileOpen(false)}
-                className={({ isActive }) => `mobile-nav__link${isActive ? " is-active" : ""}`}
-              >
-                <Icon size={16} />
-                <span>{t(item.name, item.name)}</span>
-              </NavLink>
-            );
-          })}
-        </nav>
-      ) : null}
-
-      <main className="page">
-        <Outlet />
-      </main>
+      </div>
 
       {isLangModalOpen && (
         <div className="lang-modal-overlay" onClick={() => setIsLangModalOpen(false)}>
@@ -302,10 +328,10 @@ export function RootLayout() {
             </div>
 
             <div className="lang-modal-actions">
-              <button className="btn-secondary" onClick={() => setIsLangModalOpen(false)}>
+              <button className="btn-secondary" onClick={() => setIsLangModalOpen(false)} type="button">
                 {t("Cancel", "Cancel")}
               </button>
-              <button className="btn-primary" onClick={handleSaveLangSettings}>
+              <button className="btn-primary" onClick={handleSaveLangSettings} type="button">
                 {t("Save Changes", "Save Changes")}
               </button>
             </div>

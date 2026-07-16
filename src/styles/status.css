@@ -1,0 +1,213 @@
+/* ── Status Page ── */
+.status-page {
+  min-height: 100vh;
+  background: var(--lp-bg, #f8fafc);
+  font-family: "Inter", "Segoe UI", -apple-system, sans-serif;
+}
+
+.status-page__header {
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.status-page__header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 16px 24px;
+}
+
+.status-page__header-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.status-page__body {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 40px 24px 80px;
+}
+
+/* Overall status */
+.status-page__overall {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 24px;
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  margin-bottom: 32px;
+}
+
+.status-page__overall-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.status-page__overall-dot--operational {
+  background: var(--success);
+  box-shadow: 0 0 8px rgba(22, 155, 98, 0.4);
+}
+
+.status-page__overall-dot--degraded {
+  background: var(--warning);
+  box-shadow: 0 0 8px rgba(192, 122, 19, 0.4);
+}
+
+.status-page__overall-dot--outage {
+  background: var(--error);
+  box-shadow: 0 0 8px rgba(220, 38, 38, 0.4);
+}
+
+.status-page__overall-text h2 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin: 0 0 4px;
+}
+
+.status-page__overall-text p {
+  font-size: 0.88rem;
+  color: var(--muted);
+  margin: 0;
+}
+
+/* Services list */
+.status-page__services {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 32px;
+}
+
+.status-page__service {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+
+.status-page__service-name {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.95rem;
+  font-weight: 500;
+}
+
+.status-page__service-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.status-page__service-dot--operational {
+  background: var(--success);
+}
+
+.status-page__service-dot--degraded {
+  background: var(--warning);
+}
+
+.status-page__service-dot--outage {
+  background: var(--error);
+}
+
+.status-page__service-status {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.status-page__service-status--operational {
+  color: var(--success);
+}
+
+.status-page__service-status--degraded {
+  color: var(--warning);
+}
+
+.status-page__service-status--outage {
+  color: var(--error);
+}
+
+/* Incidents */
+.status-page__section-title {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0 0 16px;
+}
+
+.status-page__incidents {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.status-page__incident {
+  padding: 16px 20px;
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--warning);
+}
+
+.status-page__incident--resolved {
+  border-left-color: var(--success);
+  opacity: 0.75;
+}
+
+.status-page__incident-title {
+  font-size: 0.92rem;
+  font-weight: 600;
+  margin: 0 0 4px;
+}
+
+.status-page__incident-date {
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.status-page__incident-desc {
+  font-size: 0.88rem;
+  color: var(--muted);
+  margin: 8px 0 0;
+  line-height: 1.5;
+}
+
+.status-page__empty {
+  text-align: center;
+  padding: 32px;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+/* Footer */
+.status-page__footer {
+  text-align: center;
+  padding: 24px;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.status-page__footer a {
+  color: var(--primary);
+  text-decoration: none;
+}
+
+.status-page__footer a:hover {
+  text-decoration: underline;
+}
+
+/* Dark theme */
+:root.theme-dark .status-page {
+  --lp-bg: #0b0f19;
+}

@@ -194,6 +194,43 @@ button:disabled {
   font-weight: 700;
 }
 
+/* ── Logo ── */
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: inherit;
+}
+
+.logo-mark {
+  flex-shrink: 0;
+  color: var(--primary);
+}
+
+.logo-text {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.logo-text-accent {
+  color: var(--muted);
+  font-weight: 500;
+}
+
+/* Sidebar logo */
+.sidebar__header .logo .logo-mark {
+  color: var(--warning);
+}
+
+/* Topbar logo */
+.brand .logo .logo-mark {
+  color: var(--warning);
+}
+
 .brand__subtitle,
 .account__email,
 .muted,

@@ -12,3 +12,5 @@ export { EmptyState } from "./EmptyState";
 
 export { Table } from "./Table";
 export type { TableColumn } from "./Table";
+
+export { Logo } from "./Logo";

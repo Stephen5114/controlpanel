@@ -165,7 +165,6 @@ export function NodeDeployGuide() {
         {[0, 1, 2].map((i) => (
           <button key={i} type="button" className={`ndg__dot${step === i ? " ndg__dot--active ndg-dot--active" : ""}`}
             style={step === i ? { background: infos[step].accent } : undefined}
-            style={step === i ? { background: infos[step].accent } : undefined}
             onClick={() => { setStep(i); setIsPaused(true); }} aria-label={`Step ${i + 1}`} />
         ))}
         <button type="button" className="ndg__pause-btn ndg-pause-btn" onClick={() => setIsPaused(!isPaused)}

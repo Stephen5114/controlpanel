@@ -1,4 +1,5 @@
-import { ChevronDown, CreditCard, Gift, Globe2, Headphones, LayoutDashboard, Menu, Package, Server, Settings, User, X, Zap, Sun, Moon, Palette } from "lucide-react";
+import { ChevronDown, CreditCard, Gift, Globe2, Headphones, LayoutDashboard, Menu, Package, Server, Settings, User, X, Sun, Moon, Palette } from "lucide-react";
+import { Logo } from "../components/Logo";
 import { useEffect, useMemo, useState } from "react";
 import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
 import { getBillingSummary, getCustomerProfile } from "../lib/customer-api";
@@ -21,13 +22,7 @@ function Sidebar({ navigation, mobileOpen, onNavClick, theme, ThemeIcon, setThem
   return (
     <aside className={`sidebar${mobileOpen ? " sidebar--open" : ""}`}>
       <div className="sidebar__header">
-        <div className="sidebar__brand">
-          <Zap size={16} fill="currentColor" />
-        </div>
-        <div>
-          <div className="sidebar__brand-name">Vibe Hosting</div>
-          <div className="sidebar__brand-sub">Control Panel</div>
-        </div>
+        <Logo compact />
       </div>
 
       <nav className="sidebar__nav">
@@ -211,10 +206,7 @@ export function RootLayout() {
               <button className="mobile-toggle" onClick={() => setMobileOpen((v) => !v)} type="button" aria-label={t("Toggle navigation", "Toggle navigation")}>
                 {mobileOpen ? <X size={20} /> : <Menu size={20} />}
               </button>
-              <div className="brand__mark">
-                <Zap size={16} fill="currentColor" />
-              </div>
-              <div className="brand__title">Vibe Hosting</div>
+              <Logo compact />
             </div>
 
             <div className="account">
@@ -226,6 +218,32 @@ export function RootLayout() {
                 <span className="affiliate-nav-promo__icon"><Gift size={16} /></span>
                 <span>{t("Refer & earn up to ${amount}/mo", "Refer & earn up to ${amount}/mo").replace("{amount}", String(MAX_AFFILIATE_MONTHLY_REWARD_USD))}</span>
               </Link>
+
+              <button className="nav-lang-selector" onClick={() => setIsLangModalOpen(true)} type="button" title={t("Language", "Language")}>
+                <Globe2 size={15} />
+                <span>{currentLang}</span>
+              </button>
+
+              <div className="account__avatar-wrapper" style={{ position: "relative" }}>
+                <button className="avatar" onClick={() => setAvatarDropdownOpen((v) => !v)} type="button" aria-label={t("Account menu", "Account menu")}>
+                  <User size={18} />
+                </button>
+                {avatarDropdownOpen && (
+                  <div className="account__dropdown">
+                    <div className="account__dropdown-header">
+                      <div className="account__dropdown-name">{username ?? session?.email ?? "Signed in"}</div>
+                    </div>
+                    <div className={`account__dropdown-balance ${accountBalanceTone}`}>
+                      <span>{t("Balance", "Balance")}</span>
+                      <strong>{accountBalance ? formatCurrency(accountBalance.amount, accountBalance.currency) : "..."}</strong>
+                    </div>
+                    <div className="account__dropdown-divider" />
+                    <button className="account__dropdown-item" onClick={() => { handleSignOut(); setAvatarDropdownOpen(false); }} type="button">
+                      {t("Sign out", "Sign out")}
+                    </button>
+                  </div>
+                )}
+              </div>
 
               <div className="theme-selector">
                 <button
@@ -266,32 +284,6 @@ export function RootLayout() {
                     })}
                   </div>
                 ) : null}
-              </div>
-
-              <button className="nav-lang-selector" onClick={() => setIsLangModalOpen(true)} type="button" title={t("Language", "Language")}>
-                <Globe2 size={15} />
-                <span>{currentLang}</span>
-              </button>
-
-              <div className="account__avatar-wrapper" style={{ position: "relative" }}>
-                <button className="avatar" onClick={() => setAvatarDropdownOpen((v) => !v)} type="button" aria-label={t("Account menu", "Account menu")}>
-                  <User size={18} />
-                </button>
-                {avatarDropdownOpen && (
-                  <div className="account__dropdown">
-                    <div className="account__dropdown-header">
-                      <div className="account__dropdown-name">{username ?? session?.email ?? "Signed in"}</div>
-                    </div>
-                    <div className={`account__dropdown-balance ${accountBalanceTone}`}>
-                      <span>{t("Balance", "Balance")}</span>
-                      <strong>{accountBalance ? formatCurrency(accountBalance.amount, accountBalance.currency) : "..."}</strong>
-                    </div>
-                    <div className="account__dropdown-divider" />
-                    <button className="account__dropdown-item" onClick={() => { handleSignOut(); setAvatarDropdownOpen(false); }} type="button">
-                      {t("Sign out", "Sign out")}
-                    </button>
-                  </div>
-                )}
               </div>
             </div>
           </header>

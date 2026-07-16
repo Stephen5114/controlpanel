@@ -465,6 +465,7 @@ export function BuySubscriptionPage() {
                 </div>
                 <p className="muted bs-balance-note">
                   {t("Your next renewal date stays the same. Future renewals will be at the new plan rate.", "Your next renewal date stays the same. Future renewals will be at the new plan rate.")}
+                </p>
               </div>
             ) : isUpgradeMode && selectedPlan && !upgradePreview?.success ? (
               <p className="muted bs-placeholder-text">{upgradePreview?.message || t("Select a plan above to see upgrade pricing.", "Select a plan above to see upgrade pricing.")}</p>

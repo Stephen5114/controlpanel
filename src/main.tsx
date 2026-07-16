@@ -28,6 +28,8 @@ import "./styles/site-settings.css";
 import "./styles/topup.css";
 import "./styles/node-deploy-guide.css";
 import "./styles/editorial-system.css";
+import "./styles/landing.css";
+import "./styles/status.css";
 import "driver.js/dist/driver.css";
 function AuthLoadingFallback() {
   return (

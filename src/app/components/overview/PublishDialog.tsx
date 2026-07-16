@@ -11,7 +11,7 @@ import { useLocalization } from "../../lib/i18n";
 import { NodeDeployGuide } from "./NodeDeployGuide";
 import { EnvVarsEditor } from "./EnvVarsEditor";
 import { getStackLabel, isSiteStackConfigured, guessEntryDll, canPublishSite, formatDateTime } from "./utils";
-import { Button } from "../components";
+import { Button } from "../";
 
 interface PublishDialogProps {
   site: SubscriptionWebsite;

@@ -6,6 +6,8 @@ import { RootLayout } from "./layout/RootLayout";
 import { SiteLayout } from "./layout/SiteLayout";
 
 // Lazy-loaded page components (named exports wrapped for React.lazy)
+const LandingPage = lazy(() => import("./pages/LandingPage").then(m => ({ default: m.LandingPage })));
+const StatusPage = lazy(() => import("./pages/StatusPage").then(m => ({ default: m.StatusPage })));
 const DashboardPage = lazy(() => import("./pages/DashboardPage").then(m => ({ default: m.DashboardPage })));
 const AddonsPage = lazy(() => import("./pages/AddonsPage").then(m => ({ default: m.AddonsPage })));
 const BillingPage = lazy(() => import("./pages/BillingPage").then(m => ({ default: m.BillingPage })));
@@ -43,7 +45,12 @@ function SubscriptionDatabasesRedirect() {
 }
 
 export const router = createBrowserRouter([
+  // Public pages
+  { path: "/landing", element: <LandingPage /> },
+  { path: "/status", element: <StatusPage /> },
   { path: "/login-as", element: <LoginAsPage /> },
+
+  // Guest-only routes (redirect to / if already logged in)
   {
     element: <GuestGuard />,
     children: [
@@ -53,6 +60,8 @@ export const router = createBrowserRouter([
       { path: "/reset-password", element: <ResetPasswordPage /> },
     ],
   },
+
+  // Auth-required routes
   {
     element: <AuthGuard />,
     children: [

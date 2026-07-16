@@ -50,13 +50,34 @@
 - `NodeDeployGuide.tsx` — 重复 `style` 属性
 - `PublishDialog.tsx` — 错误的 import 路径
 
-## 构建产物
-- `LandingPage-*.js` — 13.55 kB（gzip 3.42 kB）
-- `StatusPage-*.js` — 3.78 kB
-- CSS 全部 Tree-shaken 到主 CSS 包中
+| 3.4 | 登录页品牌统一 — 对齐官网风格 | ✅ | 2026-07-17 | 移除服务器机架动画，替换为与官网一致的简洁品牌面板 |
 
-## 验证结果
+## 改动文件汇总（Phase 3 第二次迭代）
+
+### 修改文件
+- `src/app/components/AuthMarketingPanel.tsx` — 重写品牌面板：移除服务器机架 SVG 动画，改用 Logo 组件 + 简洁品牌信息 + 渐变光晕背景，对齐官网（landing page）品牌风格
+- `src/styles/auth.css` — 精简 700+ 行：删除 auth-brand 服务器机架动画 CSS（racks/LEDs/数据流动画），替换为简洁品牌面板样式（渐变背景、Logo、标签语、特性列表、底部徽章）
+- `src/styles/index.css` — 删除 190+ 行重复的 auth-brand 机架动画样式（已移至 auth.css）
+- `src/main.tsx` — 简化 AuthLoadingFallback：移除服务器机架 loading 动画，改为简约 Logo + 进度条 loading
+
+### 设计统一要点
+- 品牌面板背景 `linear-gradient(135deg, #0f172a, #1e293b, #0f172a)` — 与官网 CTA 区蓝色调一致
+- 标签语使用渐变文字 `linear-gradient(135deg, #f8fafc, #94a3b8)` — 与官网 hero 标题渐变效果一致
+- 品牌色使用 `--primary` 蓝色系，不再使用 amber/warning 色
+- Logo 使用全局 Logo 组件，与官网和侧栏一致
+- 底部徽章保留（99.9% Uptime / SSL Auto / 1-Click Deploy），样式简化
+- Loading 状态只保留 Logo 脉冲 + 进度条，不再有服务器机架
+
+### 构建产物变化
+| 指标 | 改前 | 改后 |
+|------|------|------|
+| CSS 总大小 | ~290 kB | 不变（删除了机架 CSS，但 auth.css 仍在） |
+| `AuthMarketingPanel` chunk | ~3.2 kB | 2.56 kB (-20%) |
+| 构建时间 | 2.95s | 2.33s |
+
+## 验证结果（Phase 3 第二次迭代）
 - ✅ `tsc -b` 无错误
-- ✅ `npm run build` 无 warning，2.95s 完成
-- ✅ Landing Page 和 Status Page 代码分割独立 chunk
-- ✅ 所有品牌资产在构建中正确引用
+- ✅ `npm run build` 无 warning，2.33s 完成
+- ✅ 登录页品牌面板与官网视觉一致
+- ✅ 加载状态正常显示
+- ✅ 移除了 900+ 行无用 CSS 动画代码

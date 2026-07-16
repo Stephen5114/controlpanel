@@ -31,55 +31,32 @@ import "./styles/editorial-system.css";
 import "./styles/landing.css";
 import "./styles/status.css";
 import "driver.js/dist/driver.css";
+
 function AuthLoadingFallback() {
   return (
     <div className="auth-brand auth-brand--loading">
-      {/* Sequential connection: rack 1 → rack 2 → rack 3 */}
-      <svg className="auth-brand-links" viewBox="0 0 100 100" preserveAspectRatio="none">
-        {/* Path rack1→rack2 with animated draw */}
-        <path d="M 22 56 L 50 56" className="auth-brand-path auth-brand-path--load" />
-        {/* Path rack2→rack3 with animated draw */}
-        <path d="M 50 56 L 78 56" className="auth-brand-path auth-brand-path--load auth-brand-path--load-2" />
-        {/* Data packets */}
-        <circle r="0.6" className="auth-brand-pkt auth-brand-pkt--a">
-          <animateMotion dur="1.5s" repeatCount="indefinite" path="M 22 56 L 50 56" />
-        </circle>
-        <circle r="0.6" className="auth-brand-pkt auth-brand-pkt--c">
-          <animateMotion dur="1.5s" repeatCount="indefinite" path="M 50 56 L 78 56" />
-        </circle>
-        {/* Nodes light up sequentially */}
-        <circle cx="22" cy="56" r="0.75" className="auth-brand-node auth-brand-node--rack1" />
-        <circle cx="50" cy="56" r="0.75" className="auth-brand-node auth-brand-node--rack2" />
-        <circle cx="78" cy="56" r="0.75" className="auth-brand-node auth-brand-node--rack3" />
-      </svg>
-
-      {/* Server racks with connection states */}
-      <div className="auth-brand-racks">
-        <div className="auth-brand-rack auth-brand-rack--1">
-          <div className="auth-brand-blade"><span className="auth-brand-led auth-brand-led--g" /><span className="auth-brand-led auth-brand-led--g" /><span className="auth-brand-led auth-brand-led--b" /></div>
-          <div className="auth-brand-blade"><span className="auth-brand-led auth-brand-led--g" /><span className="auth-brand-led auth-brand-led--b" /></div>
-          <div className="auth-brand-blade"><span className="auth-brand-led auth-brand-led--g" /><span className="auth-brand-led auth-brand-led--g" /><span className="auth-brand-led auth-brand-led--g" /></div>
-          <div className="auth-brand-blade"><span className="auth-brand-led auth-brand-led--b" /></div>
-        </div>
-        <div className="auth-brand-rack auth-brand-rack--2">
-          <div className="auth-brand-blade"><span className="auth-brand-led auth-brand-led--g" /><span className="auth-brand-led auth-brand-led--g" /></div>
-          <div className="auth-brand-blade"><span className="auth-brand-led auth-brand-led--g" /><span className="auth-brand-led auth-brand-led--b" /><span className="auth-brand-led auth-brand-led--b" /></div>
-          <div className="auth-brand-blade"><span className="auth-brand-led auth-brand-led--g" /></div>
-          <div className="auth-brand-blade"><span className="auth-brand-led auth-brand-led--g" /><span className="auth-brand-led auth-brand-led--g" /></div>
-          <div className="auth-brand-blade"><span className="auth-brand-led auth-brand-led--b" /></div>
-        </div>
-        <div className="auth-brand-rack auth-brand-rack--3">
-          <div className="auth-brand-blade"><span className="auth-brand-led auth-brand-led--g" /><span className="auth-brand-led auth-brand-led--b" /></div>
-          <div className="auth-brand-blade"><span className="auth-brand-led auth-brand-led--g" /><span className="auth-brand-led auth-brand-led--g" /><span className="auth-brand-led auth-brand-led--g" /></div>
-          <div className="auth-brand-blade"><span className="auth-brand-led auth-brand-led--b" /><span className="auth-brand-led auth-brand-led--b" /></div>
-          <div className="auth-brand-blade"><span className="auth-brand-led auth-brand-led--g" /></div>
-        </div>
-      </div>
-
-      <div className="auth-brand-dataflow" />
-
-      {/* Loading indicator */}
       <div className="auth-brand-loading">
+        <svg
+          className="logo-mark"
+          viewBox="0 0 40 40"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          aria-hidden="true"
+          width={36}
+          height={36}
+          style={{ color: "#818cf8" }}
+        >
+          <defs>
+            <linearGradient id="logo-grad2" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stopColor="#6366f1" />
+              <stop offset="100%" stopColor="#818cf8" />
+            </linearGradient>
+          </defs>
+          <path d="M4 32L20 4" stroke="currentColor" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" />
+          <path d="M20 4L36 32" stroke="currentColor" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" />
+          <path d="M24 6L14 20h8l-6 16" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+
         <div className="auth-brand-loading-text">Loading</div>
         <div className="auth-brand-loading-bar">
           <div className="auth-brand-loading-bar-fill" />

@@ -36,7 +36,7 @@ function getPrimaryHostname(site: HostedSite) {
 function CopyCredentialButton({ copied, onCopy }: { copied: boolean; onCopy: () => void }) {
   const { t } = useLocalization();
   return (
-    <button type="button" className="text-button" style={{ padding: 0, fontSize: "0.8rem" }} onClick={onCopy}>
+    <button type="button" className="text-button ss-copy-btn" onClick={onCopy}>
       {copied ? <CheckCircle2 size={14} /> : <Copy size={14} />}
       {copied ? t("Copied", "Copied") : t("Copy", "Copy")}
     </button>
@@ -138,11 +138,11 @@ export function SiteSettingsPage() {
 
   return (
     <div className="stack">
-      <section className="page-hero" style={{ display: "flex", justifyContent: "space-between", gap: "20px", alignItems: "flex-start" }}>
+      <section className="page-hero ss-hero">
         <div>
           <p className="eyebrow">{formatRegionLabel(site.regionSlug)}</p>
           <h1>{site.siteName}</h1>
-          <p className="page-copy" style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+          <p className="page-copy ss-hero-copy">
             <span className={`badge${site.provisioningStatus.toLowerCase() === "active" ? " badge--success" : ""}`}>
               {t(site.provisioningStatus, site.provisioningStatus)}
             </span>
@@ -150,7 +150,7 @@ export function SiteSettingsPage() {
             <span>{t("Created {date}", "Created {date}").replace("{date}", new Date(site.createdUtc).toLocaleDateString(getActiveLocale()))}</span>
           </p>
         </div>
-        <a href={`http://${visitHostname}`} target="_blank" rel="noreferrer" className="secondary-button" style={{ height: "40px" }}>
+        <a href={`http://${visitHostname}`} target="_blank" rel="noreferrer" className="secondary-button ss-visit-btn">
           {t("Visit Site", "Visit Site")}
           <ExternalLink size={16} />
         </a>
@@ -159,7 +159,7 @@ export function SiteSettingsPage() {
       <div className="two-up-grid">
         <div className="card stack-sm">
           <div className="section-head">
-            <h3 style={{ display: "flex", alignItems: "center", gap: "8px" }}><Server size={18} /> {t("Server Details", "Server Details")}</h3>
+            <h3 className="ss-head-icon"><Server size={18} /> {t("Server Details", "Server Details")}</h3>
           </div>
           <div className="detail-grid">
             <div>
@@ -183,20 +183,20 @@ export function SiteSettingsPage() {
 
         <div className="card stack-sm">
           <div className="section-head">
-            <h3 style={{ display: "flex", alignItems: "center", gap: "8px" }}><UploadCloud size={18} /> {t("Publishing Credentials", "Publishing Credentials")}</h3>
+            <h3 className="ss-head-icon"><UploadCloud size={18} /> {t("Publishing Credentials", "Publishing Credentials")}</h3>
           </div>
           <div className="detail-grid">
             <div className="form-grid__wide">
               <dt>{t("Web Deploy Endpoint", "Web Deploy Endpoint")}</dt>
-              <dd style={{ fontFamily: "monospace", fontSize: "0.85rem", overflowWrap: "anywhere" }}>{site.publish.webDeployEndpoint}</dd>
+              <dd className="ss-dd-mono" style={{ fontSize: "0.85rem" }}>{site.publish.webDeployEndpoint}</dd>
             </div>
             <div>
               <dt>{t("Deploy Username", "Deploy Username")}</dt>
-              <dd style={{ fontFamily: "monospace", overflowWrap: "anywhere" }}>{site.publish.deployUser}</dd>
+              <dd className="ss-dd-mono">{site.publish.deployUser}</dd>
             </div>
             <div>
               <dt>{t("Deploy Password", "Deploy Password")}</dt>
-              <dd style={{ fontFamily: "monospace", display: "flex", justifyContent: "space-between", gap: "12px" }}>
+              <dd className="ss-dd-mono-row">
                 <span>************</span>
                 <CopyCredentialButton
                   copied={copiedKey === "deploy-password"}
@@ -206,15 +206,15 @@ export function SiteSettingsPage() {
             </div>
             <div>
               <dt>{t("FTP Host", "FTP Host")}</dt>
-              <dd style={{ overflowWrap: "anywhere" }}>{site.publish.ftpHost}</dd>
+              <dd className="ss-dd-wrap">{site.publish.ftpHost}</dd>
             </div>
             <div>
               <dt>{t("FTP Username", "FTP Username")}</dt>
-              <dd style={{ fontFamily: "monospace", overflowWrap: "anywhere" }}>{site.publish.ftpUser}</dd>
+              <dd className="ss-dd-mono">{site.publish.ftpUser}</dd>
             </div>
             <div>
               <dt>{t("FTP Password", "FTP Password")}</dt>
-              <dd style={{ fontFamily: "monospace", display: "flex", justifyContent: "space-between", gap: "12px" }}>
+              <dd className="ss-dd-mono-row">
                 <span>************</span>
                 <CopyCredentialButton
                   copied={copiedKey === "ftp-password"}
@@ -226,15 +226,14 @@ export function SiteSettingsPage() {
         </div>
       </div>
       
-      <div className="card stack-sm" style={{ border: "1px solid var(--error)", background: "var(--background)" }}>
-        <h3 style={{ margin: 0, color: "var(--error)", display: "flex", alignItems: "center", gap: "8px" }}>
+      <div className="card stack-sm ss-danger-zone">
+        <h3 className="ss-danger-title">
           <Trash2 size={20} /> {t("Danger Zone", "Danger Zone")}
         </h3>
         <p className="muted">{t("Permanently remove this project and all of its resources from your subscription. This action cannot be undone, and the subdomain will be released immediately.", "Permanently remove this project and all of its resources from your subscription. This action cannot be undone, and the subdomain will be released immediately.")}</p>
-        <div style={{ marginTop: "8px" }}>
-          <button 
-            className="primary-button" 
-            style={{ background: "var(--error)", color: "white", border: "none" }} 
+        <div className="ss-danger-btn-wrap">
+          <button
+            className="primary-button ss-danger-btn"
             onClick={handleDelete} 
             disabled={isDeleting}
           >

@@ -11,6 +11,7 @@ import { useLocalization } from "../../lib/i18n";
 import { NodeDeployGuide } from "./NodeDeployGuide";
 import { EnvVarsEditor } from "./EnvVarsEditor";
 import { getStackLabel, isSiteStackConfigured, guessEntryDll, canPublishSite, formatDateTime } from "./utils";
+import { Button } from "../components";
 
 interface PublishDialogProps {
   site: SubscriptionWebsite;
@@ -413,38 +414,31 @@ export function PublishDialog({
   const supportsStartupCommand = ["node", "python", "springboot"].includes(activeStack);
 
   return (
-    <div className="al-modal-backdrop" onClick={onClose}>
-      <div
-        className="card stack al-modal-card al-publish-modal"
-        style={{ width: "min(640px, 100%)", padding: "28px" }}
-        onClick={(e) => e.stopPropagation()}
-      >
+    <div className="pd-overlay" onClick={onClose}>
+      <div className="card stack al-modal-card pd-modal" onClick={(e) => e.stopPropagation()}>
         {/* Header */}
-        <div className="al-modal-card__head" style={{ marginBottom: "16px" }}>
+        <div className="pd-header">
           <div>
-            <h2 style={{ margin: 0, display: "inline-flex", alignItems: "center", gap: 8, fontSize: "1.35rem", fontWeight: 700 }}>
-              <Rocket size={20} style={{ color: "var(--primary)" }} />
+            <h2 className="pd-title">
+              <Rocket size={20} className="pd-title-icon" />
               {t("Publish {siteName}", "Publish {siteName}").replace("{siteName}", site.siteName)}
             </h2>
-            <p className="muted" style={{ margin: "4px 0 0 0", fontSize: "0.85rem" }}>{site.domain}</p>
+            <p className="muted pd-domain">{site.domain}</p>
           </div>
-          <button type="button" onClick={onClose} disabled={isSubmittingStack || isPublishing}
-            style={{ background: "none", border: "none", cursor: "pointer", color: "var(--muted)", padding: "8px", borderRadius: "50%", display: "grid", placeItems: "center", transition: "all 150ms ease" }}
-            onMouseEnter={(e) => { e.currentTarget.style.background = "var(--surface-soft)"; e.currentTarget.style.color = "var(--text)"; }}
-            onMouseLeave={(e) => { e.currentTarget.style.background = "none"; e.currentTarget.style.color = "var(--muted)"; }}>
+          <button type="button" className="pd-close-btn" onClick={onClose} disabled={isSubmittingStack || isPublishing} aria-label="Close publish dialog">
             <X size={18} />
           </button>
         </div>
 
         {/* Status messages */}
-        {publishError && <div className="inline-message inline-message--error" style={{ marginBottom: "16px" }}>{publishError}</div>}
+        {publishError && <div className="inline-message inline-message--error pd-status-spacer">{publishError}</div>}
         {!publishError && (site.hasActivePublishJob || deployPhase) && (
-          <div style={{ background: "#eff6ff", border: "1px solid #bfdbfe", borderRadius: 10, padding: "12px 14px", marginBottom: "16px" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10, color: "#1e40af" }}>
+          <div className="pd-progress-card">
+            <div className="pd-progress-head">
               {site.hasActivePublishJob
                 ? <Loader2 size={14} className="al-spin" />
                 : <CheckCircle2 size={14} style={{ color: deployPhase === "succeeded" ? "#16a34a" : "#ef4444" }} />}
-              <span style={{ fontSize: "0.88rem", fontWeight: 600 }}>
+              <span>
                 {site.hasActivePublishJob
                   ? t("Publishing... the agent is preparing your web container.", "Publishing... the agent is preparing your web container.")
                   : deployPhase === "succeeded"
@@ -452,31 +446,35 @@ export function PublishDialog({
                     : t("Deploy ended.", "Deploy ended.")}
               </span>
             </div>
-            <div style={{ height: 6, borderRadius: 999, background: "#bfdbfe", overflow: "hidden" }}>
-              <div style={{ height: "100%", width: `${phaseToProgress(deployPhase)}%`, background: "linear-gradient(90deg, #2563eb, #60a5fa)", borderRadius: 999, transition: "width 0.8s ease" }} />
+            <div className="pd-progress-bar-track">
+              <div className="pd-progress-bar-fill" style={{ width: `${phaseToProgress(deployPhase)}%` }} />
             </div>
-            <div style={{ display: "flex", justifyContent: "space-between", marginTop: 6, fontSize: "0.68rem", color: "#3b82f6" }}>
+            <div className="pd-progress-steps">
               {(["Queued", "Cloning", "Installing", "Building", "Activating", "Done"] as const).map((step, i, arr) => {
                 const stepPct = i === 0 ? 0 : (i / (arr.length - 1)) * 95;
                 const progress = phaseToProgress(deployPhase);
-                return <span key={step} style={{ fontWeight: progress >= stepPct ? 700 : 400, opacity: progress >= stepPct ? 1 : 0.45 }}>{step}</span>;
+                return (
+                  <span key={step} className={progress >= stepPct ? "pd-progress-step--done" : "pd-progress-step"}>
+                    {step}
+                  </span>
+                );
               })}
             </div>
           </div>
         )}
         {!publishError && !site.hasActivePublishJob && site.lastPublishStatus?.toLowerCase() === "succeeded" && (
-          <div className="inline-message" style={{ background: "#ecfdf5", color: "#065f46", borderColor: "#a7f3d0", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, marginBottom: "16px" }}>
+          <div className="inline-message pd-publish-success">
             <span><CheckCircle2 size={14} style={{ marginRight: 6, verticalAlign: "-2px" }} />{t("Publish complete", "Publish complete")}{site.lastPublishedUtc ? ` · ${formatDateTime(site.lastPublishedUtc)}` : ""}.</span>
-            <a href={`https://${site.domain}`} target="_blank" rel="noreferrer" style={{ color: "#065f46", fontWeight: 600, textDecoration: "underline" }}>{t("Open site", "Open site")}</a>
+            <a href={`https://${site.domain}`} target="_blank" rel="noreferrer" className="pd-open-site-link">{t("Open site", "Open site")}</a>
           </div>
         )}
         {!publishError && !site.hasActivePublishJob && site.lastPublishStatus?.toLowerCase() === "failed" && (
-          <div className="inline-message inline-message--error" style={{ marginBottom: "16px" }}>
+          <div className="inline-message inline-message--error pd-status-spacer">
             {t("Publish failed", "Publish failed")}{site.lastPublishMessage ? ` — ${site.lastPublishMessage}` : "."}
           </div>
         )}
         {publishInfo && !site.hasActivePublishJob && site.lastPublishStatus?.toLowerCase() !== "succeeded" && site.lastPublishStatus?.toLowerCase() !== "failed" && (
-          <div className="inline-message" style={{ background: "#ecfdf5", color: "#065f46", borderColor: "#a7f3d0", marginBottom: "16px" }}>
+          <div className="inline-message pd-publish-info">
             <CheckCircle2 size={14} style={{ marginRight: 6, verticalAlign: "-2px" }} />{t(publishInfo, publishInfo)}
           </div>
         )}
@@ -487,7 +485,7 @@ export function PublishDialog({
             <p className="muted" style={{ marginTop: 0, fontSize: "0.88rem", lineHeight: 1.5 }}>
               {t("Pick a runtime stack. The hosting agent will prepare the hosting environment automatically. This is a one-time setup; after it's done, publishing becomes a single click.", "Pick a runtime stack. The hosting agent will prepare the hosting environment automatically. This is a one-time setup; after it's done, publishing becomes a single click.")}
             </p>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))", gap: 12 }}>
+            <div className="pd-stack-grid">
               {stackCatalog.map((entry) => {
                 const isSelected = stackChoice === entry.slug;
                 const isAvailable = entry.status === "available";
@@ -502,15 +500,16 @@ export function PublishDialog({
                   <button key={entry.slug} type="button"
                     onClick={() => isAvailable && handleStackChoiceChange(entry.slug)}
                     disabled={!isAvailable || isSubmittingStack}
-                    style={{ textAlign: "left", padding: "16px", borderRadius: "14px", border: isSelected ? "2.5px solid var(--primary)" : "1px solid var(--border)", background: isSelected ? "rgba(37, 99, 235, 0.03)" : isAvailable ? "var(--surface)" : "#f8fafc", cursor: isAvailable ? "pointer" : "not-allowed", opacity: isAvailable ? 1 : 0.65, display: "flex", flexDirection: "column", gap: 6, transition: "all 150ms ease", boxShadow: isSelected ? "0 8px 20px rgba(37, 99, 235, 0.06)" : "none" }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 10, width: "100%" }}>
-                      <div style={{ width: "32px", height: "32px", borderRadius: "8px", background: isSelected ? "var(--primary-soft)" : "#e2e8f0", color: isSelected ? "var(--primary)" : "var(--muted)", display: "grid", placeItems: "center" }}><StackIcon size={16} /></div>
-                      {isSelected && <CheckCircle2 size={16} style={{ color: "var(--primary)", marginLeft: "auto" }} />}
+                    className={`pd-stack-card${isSelected ? " pd-stack-card--selected" : ""}`}
+                  >
+                    <div className="pd-stack-card-head">
+                      <div className={`pd-stack-card-icon${isSelected ? " pd-stack-card-icon--selected" : ""}`}><StackIcon size={16} /></div>
+                      {isSelected && <CheckCircle2 size={16} className="pd-stack-card-check" />}
                     </div>
-                    <strong style={{ fontSize: "0.95rem", color: "var(--text)", marginTop: 6 }}>{t(entry.name, entry.name)}</strong>
-                    <span style={{ fontSize: "0.78rem", color: "var(--muted)", lineHeight: 1.3 }}>{t(entry.description, entry.description)}</span>
+                    <strong className="pd-stack-card-name">{t(entry.name, entry.name)}</strong>
+                    <span className="pd-stack-card-desc">{t(entry.description, entry.description)}</span>
                     {!isAvailable && (
-                      <span style={{ fontSize: "0.72rem", fontWeight: 700, color: "var(--muted)", background: "#e2e8f0", padding: "3px 8px", borderRadius: "999px", display: "inline-block", width: "fit-content", marginTop: 4 }}>{t("Coming soon", "Coming soon")}</span>
+                      <span className="pd-stack-card-badge">{t("Coming soon", "Coming soon")}</span>
                     )}
                   </button>
                 );
@@ -520,30 +519,30 @@ export function PublishDialog({
               const chosen = stackCatalog.find((s) => s.slug === stackChoice);
               if (!chosen || chosen.versions.length === 0) return null;
               return (
-                <label style={{ display: "grid", gap: 6, marginTop: 16 }}>
-                  <span style={{ fontSize: "0.88rem", fontWeight: 600, color: "var(--muted)" }}>{t("Runtime version", "Runtime version")}</span>
+                <label className="pd-field" style={{ marginTop: 16 }}>
+                  <span className="pd-field__label">{t("Runtime version", "Runtime version")}</span>
                   <select value={versionChoice} onChange={(e) => setVersionChoice(e.target.value)} disabled={isSubmittingStack}
-                    style={{ width: "100%", minHeight: "46px", padding: "0 16px", borderRadius: "12px", border: "1.5px solid var(--border)", background: "var(--surface)", outline: "none", fontSize: "0.9rem", fontWeight: 500, color: "var(--text)" }}>
+                    className="pd-select--lg">
                     {chosen.versions.map((v) => (<option key={v.value} value={v.value}>{t(v.label, v.label)}</option>))}
                   </select>
                 </label>
               );
             })()}
             <div style={{ display: "flex", justifyContent: "flex-end", gap: 12, marginTop: 20 }}>
-              <button type="button" className="secondary-button" onClick={onClose} disabled={isSubmittingStack} style={{ minHeight: "42px", padding: "0 20px" }}>{t("Cancel", "Cancel")}</button>
-              <button type="button" className="primary-button" onClick={handleConfirmStack} disabled={isSubmittingStack || !stackCatalog.find((s) => s.slug === stackChoice && s.status === "available")}
-                style={{ minHeight: "42px", padding: "0 20px", display: "flex", alignItems: "center", gap: 8 }}>
-                {isSubmittingStack ? (<><RefreshCw size={14} className="spin" /> {t("Preparing runtime...", "Preparing runtime...")}</>) : (<>{t("Continue", "Continue")}</>)}
-              </button>
+              <Button variant="secondary" onClick={onClose} disabled={isSubmittingStack}>{t("Cancel", "Cancel")}</Button>
+              <Button variant="primary" onClick={handleConfirmStack}
+                disabled={isSubmittingStack || !stackCatalog.find((s) => s.slug === stackChoice && s.status === "available")}>
+                {isSubmittingStack ? (<><RefreshCw size={14} className="al-spin" /> {t("Preparing runtime...", "Preparing runtime...")}</>) : (<>{t("Continue", "Continue")}</>)}
+              </Button>
             </div>
           </div>
         ) : (
           <div className="stack-sm">
             {/* Deploy mode tabs */}
-            <div style={{ display: "flex", gap: 0, background: "var(--surface-soft)", borderRadius: 10, padding: 3, border: "1px solid var(--border)", marginBottom: 4 }}>
+            <div className="pd-mode-tabs">
               {(["git", "ftp"] as const).map((mode) => (
                 <button key={mode} type="button" onClick={() => setDeployMode(mode)}
-                  style={{ flex: 1, padding: "7px 14px", borderRadius: 8, border: "none", cursor: "pointer", fontWeight: 600, fontSize: "0.82rem", transition: "all 140ms ease", background: deployMode === mode ? "var(--primary)" : "transparent", color: deployMode === mode ? "#fff" : "var(--muted)" }}>
+                  className={`pd-mode-tab${deployMode === mode ? " pd-mode-tab--active" : ""}`}>
                   {mode === "git" ? "Deploy from GitHub" : "Manual Upload (FTP)"}
                 </button>
               ))}
@@ -553,28 +552,26 @@ export function PublishDialog({
             {deployMode === "git" && (
               <div className="stack-sm">
                 {/* GitHub OAuth section */}
-                <div style={{ padding: "14px 16px", borderRadius: 14, border: "1px solid var(--border)", background: "var(--surface-soft)" }}>
-                  <p style={{ margin: "0 0 12px 0", fontWeight: 700, fontSize: "0.9rem" }}>Auto Build and Deploy</p>
-                  <p style={{ margin: "0 0 14px 0", fontSize: "0.8rem", color: "var(--muted)" }}>
+                <div className="pd-panel">
+                  <p className="pd-panel-title">Auto Build and Deploy</p>
+                  <p className="pd-panel-text">
                     You can build and deploy using frontend, backend, and full-stack frameworks by connecting a Git Repository.
                   </p>
                   {ghConnected === null ? (
-                    <div style={{ display: "flex", alignItems: "center", gap: 8, color: "var(--muted)", fontSize: "0.82rem" }}>
+                    <div className="pd-gh-checking">
                       <Loader2 size={13} className="al-spin" /> Checking GitHub connection…
                     </div>
                   ) : !ghConnected ? (
-                    <button type="button" onClick={handleConnectGitHub} disabled={ghConnecting}
-                      style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "#24292e", color: "#fff", border: "none", borderRadius: 10, padding: "10px 18px", fontWeight: 700, fontSize: "0.88rem", cursor: "pointer", opacity: ghConnecting ? 0.7 : 1 }}>
+                    <button type="button" onClick={handleConnectGitHub} disabled={ghConnecting} className="pd-gh-connect-btn">
                       {ghConnecting ? <Loader2 size={15} className="al-spin" /> : <Github size={15} />}
                       Connect GitHub Account
                     </button>
                   ) : (
                     <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-                      <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "#dcfce7", color: "#15803d", borderRadius: 8, padding: "5px 12px", fontSize: "0.82rem", fontWeight: 600 }}>
+                      <span className="pd-gh-connected-badge">
                         <Github size={13} /> {ghLogin ?? "Connected"}
-                      </div>
-                      <button type="button" onClick={handleDisconnectGitHub}
-                        style={{ background: "none", border: "1px solid var(--border)", borderRadius: 8, padding: "5px 12px", fontSize: "0.78rem", color: "var(--muted)", cursor: "pointer" }}>
+                      </span>
+                      <button type="button" onClick={handleDisconnectGitHub} className="pd-gh-disconnect-btn">
                         Disconnect
                       </button>
                     </div>
@@ -583,39 +580,36 @@ export function PublishDialog({
                   {/* Repo selector */}
                   {ghConnected && (
                     <div style={{ marginTop: 16 }}>
-                      <span style={{ fontSize: "0.82rem", fontWeight: 600, color: "var(--muted)", display: "block", marginBottom: 6 }}>Repository</span>
-                      <div style={{ position: "relative" }}>
+                      <span className="pd-field__label" style={{ display: "block", marginBottom: 6 }}>Repository</span>
+                      <div className="pd-repo-dropdown">
                         <button type="button"
                           onClick={() => setGhRepoOpen((v) => !v)}
                           disabled={ghReposLoading}
-                          style={{ width: "100%", minHeight: 42, padding: "0 14px", borderRadius: 10, border: "1.5px solid var(--border)", background: "var(--surface)", fontSize: "0.88rem", display: "flex", alignItems: "center", justifyContent: "space-between", cursor: "pointer", textAlign: "left" }}>
-                          <span style={{ color: ghSelectedRepo ? "var(--text)" : "var(--muted)" }}>
+                          className="pd-repo-trigger">
+                          <span className={ghSelectedRepo ? "" : "pd-repo-trigger-placeholder"}>
                             {ghReposLoading ? <><Loader2 size={13} className="al-spin" style={{ marginRight: 6 }} />Loading repos…</> : ghSelectedRepo ? ghSelectedRepo.fullName : "Select a repository…"}
                           </span>
                           <ChevronDown size={14} style={{ color: "var(--muted)", flexShrink: 0 }} />
                         </button>
                         {ghRepoOpen && (
-                          <div style={{ position: "absolute", top: "calc(100% + 4px)", left: 0, right: 0, zIndex: 99, background: "var(--surface)", border: "1.5px solid var(--border)", borderRadius: 10, boxShadow: "0 8px 24px rgba(0,0,0,0.12)", overflow: "hidden" }}>
-                            <div style={{ padding: "8px 10px", borderBottom: "1px solid var(--border)", display: "flex", alignItems: "center", gap: 6 }}>
+                          <div className="pd-repo-menu">
+                            <div className="pd-repo-search">
                               <Search size={13} style={{ color: "var(--muted)", flexShrink: 0 }} />
                               <input autoFocus type="text" placeholder="Search repos…" value={ghRepoSearch}
-                                onChange={(e) => setGhRepoSearch(e.target.value)}
-                                style={{ border: "none", outline: "none", background: "transparent", fontSize: "0.85rem", width: "100%", color: "var(--text)" }} />
+                                onChange={(e) => setGhRepoSearch(e.target.value)} />
                             </div>
-                            <div style={{ maxHeight: 220, overflowY: "auto" }}>
+                            <div className="pd-repo-list">
                               {(ghRepos ?? []).filter((r) => r.fullName.toLowerCase().includes(ghRepoSearch.toLowerCase())).map((repo) => (
                                 <button key={repo.id} type="button"
                                   onClick={() => void handleSelectGhRepo(repo)}
-                                  style={{ display: "flex", alignItems: "center", gap: 8, width: "100%", padding: "9px 14px", border: "none", background: "none", cursor: "pointer", textAlign: "left", fontSize: "0.85rem", color: "var(--text)" }}
-                                  onMouseEnter={(e) => { e.currentTarget.style.background = "var(--surface-soft)"; }}
-                                  onMouseLeave={(e) => { e.currentTarget.style.background = "none"; }}>
+                                  className="pd-repo-item">
                                   <Github size={13} style={{ color: "var(--muted)", flexShrink: 0 }} />
-                                  <span style={{ flex: 1, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{repo.fullName}</span>
-                                  {repo.private && <span style={{ fontSize: "0.68rem", background: "#f1f5f9", color: "#64748b", borderRadius: 4, padding: "1px 5px", flexShrink: 0 }}>Private</span>}
+                                  <span className="pd-repo-item__name">{repo.fullName}</span>
+                                  {repo.private && <span className="pd-repo-item__private">Private</span>}
                                 </button>
                               ))}
                               {(ghRepos ?? []).filter((r) => r.fullName.toLowerCase().includes(ghRepoSearch.toLowerCase())).length === 0 && (
-                                <p style={{ textAlign: "center", color: "var(--muted)", fontSize: "0.82rem", padding: "16px 0" }}>No repos found.</p>
+                                <p className="pd-gh-no-repos">No repos found.</p>
                               )}
                             </div>
                           </div>
@@ -625,14 +619,13 @@ export function PublishDialog({
                       {/* Branch selector — shown after repo picked */}
                       {ghSelectedRepo && (
                         <div style={{ marginTop: 10 }}>
-                          <span style={{ fontSize: "0.82rem", fontWeight: 600, color: "var(--muted)", display: "block", marginBottom: 6 }}>Branch</span>
+                          <span className="pd-field__label" style={{ display: "block", marginBottom: 6 }}>Branch</span>
                           {ghBranchesLoading ? (
-                            <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: "0.82rem", color: "var(--muted)" }}>
+                            <div className="pd-gh-loading">
                               <Loader2 size={12} className="al-spin" /> Loading branches…
                             </div>
                           ) : (
-                            <select value={gitBranch} onChange={(e) => setGitBranch(e.target.value)}
-                              style={{ width: "100%", minHeight: 42, padding: "0 14px", borderRadius: 10, border: "1.5px solid var(--border)", background: "var(--surface)", fontSize: "0.88rem", color: "var(--text)", outline: "none" }}>
+                            <select value={gitBranch} onChange={(e) => setGitBranch(e.target.value)} className="pd-select">
                               {ghBranches.length === 0 ? (
                                 <option value={gitBranch}>{gitBranch}</option>
                               ) : ghBranches.map((b) => (
@@ -646,43 +639,37 @@ export function PublishDialog({
                   )}
                 </div>
 
-                <div style={{ display: "grid", gap: 12, padding: 16, borderRadius: 14, border: "1px solid var(--border)", background: "var(--surface-soft)" }}>
-                  <label style={{ display: "grid", gap: 4 }}>
-                    <span style={{ fontSize: "0.82rem", fontWeight: 600, color: "var(--muted)" }}>Repository URL</span>
+                <div className="pd-panel pd-panel--grid" style={{ display: "grid", gap: 12 }}>
+                  <label className="pd-field" style={{ gridColumn: "span 2" }}>
+                    <span className="pd-field__label">Repository URL</span>
                     <input type="url" placeholder="https://github.com/youruser/xxxx.git" value={gitRepoUrl} onChange={(e) => setGitRepoUrl(e.target.value)}
-                      disabled={isSavingGitConfig || isDeployingFromGit}
-                      style={{ width: "100%", minHeight: 42, padding: "0 14px", borderRadius: 10, border: "1.5px solid var(--border)", background: "var(--surface)", fontSize: "0.88rem", outline: "none", boxSizing: "border-box" }} />
+                      disabled={isSavingGitConfig || isDeployingFromGit} className="pd-input" />
                   </label>
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-                    <label style={{ display: "grid", gap: 4 }}>
-                      <span style={{ fontSize: "0.82rem", fontWeight: 600, color: "var(--muted)" }}>Branch</span>
-                      <input type="text" placeholder="main" value={gitBranch} onChange={(e) => setGitBranch(e.target.value)}
-                        disabled={isSavingGitConfig || isDeployingFromGit}
-                        style={{ width: "100%", minHeight: 42, padding: "0 14px", borderRadius: 10, border: "1.5px solid var(--border)", background: "var(--surface)", fontSize: "0.88rem", outline: "none", boxSizing: "border-box" }} />
-                    </label>
-                    <label style={{ display: "grid", gap: 4 }}>
-                      <span style={{ fontSize: "0.82rem", fontWeight: 600, color: "var(--muted)" }}>
-                        Personal Token {site.gitHasPat ? <span style={{ color: "#16a34a", fontWeight: 400 }}>✓ saved</span> : <span style={{ fontWeight: 400 }}>(optional)</span>}
-                      </span>
-                      <input type="password" placeholder={site.gitHasPat ? "Leave blank to keep existing" : "ghp_... (for private repos)"}
-                        value={gitPat} onChange={(e) => setGitPat(e.target.value)} disabled={isSavingGitConfig || isDeployingFromGit}
-                        style={{ width: "100%", minHeight: 42, padding: "0 14px", borderRadius: 10, border: "1.5px solid var(--border)", background: "var(--surface)", fontSize: "0.88rem", outline: "none", boxSizing: "border-box" }} />
-                    </label>
-                  </div>
-                  <div style={{ display: "flex", justifyContent: "flex-end" }}>
+                  <label className="pd-field">
+                    <span className="pd-field__label">Branch</span>
+                    <input type="text" placeholder="main" value={gitBranch} onChange={(e) => setGitBranch(e.target.value)}
+                      disabled={isSavingGitConfig || isDeployingFromGit} className="pd-input" />
+                  </label>
+                  <label className="pd-field">
+                    <span className="pd-field__label">
+                      Personal Token {site.gitHasPat ? <span style={{ color: "#16a34a", fontWeight: 400 }}>✓ saved</span> : <span style={{ fontWeight: 400 }}>(optional)</span>}
+                    </span>
+                    <input type="password" placeholder={site.gitHasPat ? "Leave blank to keep existing" : "ghp_... (for private repos)"}
+                      value={gitPat} onChange={(e) => setGitPat(e.target.value)} disabled={isSavingGitConfig || isDeployingFromGit} className="pd-input" />
+                  </label>
+                  <div className="pd-save-row" style={{ gridColumn: "span 2" }}>
                     <button type="button" className="secondary-button" onClick={handleSaveGitConfig}
                       disabled={isSavingGitConfig || isDeployingFromGit || !gitRepoUrl.trim()}
                       style={{ minHeight: 36, padding: "0 16px", borderRadius: 10, fontSize: "0.82rem", display: "inline-flex", alignItems: "center", gap: 6 }}>
                       {isSavingGitConfig ? <><Loader2 size={13} className="al-spin" /> Saving...</> : gitConfigSaved ? <><CheckCircle2 size={13} style={{ color: "#16a34a" }} /> Saved</> : "Save Connection"}
                     </button>
                   </div>
-                  {gitConfigError && <div className="inline-message inline-message--error" style={{ marginTop: 4 }}>{gitConfigError}</div>}
+                  {gitConfigError && <div className="inline-message inline-message--error" style={{ marginTop: 4, gridColumn: "span 2" }}>{gitConfigError}</div>}
                 </div>
-                <details style={{ borderRadius: 12, border: "1px solid var(--border)", background: "var(--surface-soft)" }}>
-                  <summary style={{ cursor: "pointer", fontSize: "0.82rem", fontWeight: 700, color: "var(--text)", padding: "10px 14px", userSelect: "none" }}>
-                    Environment Variables
-                  </summary>
-                  <div style={{ padding: "0 14px 14px 14px", borderTop: "1px solid var(--border)" }}>
+
+                <details className="pd-details">
+                  <summary>Environment Variables</summary>
+                  <div className="pd-details-body">
                     <p style={{ margin: "10px 0 8px 0", fontSize: "0.78rem", color: "var(--muted)" }}>
                       Variables are encrypted at rest and injected at deploy time. Existing values are not shown.
                     </p>
@@ -695,38 +682,29 @@ export function PublishDialog({
                 </details>
 
                 {/* Auto deploy on push */}
-                <div style={{ borderRadius: 12, border: "1px solid var(--border)", background: "var(--surface-soft)", padding: "12px 14px" }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <div className="pd-auto-deploy">
+                  <div className="pd-auto-deploy-head">
+                    <div className="pd-auto-deploy-label">
                       <Zap size={14} style={{ color: autoDeployEnabled ? "#f59e0b" : "var(--muted)" }} />
-                      <span style={{ fontSize: "0.84rem", fontWeight: 700, color: "var(--text)" }}>Auto deploy on push</span>
+                      <span className="pd-auto-deploy-text">Auto deploy on push</span>
                       {autoDeployEnabled && (
-                        <span style={{ fontSize: "0.70rem", fontWeight: 700, background: "#dcfce7", color: "#15803d", borderRadius: 4, padding: "1px 6px" }}>ENABLED</span>
+                        <span className="pd-auto-deploy-badge">ENABLED</span>
                       )}
                     </div>
-                    <button
-                      type="button"
-                      onClick={handleToggleAutoDeploy}
+                    <button type="button" onClick={handleToggleAutoDeploy}
                       disabled={isTogglingWebhook || !site.gitRepoUrl}
-                      style={{
-                        minHeight: 30, padding: "0 14px", borderRadius: 8, border: "none", cursor: "pointer",
-                        fontSize: "0.78rem", fontWeight: 600,
-                        background: autoDeployEnabled ? "#fee2e2" : "var(--primary)",
-                        color: autoDeployEnabled ? "#b91c1c" : "#fff",
-                        display: "inline-flex", alignItems: "center", gap: 5,
-                      }}
-                    >
+                      className={`pd-toggle-btn ${autoDeployEnabled ? "pd-toggle-btn--enabled" : "pd-toggle-btn--disabled"}`}>
                       {isTogglingWebhook ? <Loader2 size={12} className="al-spin" /> : null}
                       {autoDeployEnabled ? "Disable" : "Enable"}
                     </button>
                   </div>
                   {!site.gitRepoUrl && (
-                    <p style={{ margin: "6px 0 0 22px", fontSize: "0.76rem", color: "var(--muted)" }}>Save a repository URL first.</p>
+                    <p className="pd-auto-deploy-note">Save a repository URL first.</p>
                   )}
 
                   {/* Webhook config shown after setup or when already enabled */}
                   {autoDeployEnabled && (
-                    <div style={{ marginTop: 12, padding: "10px 12px", borderRadius: 8, background: "var(--surface)", border: "1px solid var(--border)" }}>
+                    <div className="pd-webhook-card">
                       {webhookSetup ? (
                         <div style={{ display: "grid", gap: 8 }}>
                           <p style={{ margin: 0, fontSize: "0.76rem", color: "var(--muted)", lineHeight: 1.5 }}>
@@ -734,21 +712,19 @@ export function PublishDialog({
                             Set Content type to <code>application/json</code>, trigger: <strong>Just the push event</strong>.
                           </p>
                           <div>
-                            <span style={{ fontSize: "0.72rem", fontWeight: 600, color: "var(--muted)", display: "block", marginBottom: 3 }}>PAYLOAD URL</span>
-                            <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
-                              <code style={{ fontSize: "0.72rem", background: "#f1f5f9", padding: "4px 8px", borderRadius: 6, wordBreak: "break-all", flex: 1 }}>{webhookSetup.webhookUrl}</code>
-                              <button type="button" onClick={() => copyToClipboard(webhookSetup.webhookUrl, "url")}
-                                style={{ minWidth: 30, minHeight: 30, border: "1px solid var(--border)", borderRadius: 6, background: "none", cursor: "pointer", display: "grid", placeItems: "center" }}>
+                            <span className="pd-field__label" style={{ display: "block", marginBottom: 3, fontSize: "0.72rem" }}>PAYLOAD URL</span>
+                            <div className="pd-webhook-row">
+                              <code className="pd-webhook-code">{webhookSetup.webhookUrl}</code>
+                              <button type="button" onClick={() => copyToClipboard(webhookSetup.webhookUrl, "url")} className="pd-webhook-copy-btn" aria-label="Copy webhook URL">
                                 {copiedField === "url" ? <Check size={12} style={{ color: "#16a34a" }} /> : <Copy size={12} />}
                               </button>
                             </div>
                           </div>
                           <div>
-                            <span style={{ fontSize: "0.72rem", fontWeight: 600, color: "#b91c1c", display: "block", marginBottom: 3 }}>SECRET (shown once — copy now)</span>
-                            <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
-                              <code style={{ fontSize: "0.72rem", background: "#fef2f2", padding: "4px 8px", borderRadius: 6, wordBreak: "break-all", flex: 1 }}>{webhookSetup.secret}</code>
-                              <button type="button" onClick={() => copyToClipboard(webhookSetup.secret, "secret")}
-                                style={{ minWidth: 30, minHeight: 30, border: "1px solid var(--border)", borderRadius: 6, background: "none", cursor: "pointer", display: "grid", placeItems: "center" }}>
+                            <span className="pd-field__label" style={{ display: "block", marginBottom: 3, fontSize: "0.72rem", color: "#b91c1c" }}>SECRET (shown once — copy now)</span>
+                            <div className="pd-webhook-row">
+                              <code className="pd-webhook-code pd-webhook-code--secret">{webhookSetup.secret}</code>
+                              <button type="button" onClick={() => copyToClipboard(webhookSetup.secret, "secret")} className="pd-webhook-copy-btn" aria-label="Copy webhook secret">
                                 {copiedField === "secret" ? <Check size={12} style={{ color: "#16a34a" }} /> : <Copy size={12} />}
                               </button>
                             </div>
@@ -765,14 +741,14 @@ export function PublishDialog({
                 </div>
 
                 {deployLog && (
-                  <div style={{ background: "#0f172a", color: "#94a3b8", borderRadius: 12, padding: "12px 16px", fontFamily: "monospace", fontSize: "0.75rem", maxHeight: 220, overflowY: "auto", whiteSpace: "pre-wrap", lineHeight: 1.5 }}>{deployLog}</div>
+                  <div className="pd-deploy-log">{deployLog}</div>
                 )}
                 <div style={{ display: "flex", justifyContent: "flex-end" }}>
-                  <button type="button" className="primary-button" onClick={handleGitDeploy}
+                  <Button variant="primary" onClick={handleGitDeploy}
                     disabled={isDeployingFromGit || site.hasActivePublishJob || !site.gitRepoUrl}
-                    style={{ minHeight: 44, padding: "0 24px", borderRadius: 12, fontSize: "0.92rem", fontWeight: 700, display: "inline-flex", alignItems: "center", gap: 8 }}>
+                    size="lg">
                     {isDeployingFromGit || site.hasActivePublishJob ? (<><Loader2 size={15} className="al-spin" /> {site.hasActivePublishJob ? "Deploying..." : "Queuing..."}</>) : (<><Rocket size={15} /> Deploy from GitHub</>)}
-                  </button>
+                  </Button>
                 </div>
               </div>
             )}
@@ -781,19 +757,18 @@ export function PublishDialog({
             {deployMode === "ftp" && (
               <div className="stack-sm">
                 {isDotnet && (
-                  <div style={{ padding: 18, borderRadius: 14, border: "1px solid #c7d2fe", borderLeft: "4px solid var(--primary)", background: "linear-gradient(180deg, #f5f7ff 0%, #eef2ff 100%)" }}>
+                  <div className="pd-panel--info">
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12, flexWrap: "wrap", marginBottom: 10 }}>
                       <div>
                         <strong style={{ fontSize: "0.98rem", color: "#1e293b" }}>{t("Publish from Visual Studio 2022", "Publish from Visual Studio 2022")}</strong>
                         <p className="muted" style={{ margin: "2px 0 0 0", fontSize: "0.8rem" }}>{t("Download the profile and import it — VS handles the upload via Web Deploy.", "Download the profile and import it — VS handles the upload via Web Deploy.")}</p>
                       </div>
-                      <button type="button" className="secondary-button" onClick={handleDownloadPublishProfile} disabled={isDownloadingProfile || isPublishing}
-                        style={{ display: "inline-flex", alignItems: "center", gap: 6, whiteSpace: "nowrap", minHeight: "36px", borderRadius: "10px", fontSize: "0.82rem" }}>
+                      <Button variant="secondary" onClick={handleDownloadPublishProfile} disabled={isDownloadingProfile || isPublishing} size="sm">
                         {isDownloadingProfile ? <Loader2 size={14} className="al-spin" /> : <Download size={14} />}
                         <span>{t("Download profile", "Download profile")}</span>
-                      </button>
+                      </Button>
                     </div>
-                    <ol style={{ margin: "10px 0 0 18px", padding: 0, fontSize: "0.82rem", color: "#334155", lineHeight: 1.6 }}>
+                    <ol className="pd-ftp-step-list">
                       <li>{t("Download the {publish_settings} file above.", "Download the {publish_settings} file above.").split(/(\{publish_settings\})/).map((part, index) => part === "{publish_settings}" ? <code key={index}>.PublishSettings</code> : part)}</li>
                       <li>{(() => { const text = t("In Visual Studio 2022, right-click the project → Publish… → Import Profile, then pick the file.", "In Visual Studio 2022, right-click the project → Publish… → Import Profile, then pick the file."); const parts = text.split(/(Publish…|Import Profile)/); return parts.map((part, idx) => { if (part === "Publish…") return <strong key={idx}>Publish…</strong>; if (part === "Import Profile") return <strong key={idx}>Import Profile</strong>; return part; }); })()}</li>
                       <li>{(() => { const text = t("Click Publish in Visual Studio — it uploads via Web Deploy.", "Click Publish in Visual Studio — it uploads via Web Deploy."); const parts = text.split(/(Publish)/); return parts.map((part, idx) => part === "Publish" ? <strong key={idx}>Publish</strong> : part); })()}</li>
@@ -803,15 +778,15 @@ export function PublishDialog({
                 )}
                 {isNode && <NodeDeployGuide />}
 
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", padding: "16px", borderRadius: "14px", background: "var(--surface-soft)", border: "1px solid var(--border)", fontSize: "0.85rem" }}>
-                  <div><span style={{ display: "block", fontSize: "0.75rem", color: "var(--muted)", fontWeight: 500, marginBottom: 2 }}>{t("Runtime", "Runtime")}</span><strong style={{ color: "var(--text)" }}>{t(getStackLabel(site, stackCatalog), getStackLabel(site, stackCatalog))}</strong></div>
-                  <div><span style={{ display: "block", fontSize: "0.75rem", color: "var(--muted)", fontWeight: 500, marginBottom: 2 }}>{t("Runtime status", "Runtime status")}</span><strong style={{ color: "var(--text)" }}>{t(site.runtimeStatus ?? "Unknown", site.runtimeStatus ?? "Unknown")}{site.runtimeMessage ? ` — ${t(site.runtimeMessage, site.runtimeMessage)}` : ""}</strong></div>
-                  <div style={{ gridColumn: "span 2" }}><span style={{ display: "block", fontSize: "0.75rem", color: "var(--muted)", fontWeight: 500, marginBottom: 2 }}>{t("Last publish", "Last publish")}</span><strong style={{ color: "var(--text)" }}>{formatDateTime(site.lastPublishedUtc)}{site.lastPublishStatus ? ` (${t(site.lastPublishStatus, site.lastPublishStatus)})` : ""}</strong></div>
+                <div className="pd-runtime-grid">
+                  <div><span className="pd-runtime-label">{t("Runtime", "Runtime")}</span><strong className="pd-runtime-value">{t(getStackLabel(site, stackCatalog), getStackLabel(site, stackCatalog))}</strong></div>
+                  <div><span className="pd-runtime-label">{t("Runtime status", "Runtime status")}</span><strong className="pd-runtime-value">{t(site.runtimeStatus ?? "Unknown", site.runtimeStatus ?? "Unknown")}{site.runtimeMessage ? ` — ${t(site.runtimeMessage, site.runtimeMessage)}` : ""}</strong></div>
+                  <div style={{ gridColumn: "span 2" }}><span className="pd-runtime-label">{t("Last publish", "Last publish")}</span><strong className="pd-runtime-value">{formatDateTime(site.lastPublishedUtc)}{site.lastPublishStatus ? ` (${t(site.lastPublishStatus, site.lastPublishStatus)})` : ""}</strong></div>
                 </div>
 
                 {supportsStartupCommand && (
-                  <label style={{ display: "grid", gap: 6 }}>
-                    <span style={{ fontSize: "0.88rem", fontWeight: 600, color: "var(--muted)" }}>
+                  <label className="pd-field">
+                    <span className="pd-field__label">
                       {isNode ? t("Startup file (optional)", "Startup file (optional)") : t("Startup command (optional)", "Startup command (optional)")}
                     </span>
                     <input type="text"
@@ -823,34 +798,34 @@ export function PublishDialog({
                             : t("java -jar app.jar (auto-detected)", "java -jar app.jar (auto-detected)")
                       }
                       value={startupCommandInput} onChange={(e) => setStartupCommandInput(e.target.value)} disabled={isPublishing}
-                      style={{ width: "100%", minHeight: "44px", padding: "0 16px", borderRadius: "12px", border: "1.5px solid var(--border)", background: "var(--surface)", outline: "none", fontSize: "0.88rem" }} />
-                    <span className="muted" style={{ fontSize: "0.76rem" }}>{t("Leave empty to auto-detect. Specify a command only if your entry point is non-standard.", "Leave empty to auto-detect. Specify a command only if your entry point is non-standard.")}</span>
+                      className="pd-input--lg" />
+                    <span className="pd-field__hint">{t("Leave empty to auto-detect. Specify a command only if your entry point is non-standard.", "Leave empty to auto-detect. Specify a command only if your entry point is non-standard.")}</span>
                   </label>
                 )}
                 {isDotnet && (
-                  <label style={{ display: "grid", gap: 6 }}>
-                    <span style={{ fontSize: "0.88rem", fontWeight: 600, color: "var(--muted)" }}>{t("Entry DLL (optional)", "Entry DLL (optional)")}</span>
+                  <label className="pd-field">
+                    <span className="pd-field__label">{t("Entry DLL (optional)", "Entry DLL (optional)")}</span>
                     <input type="text" placeholder={t("Auto-detected, e.g. {dll}", "Auto-detected, e.g. {dll}").replace("{dll}", guessEntryDll(site))}
                       value={entryDllInput} onChange={(e) => setEntryDllInput(e.target.value)} disabled={isPublishing}
-                      style={{ width: "100%", minHeight: "44px", padding: "0 16px", borderRadius: "12px", border: "1.5px solid var(--border)", background: "var(--surface)", outline: "none", fontSize: "0.88rem" }} />
-                    <span className="muted" style={{ fontSize: "0.76rem" }}>{t("Leave empty to auto-detect. Provide a filename only if your app uses a non-standard entry DLL.", "Leave empty to auto-detect. Provide a filename only if your app uses a non-standard entry DLL.")}</span>
+                      className="pd-input--lg" />
+                    <span className="pd-field__hint">{t("Leave empty to auto-detect. Provide a filename only if your app uses a non-standard entry DLL.", "Leave empty to auto-detect. Provide a filename only if your app uses a non-standard entry DLL.")}</span>
                   </label>
                 )}
 
                 {site.publish && (
-                  <details style={{ borderRadius: 14, border: "1px dashed var(--border)", background: "var(--surface-soft)", padding: "12px 16px", transition: "all 150ms ease" }}>
-                    <summary style={{ cursor: "pointer", fontSize: "0.85rem", fontWeight: 700, color: "var(--text)" }}>{!isDotnet ? t("FTP upload details", "FTP upload details") : t("Advanced: manual FTP upload", "Advanced: manual FTP upload")}</summary>
-                    <ol style={{ margin: "10px 0 0 18px", padding: 0, fontSize: "0.82rem", color: "#334155", lineHeight: 1.6 }}>
+                  <details className="pd-details pd-details--dashed">
+                    <summary>{!isDotnet ? t("FTP upload details", "FTP upload details") : t("Advanced: manual FTP upload", "Advanced: manual FTP upload")}</summary>
+                    <ol className="pd-ftp-step-list">
                       {isNode ? (<>
-                        <li>{t("Upload your project files to the site root via FTP:", "Upload your project files to the site root via FTP:")}<div style={{ marginTop: 6, display: "flex", flexWrap: "wrap", gap: 10, fontFamily: "monospace", fontSize: "0.8rem" }}><span style={{ background: "var(--surface)", border: "1px solid var(--border)", padding: "4px 8px", borderRadius: "6px" }}>{t("Host", "Host")}: <strong>{site.publish.ftpHost}</strong></span><span style={{ background: "var(--surface)", border: "1px solid var(--border)", padding: "4px 8px", borderRadius: "6px" }}>{t("User", "User")}: <strong>{site.publish.ftpUser}</strong></span></div></li>
+                        <li>{t("Upload your project files to the site root via FTP:", "Upload your project files to the site root via FTP:")}<div className="pd-ftp-host-row"><span className="pd-ftp-chip">{t("Host", "Host")}: <strong>{site.publish.ftpHost}</strong></span><span className="pd-ftp-chip">{t("User", "User")}: <strong>{site.publish.ftpUser}</strong></span></div></li>
                         <li style={{ marginTop: 6 }}>{t("Include {package_json} — do not upload {node_modules} (it will be installed on the server).", "Include package.json — do not upload node_modules (it will be installed on the server).").split(/(\{package_json\}|\{node_modules\})/).map((part, index) => { if (part === "{package_json}") return <code key={index}>package.json</code>; if (part === "{node_modules}") return <code key={index}>node_modules</code>; return part; })}</li>
                         <li style={{ marginTop: 6 }}>{(() => { const text = t("Click Publish now to run npm install, generate web.config, and start the app.", "Click Publish now to run npm install, generate web.config, and start the app."); const parts = text.split(/(Publish now|npm install|web.config)/); return parts.map((part, idx) => { if (part === "Publish now") return <strong key={idx}>{t("Publish now", "Publish now")}</strong>; if (part === "npm install") return <code key={idx}>npm install</code>; if (part === "web.config") return <code key={idx}>web.config</code>; return part; }); })()}</li>
                       </>) : isDotnet ? (<>
                         <li>{t("Run {dotnet_command} locally.", "Run {dotnet_command} locally.").split(/(\{dotnet_command\})/).map((part, index) => part === "{dotnet_command}" ? <code key={index}>dotnet publish -c Release -o ./publish</code> : part)}</li>
-                        <li>{t("Upload the contents of {publish_dir} to the site root via FTP:", "Upload the contents of {publish_dir} to the site root via FTP:")}<div style={{ marginTop: 6, display: "flex", flexWrap: "wrap", gap: 10, fontFamily: "monospace", fontSize: "0.8rem" }}><span style={{ background: "var(--surface)", border: "1px solid var(--border)", padding: "4px 8px", borderRadius: "6px" }}>{t("Host", "Host")}: <strong>{site.publish.ftpHost}</strong></span><span style={{ background: "var(--surface)", border: "1px solid var(--border)", padding: "4px 8px", borderRadius: "6px" }}>{t("User", "User")}: <strong>{site.publish.ftpUser}</strong></span></div></li>
+                        <li>{t("Upload the contents of {publish_dir} to the site root via FTP:", "Upload the contents of {publish_dir} to the site root via FTP:")}<div className="pd-ftp-host-row"><span className="pd-ftp-chip">{t("Host", "Host")}: <strong>{site.publish.ftpHost}</strong></span><span className="pd-ftp-chip">{t("User", "User")}: <strong>{site.publish.ftpUser}</strong></span></div></li>
                         <li>{t("Click Publish now to write {web_config} and recycle the app pool.", "Click Publish now to write web.config and recycle the app pool.").split(/(\{web_config\})/).map((part, index) => part === "{web_config}" ? <code key={index}>web.config</code> : part)}</li>
                       </>) : (<>
-                        <li>{t("Upload your project files to the site root via FTP:", "Upload your project files to the site root via FTP:")}<div style={{ marginTop: 6, display: "flex", flexWrap: "wrap", gap: 10, fontFamily: "monospace", fontSize: "0.8rem" }}><span style={{ background: "var(--surface)", border: "1px solid var(--border)", padding: "4px 8px", borderRadius: "6px" }}>{t("Host", "Host")}: <strong>{site.publish.ftpHost}</strong></span><span style={{ background: "var(--surface)", border: "1px solid var(--border)", padding: "4px 8px", borderRadius: "6px" }}>{t("User", "User")}: <strong>{site.publish.ftpUser}</strong></span></div></li>
+                        <li>{t("Upload your project files to the site root via FTP:", "Upload your project files to the site root via FTP:")}<div className="pd-ftp-host-row"><span className="pd-ftp-chip">{t("Host", "Host")}: <strong>{site.publish.ftpHost}</strong></span><span className="pd-ftp-chip">{t("User", "User")}: <strong>{site.publish.ftpUser}</strong></span></div></li>
                         <li style={{ marginTop: 6 }}>{
                           activeStack === "python"
                             ? t("Include requirements.txt — do not upload your local virtualenv (dependencies install on the server).", "Include requirements.txt — do not upload your local virtualenv (dependencies install on the server).")
@@ -863,21 +838,21 @@ export function PublishDialog({
                   </details>
                 )}
 
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 16, gap: 8 }}>
+                <div className="pd-actions-bar">
                   {!onlyOneStack && isSiteStackConfigured(site) ? (
-                    <button type="button" className="secondary-button" onClick={() => setPhase("select-stack")} disabled={isPublishing}
-                      style={{ minHeight: "38px", padding: "0 14px", borderRadius: "10px", fontSize: "0.85rem" }}>{t("Change runtime", "Change runtime")}</button>
+                    <Button variant="secondary" size="sm" onClick={() => setPhase("select-stack")} disabled={isPublishing}>
+                      {t("Change runtime", "Change runtime")}
+                    </Button>
                   ) : <span />}
-                  <div style={{ display: "flex", gap: 12 }}>
-                    <button type="button" className="secondary-button" onClick={onClose} disabled={isPublishing} style={{ minHeight: "42px", padding: "0 20px" }}>{t("Done", "Done")}</button>
-                    <button type="button" className="primary-button" onClick={handleConfirmPublish} disabled={isPublishing || !canPublishSite(site, availableStacks)}
-                      style={{ minHeight: "42px", padding: "0 22px", display: "inline-flex", alignItems: "center", gap: 8 }}>
+                  <div className="pd-actions-right">
+                    <Button variant="secondary" onClick={onClose} disabled={isPublishing}>{t("Done", "Done")}</Button>
+                    <Button variant="primary" onClick={handleConfirmPublish} disabled={isPublishing || !canPublishSite(site, availableStacks)}>
                       {isPublishing ? (
                         <span><Loader2 size={14} className="al-spin" />{t("Publishing...", "Publishing...")}</span>
                       ) : (
                         <span><Rocket size={14} />{t("Publish now", "Publish now")}</span>
                       )}
-                    </button>
+                    </Button>
                   </div>
                 </div>
               </div>

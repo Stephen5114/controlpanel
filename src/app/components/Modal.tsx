@@ -1,4 +1,4 @@
-import React, { useEffect, useCallback } from "react";
+import React, { useEffect, useCallback, useRef } from "react";
 
 interface ModalProps {
   open: boolean;
@@ -19,9 +19,25 @@ export function Modal({
   footer,
   size = "md",
 }: ModalProps) {
+  const overlayRef = useRef<HTMLDivElement>(null);
+
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") { onClose(); return; }
+      // Focus trapping
+      if (e.key === "Tab" && overlayRef.current) {
+        const focusable = overlayRef.current.querySelectorAll<HTMLElement>(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+        );
+        if (focusable.length === 0) return;
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (e.shiftKey) {
+          if (document.activeElement === first) { e.preventDefault(); last.focus(); }
+        } else {
+          if (document.activeElement === last) { e.preventDefault(); first.focus(); }
+        }
+      }
     },
     [onClose],
   );
@@ -30,6 +46,15 @@ export function Modal({
     if (open) {
       document.addEventListener("keydown", handleKeyDown);
       document.body.style.overflow = "hidden";
+      // Auto-focus first focusable element
+      requestAnimationFrame(() => {
+        if (overlayRef.current) {
+          const first = overlayRef.current.querySelector<HTMLElement>(
+            'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+          );
+          first?.focus();
+        }
+      });
     }
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
@@ -40,7 +65,7 @@ export function Modal({
   if (!open) return null;
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
+    <div className="modal-overlay" onClick={onClose} ref={overlayRef}>
       <div
         className={`modal modal--${size}`}
         onClick={(e) => e.stopPropagation()}
@@ -56,7 +81,7 @@ export function Modal({
           <button
             className="modal__close"
             onClick={onClose}
-            aria-label="Close"
+            aria-label="Close dialog"
             type="button"
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

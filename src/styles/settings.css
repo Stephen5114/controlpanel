@@ -1,0 +1,138 @@
+/* ── Settings Page ──────────────────────────────────── */
+
+/* Tabs */
+.st-tabs-bar {
+  display: flex;
+  gap: 24px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 16px;
+}
+
+.st-tab-btn {
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--muted);
+  font-size: 0.95rem;
+  font-weight: 700;
+  padding: 12px 4px;
+  cursor: pointer;
+  transition: all 150ms ease;
+  font-family: inherit;
+}
+
+.st-tab-btn--active {
+  border-bottom-color: var(--primary);
+  color: var(--primary);
+}
+
+.st-tab-btn:hover {
+  color: var(--text);
+}
+
+/* Profile & Security sections */
+.st-section-wrap {
+  max-width: 720px;
+}
+
+.st-section-wrap--narrow {
+  max-width: 600px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.st-card {
+  background: var(--surface);
+}
+
+.st-head-spacer {
+  margin-bottom: 20px;
+}
+
+.st-head-spacer--lg {
+  margin-bottom: 24px;
+}
+
+.st-section-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+
+.st-section-title--lg {
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.st-section-desc {
+  font-size: 0.85rem;
+  margin-top: 2px;
+}
+
+.st-section-desc--sm {
+  font-size: 0.88rem;
+  margin-top: 2px;
+}
+
+/* Info rows */
+.st-info-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.st-info-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+  border-radius: 16px;
+  background: var(--surface-soft);
+  border: 1px solid var(--border);
+}
+
+.st-info-label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.st-info-icon {
+  color: var(--muted);
+  flex-shrink: 0;
+}
+
+.st-info-label-text {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.st-info-value {
+  font-weight: 700;
+  color: var(--text);
+}
+
+.st-info-badge {
+  padding: 6px 14px;
+}
+
+/* Security form */
+.st-pw-form {
+  display: grid;
+  gap: 16px;
+}
+
+.st-pw-field-wrap {
+  display: grid;
+  gap: 4px;
+}
+
+.st-pw-msg {
+  margin-top: 8px;
+}
+
+.st-pw-submit-btn {
+  margin-top: 12px;
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}

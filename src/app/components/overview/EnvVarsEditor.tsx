@@ -104,36 +104,30 @@ export function EnvVarsEditor({ siteId, onLoad, onSave }: EnvVarsEditorProps) {
 
   if (isLoading) {
     return (
-      <div style={{ display: "flex", alignItems: "center", gap: 6, color: "var(--muted)", fontSize: "0.82rem", padding: "8px 0" }}>
+      <div className="env-loading">
         <Loader2 size={13} className="al-spin" /> Loading variables...
       </div>
     );
   }
 
   return (
-    <div style={{ display: "grid", gap: 8 }}>
+    <div className="env-container">
       {visible.length > 0 ? (
-        <div style={{ display: "grid", gap: 6 }}>
+        <div className="env-list">
           {rows.map((row, i) => {
             if (row.deleted) return null;
             return (
-              <div key={i} style={{ display: "grid", gridTemplateColumns: "1fr 1fr auto", gap: 6, alignItems: "start" }}>
-                <div>
+              <div key={i} className="env-row">
+                <div className="env-field">
                   <input
                     type="text"
                     placeholder="VARIABLE_NAME"
                     value={row.name}
                     onChange={(e) => handleNameChange(i, e.target.value)}
                     disabled={isSaving || row.isExisting}
-                    style={{
-                      width: "100%", minHeight: 36, padding: "0 10px", borderRadius: 8,
-                      border: nameErrors[i] ? "1.5px solid #ef4444" : "1.5px solid var(--border)",
-                      background: row.isExisting ? "var(--surface-soft)" : "var(--surface)",
-                      fontSize: "0.82rem", outline: "none", boxSizing: "border-box",
-                      fontFamily: "monospace",
-                    }}
+                    className={`env-input${nameErrors[i] ? " env-input--error" : ""}${row.isExisting ? " env-input--existing" : " env-input--editable"}`}
                   />
-                  {nameErrors[i] && <span style={{ fontSize: "0.72rem", color: "#ef4444" }}>{nameErrors[i]}</span>}
+                  {nameErrors[i] && <span className="env-error-text">{nameErrors[i]}</span>}
                 </div>
                 <input
                   type="password"
@@ -141,18 +135,14 @@ export function EnvVarsEditor({ siteId, onLoad, onSave }: EnvVarsEditorProps) {
                   value={row.value}
                   onChange={(e) => handleValueChange(i, e.target.value)}
                   disabled={isSaving}
-                  style={{
-                    width: "100%", minHeight: 36, padding: "0 10px", borderRadius: 8,
-                    border: "1.5px solid var(--border)", background: "var(--surface)",
-                    fontSize: "0.82rem", outline: "none", boxSizing: "border-box",
-                  }}
+                  className="env-input env-input--editable env-input--pw"
                 />
                 <button
                   type="button"
                   onClick={() => handleDelete(i)}
                   disabled={isSaving}
-                  style={{ minHeight: 36, minWidth: 36, display: "grid", placeItems: "center", borderRadius: 8, border: "1.5px solid var(--border)", background: "none", cursor: "pointer", color: "#ef4444" }}
-                  title="Remove variable"
+                  className="env-delete-btn"
+                  aria-label="Remove variable"
                 >
                   <Trash2 size={14} />
                 </button>
@@ -161,15 +151,15 @@ export function EnvVarsEditor({ siteId, onLoad, onSave }: EnvVarsEditorProps) {
           })}
         </div>
       ) : (
-        <p style={{ margin: 0, fontSize: "0.82rem", color: "var(--muted)" }}>No environment variables set.</p>
+        <p className="env-empty-text">No environment variables set.</p>
       )}
 
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 4 }}>
+      <div className="env-footer">
         <button
           type="button"
           onClick={handleAdd}
           disabled={isSaving}
-          style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: "0.80rem", color: "var(--primary)", background: "none", border: "none", cursor: "pointer", padding: 0, fontWeight: 600 }}
+          className="env-add-btn"
         >
           <Plus size={13} /> Add variable
         </button>
@@ -177,18 +167,18 @@ export function EnvVarsEditor({ siteId, onLoad, onSave }: EnvVarsEditorProps) {
           type="button"
           onClick={handleSave}
           disabled={isSaving}
-          style={{ display: "inline-flex", alignItems: "center", gap: 6, minHeight: 34, padding: "0 14px", borderRadius: 8, border: "none", background: "var(--primary)", color: "#fff", cursor: "pointer", fontSize: "0.82rem", fontWeight: 600 }}
+          className="env-save-btn"
         >
           {isSaving ? <><Loader2 size={13} className="al-spin" /> Saving...</> : <><Save size={13} /> Save</>}
         </button>
       </div>
 
       {saveMessage && (
-        <div style={{ fontSize: "0.80rem", color: saveMessage.isError ? "#ef4444" : "#065f46", display: "flex", alignItems: "center", gap: 5 }}>
-          {!saveMessage.isError && <CheckCircle2 size={13} style={{ color: "#16a34a" }} />}
+        <div className={`env-msg${saveMessage.isError ? " env-msg--error" : " env-msg--success"}`}>
+          {!saveMessage.isError && <CheckCircle2 size={13} className="env-msg-icon" style={{ color: "#16a34a" }} />}
           {saveMessage.text}
           {saveMessage.requiresRedeploy && !saveMessage.isError && (
-            <span style={{ marginLeft: 4, color: "#92400e", background: "#fef3c7", padding: "1px 6px", borderRadius: 4, fontSize: "0.72rem", fontWeight: 600 }}>Redeploy required</span>
+            <span className="env-redeploy-badge">Redeploy required</span>
           )}
         </div>
       )}

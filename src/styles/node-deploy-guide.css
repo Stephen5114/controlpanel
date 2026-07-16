@@ -1,0 +1,45 @@
+/* ── Node Deploy Guide ──────────────────────────────── */
+
+.ndg-wrapper {
+  border-width: 1px;
+  border-style: solid;
+  border-left-width: 3px;
+}
+
+.ndg-tab--active {
+  border-bottom-width: 2px;
+  border-bottom-style: solid;
+}
+
+.ndg-info-title {
+  transition: color 0.3s ease;
+}
+
+.ndg-progress-bar {
+  transition: background 0.3s ease;
+}
+
+.ndg-dots-wrap {
+  align-items: center;
+}
+
+.ndg-dot--active {
+  transition: background 0.3s ease;
+}
+
+.ndg-pause-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px;
+  margin-left: 6px;
+  transition: color 0.3s ease, transform 0.2s ease;
+  font-family: inherit;
+}
+
+.ndg-pause-btn:hover {
+  transform: scale(1.15);
+}

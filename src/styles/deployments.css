@@ -1,0 +1,247 @@
+/* ── Deployments Page ───────────────────────────────── */
+
+.dep-loading-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 240px;
+}
+
+.dep-header-desc {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.dep-header-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.dep-site-select {
+  min-height: 38px;
+  padding: 0 14px;
+  border-radius: 10px;
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  font-size: 0.88rem;
+  color: var(--text);
+  outline: none;
+  font-family: inherit;
+}
+
+.dep-site-select:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.dep-msg-spacer {
+  margin-bottom: 16px;
+}
+
+.dep-empty-state {
+  text-align: center;
+  padding: 60px 0;
+  color: var(--muted);
+}
+
+.dep-loading-small {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 160px;
+}
+
+/* ── Table ──────────────────────────────────────────── */
+
+.dep-table-wrap {
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  overflow: hidden;
+  background: var(--surface);
+}
+
+.dep-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.dep-th {
+  padding: 10px 14px;
+  text-align: left;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.dep-th--narrow {
+  width: 44px;
+}
+
+.dep-th--action {
+  width: 72px;
+}
+
+.dep-thead-tr {
+  background: var(--surface-soft);
+  border-bottom: 1px solid var(--border);
+}
+
+.dep-tr {
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: background 100ms ease;
+}
+
+.dep-tr--expanded {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.dep-tr:hover {
+  background: rgba(0, 0, 0, 0.015);
+}
+
+.dep-td {
+  padding: 10px 14px;
+}
+
+.dep-td--muted {
+  color: var(--muted);
+}
+
+.dep-td--num {
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.dep-td--mono {
+  font-family: monospace;
+  font-size: 0.78rem;
+  color: var(--text);
+}
+
+/* ── Badges ─────────────────────────────────────────── */
+
+.dep-method-badge {
+  background: #f1f5f9;
+  border-radius: 6px;
+  padding: 2px 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #475569;
+}
+
+.dep-status-badge {
+  border-radius: 6px;
+  padding: 2px 8px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.dep-commit-msg {
+  font-size: 0.82rem;
+  margin: 10px 0 6px 0;
+}
+
+.dep-commit-label {
+  color: var(--muted);
+}
+
+.dep-sha-muted {
+  color: var(--muted);
+}
+
+/* ── Expanded row ───────────────────────────────────── */
+
+.dep-expanded-tr {
+  border-bottom: 1px solid var(--border);
+  background: rgba(0, 0, 0, 0.015);
+}
+
+.dep-expanded-td {
+  padding: 0 14px 14px 14px;
+}
+
+.dep-error-msg {
+  margin: 10px 0 8px 0;
+}
+
+.dep-log-loading {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 0;
+  color: var(--muted);
+}
+
+.dep-log-loading-text {
+  font-size: 0.82rem;
+}
+
+.dep-log-pre {
+  margin: 10px 0 0 0;
+  background: #0f172a;
+  color: #94a3b8;
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-family: monospace;
+  font-size: 0.73rem;
+  max-height: 280px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  line-height: 1.5;
+}
+
+.dep-no-log {
+  margin: 10px 0 0 0;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+/* ── Action buttons in table ────────────────────────── */
+
+.dep-actions-cell {
+  cursor: default;
+}
+
+.dep-actions-row {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.dep-rollback-btn {
+  border: 1px solid var(--border);
+  background: none;
+  border-radius: 6px;
+  padding: 4px 7px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--muted);
+  font-size: 0.75rem;
+  transition: all 150ms ease;
+  font-family: inherit;
+}
+
+.dep-rollback-btn:hover:not(:disabled) {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.dep-rollback-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.dep-expand-icon {
+  color: var(--muted);
+  display: grid;
+  place-items: center;
+}

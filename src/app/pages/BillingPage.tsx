@@ -12,6 +12,7 @@ import {
 } from "../lib/customer-api";
 import { getCustomerSession } from "../lib/customer-session";
 import { getActiveLocale, useLocalization } from "../lib/i18n";
+import { Badge } from "../components";
 
 function formatCurrency(value: number, currency = "USD") {
   return new Intl.NumberFormat(getActiveLocale(), {
@@ -34,25 +35,25 @@ function formatDate(value: string | null | undefined, t?: (key: string, def: str
   }).format(date);
 }
 
-function statusTone(status: string) {
+function toneForStatus(status: string): "success" | "warning" | "danger" | "default" {
   switch (status) {
     case "paid":
     case "active":
     case "succeeded":
-      return "badge--success";
+      return "success";
     case "grace_period":
     case "past_due":
     case "partially_paid":
-      return "badge--warning";
+      return "warning";
     case "failed":
     case "void":
     case "refunded":
     case "suspended":
     case "canceled":
     case "cancelled":
-      return "badge--danger";
+      return "danger";
     default:
-      return "";
+      return "default";
   }
 }
 
@@ -256,15 +257,10 @@ export function BillingPage() {
       {error ? <div className="inline-message inline-message--error">{error}</div> : null}
       {message ? <div className="inline-message">{message}</div> : null}
       {newSubscriptionScope ? (
-        <div className="inline-message" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "12px" }}>
+        <div className="inline-message billing-new-sub">
           <span>{t("Your new subscription is ready.", "Your new subscription is ready.")}</span>
-          <button
-            type="button"
-            className="primary-button"
-            style={{ whiteSpace: "nowrap" }}
-            onClick={() => navigate(`/subscription/${newSubscriptionScope}/overview`)}
-          >
-            {t("View Subscription", "View Subscription")} <ArrowRight size={14} style={{ marginLeft: "4px" }} />
+          <button type="button" className="primary-button" onClick={() => navigate(`/subscription/${newSubscriptionScope}/overview`)}>
+            {t("View Subscription", "View Subscription")} <ArrowRight size={14} />
           </button>
         </div>
       ) : null}
@@ -297,9 +293,9 @@ export function BillingPage() {
               <Receipt size={16} />
               <span>{t("Invoices", "Invoices")}</span>
               {outstandingInvoices.length > 0 ? (
-                <span className="badge badge--warning" style={{ marginLeft: "4px", fontSize: "0.75rem", padding: "2px 6px" }}>
+                <Badge tone="warning" compact>
                   {t("{count} due", "{count} due").replace("{count}", String(outstandingInvoices.length))}
-                </span>
+                </Badge>
               ) : null}
             </button>
             <button 
@@ -313,16 +309,16 @@ export function BillingPage() {
           </div>
 
           {outstandingInvoices.length > 0 && activeTab !== "invoices" ? (
-            <div className="dashboard-alert" style={{ marginBottom: "20px" }}>
+            <div className="dashboard-alert">
               <div className="dashboard-alert__icon"><AlertTriangle size={18} /></div>
               <div className="dashboard-alert__body">
-                <strong style={{ display: "block", marginBottom: "4px" }}>{t("Invoices Awaiting Payment", "Invoices Awaiting Payment")}</strong>
-                <p className="muted" style={{ margin: 0, fontSize: "0.85rem" }}>
+                <strong>{t("Invoices Awaiting Payment", "Invoices Awaiting Payment")}</strong>
+                <p className="muted">
                   {t("You have {count} unpaid invoice(s) totaling {amount}.", "You have {count} unpaid invoice(s) totaling {amount}.").replace("{count}", String(outstandingInvoices.length)).replace("{amount}", formatCurrency(outstandingInvoices.reduce((acc, inv) => acc + inv.amountDue, 0), overview.summary.currency))}
                 </p>
               </div>
               <button className="primary-button" type="button" onClick={() => setActiveTab("invoices")}>
-                {t("View Invoices", "View Invoices")} <ArrowRight size={16} style={{ marginLeft: "6px" }} />
+                {t("View Invoices", "View Invoices")} <ArrowRight size={16} />
               </button>
             </div>
           ) : null}
@@ -345,7 +341,7 @@ export function BillingPage() {
                         <div className="billing-subscription-card" key={subscription.id}>
                           <div className="billing-subscription-card__header">
                             <strong>{subscription.displayName}</strong>
-                            <span className={`badge ${statusTone(subscription.status)}`}>{getStatusLabel(subscription.status)}</span>
+<Badge tone={toneForStatus(subscription.status)}>{getStatusLabel(subscription.status)}</Badge>
                           </div>
                           <div className="muted">{formatCurrency(subscription.monthlyAmount, subscription.currency)} / mo · {t("Next invoice {date}", "Next invoice {date}").replace("{date}", formatDate(subscription.nextInvoiceAtUtc, t))}</div>
                           {subscription.lastError ? <div className="inline-message inline-message--error">{subscription.lastError}</div> : null}
@@ -437,7 +433,7 @@ export function BillingPage() {
                     </div>
                   </div>
                   <Link to="/buy" className="primary-button billing-action-button">
-                    <ShoppingCart size={16} /> {t("Buy a subscription", "Buy a subscription")} <ArrowRight size={16} style={{ marginLeft: "6px" }} />
+                    <ShoppingCart size={16} /> {t("Buy a subscription", "Buy a subscription")} <ArrowRight size={16} />
                   </Link>
                   <button className="secondary-button billing-action-button" type="button" onClick={() => void handleSetupPaymentMethod()} disabled={busyKey === "setup-payment-method"}>
                     <CreditCard size={16} /> {busyKey === "setup-payment-method" ? t("Opening...", "Opening...") : t("Save payment method", "Save payment method")}
@@ -450,20 +446,20 @@ export function BillingPage() {
           {activeTab === "invoices" && (
             <div className="stack">
               {outstandingInvoices.length > 0 && (
-                <article className="card stack-sm" style={{ borderLeft: "4px solid var(--warning, #e2b93b)" }}>
+                <article className="card stack-sm billing-card--outstanding">
                   <div className="section-head">
                     <div>
                       <h3>{t("Outstanding invoices", "Outstanding invoices")}</h3>
                       <p className="muted">{t("These invoices require immediate payment to keep services active.", "These invoices require immediate payment to keep services active.")}</p>
                     </div>
-                    <span className="badge badge--warning">{t("{count} due", "{count} due").replace("{count}", String(outstandingInvoices.length))}</span>
+                    <Badge tone="warning">{t("{count} due", "{count} due").replace("{count}", String(outstandingInvoices.length))}</Badge>
                   </div>
                   <div className="stack-sm">
                     {outstandingInvoices.map((invoice) => (
                       <div className="billing-list-row" key={invoice.id}>
                         <div>
                           <strong>{invoice.invoiceNumber}</strong>
-                          <div className="muted">{invoice.description ?? t("Invoice", "Invoice")} · {t("Due {date}", "Due {date}").replace("{date}", formatDate(invoice.dueUtc, t))} · <span className={`badge ${statusTone(invoice.status)}`}>{getStatusLabel(invoice.status)}</span></div>
+                          <div className="muted">{invoice.description ?? t("Invoice", "Invoice")} · {t("Due {date}", "Due {date}").replace("{date}", formatDate(invoice.dueUtc, t))} · <Badge tone={toneForStatus(invoice.status)}>{getStatusLabel(invoice.status)}</Badge></div>
                         </div>
                         <div className="billing-list-actions">
                           <strong>{formatCurrency(invoice.amountDue, invoice.currency)}</strong>
@@ -495,7 +491,7 @@ export function BillingPage() {
                           <div className="muted">{invoice.description ?? t("Invoice", "Invoice")} · {t("Issued {date}", "Issued {date}").replace("{date}", formatDate(invoice.issuedUtc, t))}</div>
                         </div>
                         <div className="billing-list-actions">
-                          <span className={`badge ${statusTone(invoice.status)}`}>{getStatusLabel(invoice.status)}</span>
+<Badge tone={toneForStatus(invoice.status)}>{getStatusLabel(invoice.status)}</Badge>
                           <strong>{formatCurrency(invoice.total, invoice.currency)}</strong>
                         </div>
                       </div>
@@ -524,7 +520,7 @@ export function BillingPage() {
                         <div className="billing-list-row" key={transaction.id}>
                           <div>
                             <strong>{transaction.description ?? transaction.type}</strong>
-                            <div className="muted">{formatDate(transaction.occurredUtc, t)} · {transaction.provider} · <span className={`badge ${statusTone(transaction.status)}`}>{getStatusLabel(transaction.status)}</span></div>
+                            <div className="muted">{formatDate(transaction.occurredUtc, t)} · {transaction.provider} · <Badge tone={toneForStatus(transaction.status)}>{getStatusLabel(transaction.status)}</Badge></div>
                           </div>
                           <strong>{formatCurrency(transaction.amount, transaction.currency)}</strong>
                         </div>
@@ -556,7 +552,7 @@ export function BillingPage() {
                             <span className={entry.direction === "credit" ? "billing-amount billing-amount--positive" : "billing-amount billing-amount--negative"}>
                               {entry.direction === "credit" ? "+" : "-"}{formatCurrency(entry.amount, entry.currency)}
                             </span>
-                            <span className="muted" style={{ fontSize: "0.75rem" }}>{t("Bal: {amount}", "Bal: {amount}").replace("{amount}", formatCurrency(entry.balanceAfter, entry.currency))}</span>
+                            <span className="muted ledger-bal">{t("Bal: {amount}", "Bal: {amount}").replace("{amount}", formatCurrency(entry.balanceAfter, entry.currency))}</span>
                           </div>
                         </div>
                       ))}
@@ -574,29 +570,19 @@ export function BillingPage() {
 
 function MetricCard({ icon, label, value, note }: { icon: ReactNode; label: string; value: string; note: string }) {
   return (
-    <article className="card stat-card" style={{ display: "flex", flexDirection: "column", justifyContent: "space-between", height: "100%" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", width: "100%" }}>
+    <article className="card stat-card">
+      <div className="stat-card__header">
         <div>
-          <p className="label" style={{ margin: 0, fontSize: "0.85rem", fontWeight: "500" }}>{label}</p>
-          <h2 style={{ fontSize: "1.75rem", fontWeight: "700", margin: "6px 0 2px", letterSpacing: "-0.02em" }}>{value}</h2>
+          <p className="stat-card__label">{label}</p>
+          <h2 className="stat-card__value">{value}</h2>
         </div>
-        <div style={{ 
-          display: "flex", 
-          alignItems: "center", 
-          justifyContent: "center", 
-          width: "36px", 
-          height: "36px", 
-          borderRadius: "10px", 
-          background: "var(--background-muted, #f1f5f9)", 
-          color: "var(--primary-ink, #0f172a)",
-          border: "1px solid var(--border)",
-          boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
-          flexShrink: 0
-        }}>
+        <div className="stat-card__icon-box">
           {icon}
         </div>
       </div>
-      <p className="muted" style={{ margin: "10px 0 0 0", fontSize: "0.8rem", color: "var(--muted)" }}>{note}</p>
+      <div className="stat-card__footer">
+        <p className="muted" style={{ margin: 0 }}>{note}</p>
+      </div>
     </article>
   );
 }

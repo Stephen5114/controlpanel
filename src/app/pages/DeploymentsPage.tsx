@@ -163,7 +163,7 @@ export function DeploymentsPage() {
 
   if (loadingSites) {
     return (
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: 240 }}>
+      <div className="dep-loading-center">
         <Loader2 size={24} className="al-spin" />
       </div>
     );
@@ -174,16 +174,16 @@ export function DeploymentsPage() {
       <div className="ov-header">
         <div>
           <h1 className="ov-header__title">{t("Deployments", "Deployments")}</h1>
-          <p style={{ margin: 0, fontSize: "0.85rem", color: "var(--muted)" }}>
+          <p className="dep-header-desc">
             {t("History, logs, and rollback", "History, logs, and rollback")}
           </p>
         </div>
-        <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+        <div className="dep-header-actions">
           {sites.length > 1 && (
             <select
               value={selectedSiteId}
               onChange={(e) => handleSelectSite(e.target.value)}
-              style={{ minHeight: 38, padding: "0 14px", borderRadius: 10, border: "1.5px solid var(--border)", background: "var(--surface)", fontSize: "0.88rem", color: "var(--text)", outline: "none" }}
+              className="dep-site-select"
             >
               {sites.map((s) => (
                 <option key={s.id} value={s.id}>{s.siteName || s.domain}</option>
@@ -203,41 +203,40 @@ export function DeploymentsPage() {
       </div>
 
       {sitesError && (
-        <div className="inline-message inline-message--error" style={{ marginBottom: 16 }}>{sitesError}</div>
+        <div className="inline-message inline-message--error dep-msg-spacer">{sitesError}</div>
       )}
       {actionMsg && (
         <div
-          className={`inline-message${actionMsg.ok ? "" : " inline-message--error"}`}
-          style={{ marginBottom: 16 }}
+          className={`inline-message${actionMsg.ok ? "" : " inline-message--error"} dep-msg-spacer`}
         >
           {actionMsg.text}
         </div>
       )}
 
       {sites.length === 0 ? (
-        <div style={{ textAlign: "center", padding: "60px 0", color: "var(--muted)" }}>
+        <div className="dep-empty-state">
           {t("No websites yet. Create a website from the Websites page.", "No websites yet. Create a website from the Websites page.")}
         </div>
       ) : loadingDeploys ? (
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: 160 }}>
+        <div className="dep-loading-small">
           <Loader2 size={20} className="al-spin" />
         </div>
       ) : deployments.length === 0 ? (
-        <div style={{ textAlign: "center", padding: "60px 0", color: "var(--muted)" }}>
+        <div className="dep-empty-state">
           {t("No deployments yet for this site.", "No deployments yet for this site.")}
         </div>
       ) : (
-        <div style={{ borderRadius: 14, border: "1px solid var(--border)", overflow: "hidden", background: "var(--surface)" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.85rem" }}>
+        <div className="dep-table-wrap">
+          <table className="dep-table">
             <thead>
-              <tr style={{ background: "var(--surface-soft)", borderBottom: "1px solid var(--border)" }}>
-                <th style={{ padding: "10px 14px", textAlign: "left", fontWeight: 600, color: "var(--muted)", width: 44 }}>#</th>
-                <th style={{ padding: "10px 14px", textAlign: "left", fontWeight: 600, color: "var(--muted)" }}>{t("When", "When")}</th>
-                <th style={{ padding: "10px 14px", textAlign: "left", fontWeight: 600, color: "var(--muted)" }}>{t("Method", "Method")}</th>
-                <th style={{ padding: "10px 14px", textAlign: "left", fontWeight: 600, color: "var(--muted)" }}>{t("Branch / SHA", "Branch / SHA")}</th>
-                <th style={{ padding: "10px 14px", textAlign: "left", fontWeight: 600, color: "var(--muted)" }}>{t("Duration", "Duration")}</th>
-                <th style={{ padding: "10px 14px", textAlign: "left", fontWeight: 600, color: "var(--muted)" }}>{t("Status", "Status")}</th>
-                <th style={{ padding: "10px 14px", width: 72 }} />
+              <tr className="dep-thead-tr">
+                <th className="dep-th dep-th--narrow">#</th>
+                <th className="dep-th">{t("When", "When")}</th>
+                <th className="dep-th">{t("Method", "Method")}</th>
+                <th className="dep-th">{t("Branch / SHA", "Branch / SHA")}</th>
+                <th className="dep-th">{t("Duration", "Duration")}</th>
+                <th className="dep-th">{t("Status", "Status")}</th>
+                <th className="dep-th--action" />
               </tr>
             </thead>
             <tbody>
@@ -248,83 +247,87 @@ export function DeploymentsPage() {
                 return (
                   <Fragment key={dep.id}>
                     <tr
-                      style={{ borderBottom: "1px solid var(--border)", cursor: "pointer", background: isExpanded ? "rgba(0,0,0,0.02)" : "transparent", transition: "background 100ms ease" }}
+                      className={`dep-tr${isExpanded ? " dep-tr--expanded" : ""}`}
                       onClick={() => void handleToggleExpand(dep)}
+                      tabIndex={0}
+                      role="button"
+                      aria-expanded={isExpanded}
+                      onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); void handleToggleExpand(dep); } }}
                     >
-                      <td style={{ padding: "10px 14px", color: "var(--muted)", fontWeight: 500 }}>{dep.number}</td>
-                      <td style={{ padding: "10px 14px" }}>{formatRelative(dep.createdUtc)}</td>
-                      <td style={{ padding: "10px 14px" }}>
-                        <span style={{ background: "#f1f5f9", borderRadius: 6, padding: "2px 8px", fontSize: "0.75rem", fontWeight: 600, color: "#475569" }}>
+                      <td className="dep-td dep-td--num">{dep.number}</td>
+                      <td className="dep-td">{formatRelative(dep.createdUtc)}</td>
+                      <td className="dep-td">
+                        <span className="dep-method-badge">
                           {methodLabel(dep.method)}
                         </span>
                       </td>
-                      <td style={{ padding: "10px 14px", fontFamily: "monospace", fontSize: "0.78rem", color: "var(--text)" }}>
+                      <td className="dep-td dep-td--mono">
                         {dep.gitBranch ? (
                           <span>
                             {dep.gitBranch}
                             {dep.gitCommitSha && (
-                              <span style={{ color: "var(--muted)" }}>@{dep.gitCommitSha.slice(0, 7)}</span>
+                              <span className="dep-sha-muted">@{dep.gitCommitSha.slice(0, 7)}</span>
                             )}
                           </span>
                         ) : "—"}
                       </td>
-                      <td style={{ padding: "10px 14px", color: "var(--muted)" }}>
+                      <td className="dep-td dep-td--muted">
                         {formatDuration(dep.startedUtc, dep.completedUtc)}
                       </td>
-                      <td style={{ padding: "10px 14px" }}>
-                        <span style={{ background: ss.bg, color: ss.color, borderRadius: 6, padding: "2px 8px", fontSize: "0.75rem", fontWeight: 700, display: "inline-flex", alignItems: "center", gap: 4 }}>
+                      <td className="dep-td">
+                        <span className="dep-status-badge" style={{ background: ss.bg, color: ss.color }}>
                           {(dep.status === "running" || dep.status === "queued") && (
                             <Loader2 size={11} className="al-spin" />
                           )}
                           {dep.status}
                         </span>
                       </td>
-                      <td style={{ padding: "10px 14px" }} onClick={(e) => e.stopPropagation()}>
-                        <div style={{ display: "flex", gap: 4, alignItems: "center", justifyContent: "flex-end" }}>
+                      <td className="dep-td dep-actions-cell" onClick={(e) => e.stopPropagation()}>
+                        <div className="dep-actions-row">
                           {canRollback && (
                             <button
                               type="button"
-                              title={t("Rollback to this deployment", "Rollback to this deployment")}
+                              aria-label={t("Rollback to this deployment", "Rollback to this deployment")}
                               onClick={() => void handleRollback(dep)}
                               disabled={rollingBack !== null}
-                              style={{ border: "1px solid var(--border)", background: "none", borderRadius: 6, padding: "4px 7px", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 4, color: "var(--muted)", fontSize: "0.75rem" }}
+                              className="dep-rollback-btn"
                             >
                               {rollingBack === dep.id
                                 ? <Loader2 size={11} className="al-spin" />
                                 : <RotateCcw size={11} />}
                             </button>
                           )}
-                          <span style={{ color: "var(--muted)", display: "grid", placeItems: "center" }}>
+                          <span className="dep-expand-icon">
                             {isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
                           </span>
                         </div>
                       </td>
                     </tr>
                     {isExpanded && (
-                      <tr style={{ borderBottom: "1px solid var(--border)", background: "rgba(0,0,0,0.015)" }}>
-                        <td colSpan={7} style={{ padding: "0 14px 14px 14px" }}>
+                      <tr className="dep-expanded-tr">
+                        <td colSpan={7} className="dep-expanded-td">
                           {dep.gitCommitMessage && (
-                            <p style={{ margin: "10px 0 6px 0", fontSize: "0.82rem" }}>
-                              <span style={{ color: "var(--muted)" }}>Commit: </span>
+                            <p className="dep-commit-msg">
+                              <span className="dep-commit-label">Commit: </span>
                               <strong>{dep.gitCommitMessage}</strong>
                             </p>
                           )}
                           {dep.error && (
-                            <div className="inline-message inline-message--error" style={{ margin: "10px 0 8px 0" }}>
+                            <div className="inline-message inline-message--error dep-error-msg">
                               {dep.error}
                             </div>
                           )}
                           {loadingLog ? (
-                            <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "12px 0", color: "var(--muted)" }}>
+                            <div className="dep-log-loading">
                               <Loader2 size={13} className="al-spin" />
-                              <span style={{ fontSize: "0.82rem" }}>{t("Loading log…", "Loading log…")}</span>
+                              <span className="dep-log-loading-text">{t("Loading log…", "Loading log…")}</span>
                             </div>
                           ) : expandedLog ? (
-                            <pre style={{ margin: "10px 0 0 0", background: "#0f172a", color: "#94a3b8", borderRadius: 10, padding: "12px 14px", fontFamily: "monospace", fontSize: "0.73rem", maxHeight: 280, overflowY: "auto", whiteSpace: "pre-wrap", lineHeight: 1.5 }}>
+                            <pre className="dep-log-pre">
                               {expandedLog}
                             </pre>
                           ) : (
-                            <p style={{ margin: "10px 0 0 0", fontSize: "0.82rem", color: "var(--muted)" }}>
+                            <p className="dep-no-log">
                               {t("No log available.", "No log available.")}
                             </p>
                           )}

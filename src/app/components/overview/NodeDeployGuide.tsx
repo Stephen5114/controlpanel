@@ -56,11 +56,11 @@ export function NodeDeployGuide() {
   } as React.CSSProperties;
 
   return (
-    <div className="ndg" style={ndgStyle}>
+    <div className="ndg ndg-wrapper" style={ndgStyle}>
       <div className="ndg__tabs" role="tablist">
         {tabs.map((label, i) => (
           <button key={i} type="button" role="tab" aria-selected={step === i}
-            className={`ndg__tab ${step === i ? "ndg__tab--active" : ""}`}
+            className={`ndg__tab ${step === i ? "ndg__tab--active ndg-tab--active" : ""}`}
             style={step === i ? { color: infos[i].accent, borderBottomColor: infos[i].accent } : undefined}
             onClick={() => setStep(i)}>
             {label}
@@ -150,7 +150,7 @@ export function NodeDeployGuide() {
           )}
         </div>
         <div className="ndg__info">
-          <strong className="ndg__info-title" style={{ color: infos[step].accent }}>{infos[step].title}</strong>
+          <strong className="ndg__info-title ndg-info-title" style={{ color: infos[step].accent }}>{infos[step].title}</strong>
           <ul className="ndg__bullets">
             {infos[step].bullets.map((b, i) => (
               <li key={i} className="ndg__bullet" style={{ animationDelay: `${i * 0.1}s` }}>{b}</li>
@@ -159,17 +159,18 @@ export function NodeDeployGuide() {
         </div>
       </div>
       <div className="ndg__track">
-        <div className="ndg__bar" key={`bar-${step}`} style={{ background: infos[step].accent, animationPlayState: isPaused ? "paused" : "running" }} />
+        <div className="ndg__bar ndg-progress-bar" key={`bar-${step}`} style={{ background: infos[step].accent, animationPlayState: isPaused ? "paused" : "running" }} />
       </div>
-      <div className="ndg__dots" style={{ alignItems: "center" }}>
+      <div className="ndg__dots ndg-dots-wrap">
         {[0, 1, 2].map((i) => (
-          <button key={i} type="button" className={`ndg__dot ${step === i ? "ndg__dot--active" : ""}`}
+          <button key={i} type="button" className={`ndg__dot${step === i ? " ndg__dot--active ndg-dot--active" : ""}`}
+            style={step === i ? { background: infos[step].accent } : undefined}
             style={step === i ? { background: infos[step].accent } : undefined}
             onClick={() => { setStep(i); setIsPaused(true); }} aria-label={`Step ${i + 1}`} />
         ))}
-        <button type="button" className="ndg__pause-btn" onClick={() => setIsPaused(!isPaused)}
+        <button type="button" className="ndg__pause-btn ndg-pause-btn" onClick={() => setIsPaused(!isPaused)}
           aria-label={isPaused ? "Play autoplay" : "Pause autoplay"}
-          style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", background: "none", border: "none", cursor: "pointer", padding: "2px", marginLeft: "6px", color: infos[step].accent, transition: "color 0.3s ease, transform 0.2s ease" }}>
+          style={{ color: infos[step].accent }}>
           {isPaused ? <Play size={10} strokeWidth={3} /> : <Pause size={10} strokeWidth={3} />}
         </button>
       </div>

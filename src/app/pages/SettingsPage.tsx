@@ -114,44 +114,17 @@ export function SettingsPage() {
       </section>
 
       {/* Tabs */}
-      <div
-        style={{
-          display: "flex",
-          gap: "24px",
-          borderBottom: "1px solid var(--border)",
-          marginBottom: "16px"
-        }}
-      >
+      <div className="st-tabs-bar">
         <button
           onClick={() => setActiveTab("profile")}
-          style={{
-            background: "none",
-            border: "none",
-            borderBottom: activeTab === "profile" ? "2px solid var(--primary)" : "2px solid transparent",
-            color: activeTab === "profile" ? "var(--primary)" : "var(--muted)",
-            fontSize: "0.95rem",
-            fontWeight: 700,
-            padding: "12px 4px",
-            cursor: "pointer",
-            transition: "all 150ms ease",
-          }}
+          className={`st-tab-btn${activeTab === "profile" ? " st-tab-btn--active" : ""}`}
           type="button"
         >
           {t("Profile", "Profile")}
         </button>
         <button
           onClick={() => setActiveTab("security")}
-          style={{
-            background: "none",
-            border: "none",
-            borderBottom: activeTab === "security" ? "2px solid var(--primary)" : "2px solid transparent",
-            color: activeTab === "security" ? "var(--primary)" : "var(--muted)",
-            fontSize: "0.95rem",
-            fontWeight: 700,
-            padding: "12px 4px",
-            cursor: "pointer",
-            transition: "all 150ms ease",
-          }}
+          className={`st-tab-btn${activeTab === "security" ? " st-tab-btn--active" : ""}`}
           type="button"
         >
           {t("Security & Password", "Security & Password")}
@@ -159,80 +132,48 @@ export function SettingsPage() {
       </div>
 
       {activeTab === "profile" && (
-        <div style={{ maxWidth: "720px" }}>
-          <article className="card" style={{ background: "var(--surface)" }}>
-            <div className="section-head" style={{ marginBottom: "20px" }}>
+        <div className="st-section-wrap">
+          <article className="card st-card">
+            <div className="section-head st-head-spacer">
               <div>
-                <h3 style={{ fontSize: "1.2rem", fontWeight: 700 }}>{t("Profile Information", "Profile Information")}</h3>
-                <p className="muted" style={{ fontSize: "0.85rem", marginTop: "2px" }}>{t("Your account registration details", "Your account registration details")}</p>
+                <h3 className="st-section-title">{t("Profile Information", "Profile Information")}</h3>
+                <p className="muted st-section-desc">{t("Your account registration details", "Your account registration details")}</p>
               </div>
             </div>
 
-            <div style={{ display: "grid", gap: "12px" }}>
-              <div style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                padding: "14px 18px",
-                borderRadius: "16px",
-                background: "var(--surface-soft)",
-                border: "1px solid var(--border)"
-              }}>
-                <span style={{ display: "flex", alignItems: "center", gap: 12, flex: 1 }}>
-                  <User size={18} style={{ color: "var(--muted)" }} />
-                  <strong style={{ fontWeight: 600, color: "var(--text)" }}>{t("Username", "Username")}</strong>
+            <div className="st-info-grid">
+              <div className="st-info-row">
+                <span className="st-info-label">
+                  <User size={18} className="st-info-icon" />
+                  <strong className="st-info-label-text">{t("Username", "Username")}</strong>
                 </span>
-                <span style={{ fontWeight: 700, color: "var(--text)" }}>{profile?.username || "-"}</span>
+                <span className="st-info-value">{profile?.username || "-"}</span>
               </div>
 
-              <div style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                padding: "14px 18px",
-                borderRadius: "16px",
-                background: "var(--surface-soft)",
-                border: "1px solid var(--border)"
-              }}>
-                <span style={{ display: "flex", alignItems: "center", gap: 12, flex: 1 }}>
-                  <Mail size={18} style={{ color: "var(--muted)" }} />
-                  <strong style={{ fontWeight: 600, color: "var(--text)" }}>{t("Email", "Email")}</strong>
+              <div className="st-info-row">
+                <span className="st-info-label">
+                  <Mail size={18} className="st-info-icon" />
+                  <strong className="st-info-label-text">{t("Email", "Email")}</strong>
                 </span>
-                <span style={{ fontWeight: 700, color: "var(--text)" }}>{profile?.email}</span>
+                <span className="st-info-value">{profile?.email}</span>
               </div>
 
-              <div style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                padding: "14px 18px",
-                borderRadius: "16px",
-                background: "var(--surface-soft)",
-                border: "1px solid var(--border)"
-              }}>
-                <span style={{ display: "flex", alignItems: "center", gap: 12, flex: 1 }}>
-                  <Shield size={18} style={{ color: "var(--muted)" }} />
-                  <strong style={{ fontWeight: 600, color: "var(--text)" }}>{t("Account Status", "Account Status")}</strong>
+              <div className="st-info-row">
+                <span className="st-info-label">
+                  <Shield size={18} className="st-info-icon" />
+                  <strong className="st-info-label-text">{t("Account Status", "Account Status")}</strong>
                 </span>
-                <span className={`badge ${profile?.status === "active" ? "badge--success" : "badge--warning"}`} style={{ padding: "6px 14px" }}>
+                <span className={`badge ${profile?.status === "active" ? "badge--success" : "badge--warning"} st-info-badge`}>
                   {profile?.status === "active" ? t("Active", "Active") : profile?.status}
                 </span>
               </div>
 
-              <div style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                padding: "14px 18px",
-                borderRadius: "16px",
-                background: "var(--surface-soft)",
-                border: "1px solid var(--border)"
-              }}>
-                <span style={{ display: "flex", alignItems: "center", gap: 12, flex: 1 }}>
-                  <Calendar size={18} style={{ color: "var(--muted)" }} />
-                  <strong style={{ fontWeight: 600, color: "var(--text)" }}>{t("Member Since", "Member Since")}</strong>
+              <div className="st-info-row">
+                <span className="st-info-label">
+                  <Calendar size={18} className="st-info-icon" />
+                  <strong className="st-info-label-text">{t("Member Since", "Member Since")}</strong>
                 </span>
-                <span style={{ fontWeight: 700, color: "var(--text)" }}>{formatDate(profile?.createdUtc, t)}</span>
+                <span className="st-info-value">{formatDate(profile?.createdUtc, t)}</span>
               </div>
             </div>
           </article>
@@ -240,17 +181,17 @@ export function SettingsPage() {
       )}
 
       {activeTab === "security" && (
-        <div style={{ maxWidth: "600px", margin: "0 auto", width: "100%" }}>
-          <article className="card" style={{ background: "var(--surface)" }}>
-            <div className="section-head" style={{ marginBottom: "24px" }}>
+        <div className="st-section-wrap--narrow">
+          <article className="card st-card">
+            <div className="section-head st-head-spacer--lg">
               <div>
-                <h3 style={{ fontSize: "1.25rem", fontWeight: 700 }}>{t("Security Settings", "Security Settings")}</h3>
-                <p className="muted" style={{ fontSize: "0.88rem", marginTop: "2px" }}>{t("Update your account security password", "Update your account security password")}</p>
+                <h3 className="st-section-title--lg">{t("Security Settings", "Security Settings")}</h3>
+                <p className="muted st-section-desc--sm">{t("Update your account security password", "Update your account security password")}</p>
               </div>
             </div>
 
-            <form onSubmit={handleChangePassword} className="stack-sm" style={{ display: "grid", gap: "16px" }}>
-              <div style={{ display: "grid", gap: "4px" }}>
+            <form onSubmit={handleChangePassword} className="st-pw-form">
+              <div className="st-pw-field-wrap">
                 <AuthPasswordField
                   label={t("Current Password", "Current Password")}
                   value={currentPassword}
@@ -261,7 +202,7 @@ export function SettingsPage() {
                 />
               </div>
 
-              <div style={{ display: "grid", gap: "4px" }}>
+              <div className="st-pw-field-wrap">
                 <AuthPasswordField
                   label={t("New Password", "New Password")}
                   value={newPassword}
@@ -274,7 +215,7 @@ export function SettingsPage() {
 
               <PasswordRequirements password={newPassword} />
 
-              <div style={{ display: "grid", gap: "4px" }}>
+              <div className="st-pw-field-wrap">
                 <AuthPasswordField
                   label={t("Confirm New Password", "Confirm New Password")}
                   value={confirmPassword}
@@ -286,16 +227,15 @@ export function SettingsPage() {
               </div>
 
               {pwMessage && (
-                <div className={`inline-message ${pwMessage.type === "error" ? "inline-message--error" : "inline-message--success"}`} style={{ marginTop: "8px" }}>
+                <div className={`inline-message ${pwMessage.type === "error" ? "inline-message--error" : "inline-message--success"} st-pw-msg`}>
                   {pwMessage.text}
                 </div>
               )}
 
               <button
                 type="submit"
-                className="primary-button"
+                className="primary-button st-pw-submit-btn"
                 disabled={pwSaving || !currentPassword || !newPassword || !confirmPassword}
-                style={{ marginTop: "12px", display: "flex", gap: "8px", justifyContent: "center" }}
               >
                 {pwSaving ? (
                   <><RefreshCw size={16} className="spin" /> {t("Changing...", "Changing...")}</>

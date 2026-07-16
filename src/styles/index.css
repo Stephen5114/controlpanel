@@ -1490,3 +1490,401 @@ select {
     transform: translateX(0);
   }
 }
+
+/* ── Badge extensions ────────────────────────────── */
+
+.badge--info {
+  background: rgba(37, 99, 235, 0.12);
+  color: var(--primary, #2563eb);
+}
+
+.badge--neutral {
+  background: var(--surface-soft);
+  color: var(--muted);
+}
+
+.badge--compact {
+  padding: 3px 8px;
+  font-size: 0.75rem;
+  border-radius: var(--radius-sm, 8px);
+}
+
+/* ── EmptyState ──────────────────────────────────── */
+
+.empty-state__card {
+  padding: 40px;
+  background: var(--surface, #fff);
+  border-radius: 24px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  text-align: center;
+}
+
+.empty-state--compact .empty-state__card {
+  padding: 24px;
+}
+
+.empty-state__title {
+  margin: 0;
+  font-size: 1.3rem;
+  color: var(--text);
+}
+
+.empty-state__desc {
+  margin: 8px 0 0;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.empty-state__action {
+  margin-top: 20px;
+}
+
+/* ── Table responsive helpers ────────────────────── */
+
+@media (max-width: 1040px) {
+  .th--hide-mobile,
+  .td--hide-mobile {
+    display: none;
+  }
+}
+
+/* ── Stat Card (shared by Dashboard & Billing) ───── */
+
+.stat-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
+}
+
+.stat-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.stat-card__label {
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 500;
+}
+
+.stat-card__value {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin: 6px 0 2px;
+  letter-spacing: -0.02em;
+}
+
+.stat-card__icon-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: var(--bg-muted, #f1f5f9);
+  color: var(--primary-ink, #0f172a);
+  border: 1px solid var(--border);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  flex-shrink: 0;
+}
+
+.stat-card__footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 2px;
+}
+
+.stat-card__action {
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 8px;
+  background: var(--primary-soft);
+  color: var(--primary);
+  text-decoration: none;
+  display: inline-block;
+}
+
+/* ── Project Card (Dashboard subscriptions) ──────── */
+
+.project-card {
+  cursor: pointer;
+  transition: transform 200ms, box-shadow 200ms;
+}
+
+.project-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 32px 64px rgba(43, 73, 125, 0.12);
+}
+
+.project-card__header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.project-card__identity {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.project-card__icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #1e293b, #0f172a);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.project-card__name {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.project-card__plan {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.project-card__meta {
+  display: flex;
+  gap: 16px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.project-card__meta-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ── Subscriptions section ────────────────────────── */
+
+.sub-section__title {
+  margin: 0;
+}
+
+.sub-section__desc {
+  margin: 0;
+}
+
+.sub-sort {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.sub-sort select {
+  min-height: auto;
+  height: 34px;
+  padding: 0 10px;
+  font-size: 0.85rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  cursor: pointer;
+}
+
+/* ── Confirm Renewal Modal ─────────────────────────── */
+
+.confirm-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.confirm-modal {
+  background: white;
+  border-radius: 16px;
+  padding: 32px;
+  max-width: 420px;
+  width: 90%;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.18);
+}
+
+.confirm-modal__title {
+  margin: 0 0 8px;
+  font-size: 1.1rem;
+}
+
+.confirm-modal__body {
+  margin: 0 0 24px;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.confirm-modal__actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+/* ── Billing page extras (complements billing.css) ── */
+
+.billing-new-sub {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.billing-new-sub .primary-button {
+  white-space: nowrap;
+}
+
+.billing-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 20px;
+  padding: 4px;
+  background: var(--surface, #fff);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  width: fit-content;
+}
+
+.billing-tab-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 150ms, color 150ms;
+  white-space: nowrap;
+}
+
+.billing-tab-button.active {
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+
+.billing-subscription-card {
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+}
+
+.billing-subscription-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+
+.billing-list-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 0;
+  border-top: 1px solid var(--border);
+}
+
+.billing-list-row:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.billing-list-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.billing-inline-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.billing-card--outstanding {
+  border-left: 4px solid var(--warning, #e2b93b);
+}
+
+.billing-chip {
+  display: inline-block;
+  padding: 4px 10px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  border-radius: var(--radius-full);
+  background: var(--surface-soft);
+  color: var(--muted);
+}
+
+.billing-ledger-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 0;
+  border-top: 1px solid var(--border);
+}
+
+.billing-ledger-row:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.billing-ledger-values {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.billing-amount--positive { color: var(--success); }
+.billing-amount--negative { color: var(--error); }
+
+.ledger-bal {
+  font-size: 0.75rem;
+}
+
+.empty-panel--compact {
+  padding: 24px 22px;
+  text-align: center;
+}
+
+.field {
+  display: grid;
+  gap: 8px;
+}
+
+.field span {
+  color: var(--muted);
+  font-size: 0.92rem;
+}

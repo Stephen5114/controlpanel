@@ -434,7 +434,7 @@ export function SubscriptionDatabasesPage() {
       {/* ── Notifications ── */}
       {error && <div className="inline-message inline-message--error">{error}</div>}
       {successMessage && <div className="inline-message inline-message--success">{successMessage}</div>}
-      {hasPending && <div className="inline-message"><RefreshCw size={13} style={{ display: "inline", verticalAlign: "middle", marginRight: 6, animation: "spin 1.2s linear infinite" }} />{t("Provisioning in progress — refreshing automatically.", "Provisioning in progress — refreshing automatically.")}</div>}
+      {hasPending && <div className="inline-message"><RefreshCw size={13} className="sdb-spin-icon" />{t("Provisioning in progress — refreshing automatically.", "Provisioning in progress — refreshing automatically.")}</div>}
 
       {/* ── List ── */}
       {loading ? (
@@ -486,7 +486,7 @@ export function SubscriptionDatabasesPage() {
                         className="db2-menu-btn"
                         onClick={() => setExpandedMenuId(isMenuOpen ? null : db.id)}
                         disabled={db.isOptimistic}
-                        title={t("Actions", "Actions")}
+                        aria-label={t("Actions", "Actions")}
                       >
                         <MoreHorizontal size={16} />
                       </button>
@@ -565,7 +565,7 @@ export function SubscriptionDatabasesPage() {
                       type="button"
                       className={`db2-copy-btn ${copiedId === db.id ? "db2-copy-btn--copied" : ""}`}
                       onClick={() => void handleCopy(connStr, db.id)}
-                      title={copiedId === db.id ? t("Copied!", "Copied!") : t("Copy connection string", "Copy connection string")}
+                      aria-label={copiedId === db.id ? t("Copied!", "Copied!") : t("Copy connection string", "Copy connection string")}
                     >
                       {copiedId === db.id ? <><CheckCircle2 size={13} /> {t("Copied", "Copied")}</> : <><Copy size={13} /> {t("Copy", "Copy")}</>}
                     </button>
@@ -587,7 +587,7 @@ export function SubscriptionDatabasesPage() {
                 <h2 className="db2-modal__title">{t("Create Database", "Create Database")}</h2>
                 <p className="db2-modal__sub">{t("Choose an engine, name your database, and set a password.", "Choose an engine, name your database, and set a password.")}</p>
               </div>
-              <button type="button" className="al-modal-close" onClick={() => setIsModalOpen(false)} disabled={submitting}><X size={16} /></button>
+              <button type="button" className="al-modal-close" onClick={() => setIsModalOpen(false)} disabled={submitting} aria-label="Close"><X size={16} /></button>
             </div>
 
             {modalError && <div className="inline-message inline-message--error">{modalError}</div>}
@@ -609,9 +609,9 @@ export function SubscriptionDatabasesPage() {
                         style={{ "--active-bg": eng.bg, "--active-color": eng.color, "--active-glow": eng.glow, "--icon-bg": active ? "#fff" : "#f1f5f9" } as React.CSSProperties}
                       >
                         <div className="al-engine-icon-wrapper">{eng.svg}</div>
-                        <span style={{ fontWeight: 700, fontSize: "0.95rem", color: active ? eng.color : "var(--text)", display: "block", marginBottom: 2 }}>{eng.label}</span>
-                        <span style={{ fontSize: "0.75rem", color: "var(--text-muted)", marginBottom: 8, display: "block" }}>v{eng.version} · Port {eng.port}</span>
-                        <p style={{ margin: 0, fontSize: "0.76rem", color: "var(--text-muted)", lineHeight: 1.4 }}>{eng.desc}</p>
+                        <span className="sdb-eng-name" style={{ color: active ? eng.color : "var(--text)" }}>{eng.label}</span>
+                        <span className="sdb-eng-version">v{eng.version} · Port {eng.port}</span>
+                        <p className="sdb-eng-desc">{eng.desc}</p>
                         {active && <div className="al-engine-badge-selected" style={{ "--active-color": eng.color } as any}>✓ {t("Selected", "Selected")}</div>}
                       </button>
                     );
@@ -620,7 +620,7 @@ export function SubscriptionDatabasesPage() {
               </div>
 
               {/* Name */}
-              <label style={{ display: "grid", gap: "6px" }}>
+              <label className="sdb-form-field">
                 <span className="db2-form-label">{t("Database Name", "Database Name")}</span>
                 <div className="al-input-group" style={{ "--focused-color": newEngine === "postgres" ? "#336791" : "#00758f", "--focused-glow": newEngine === "postgres" ? "rgba(51,103,145,0.15)" : "rgba(0,117,143,0.15)" } as any}>
                   {guessedPrefix && <span className="al-input-prefix">{guessedPrefix}</span>}
@@ -635,7 +635,7 @@ export function SubscriptionDatabasesPage() {
               </label>
 
               {/* Password */}
-              <label style={{ display: "grid", gap: "6px" }}>
+              <label className="sdb-form-field">
                 <span className="db2-form-label">{t("Password", "Password")}</span>
                 <div className="al-password-wrapper" style={{ "--focused-color": newEngine === "postgres" ? "#336791" : "#00758f", "--focused-glow": newEngine === "postgres" ? "rgba(51,103,145,0.15)" : "rgba(0,117,143,0.15)" } as any}>
                   <input type={showPassword ? "text" : "password"} value={newPassword} onChange={e => setNewPassword(e.target.value)} disabled={submitting} required minLength={12} className="al-password-input" />
@@ -649,10 +649,10 @@ export function SubscriptionDatabasesPage() {
               </label>
 
               {/* Storage */}
-              <div style={{ display: "grid", gap: "6px" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <span className="db2-form-label" style={{ margin: 0 }}>{t("Storage", "Storage")}</span>
-                  <span style={{ fontSize: "0.9rem", fontWeight: 700, color: newEngine === "postgres" ? "#336791" : "#00758f" }}>{newSpaceMb} MB</span>
+              <div className="sdb-form-field">
+                <div className="sdb-storage-row">
+                  <span className="db2-form-label sdb-storage-label">{t("Storage", "Storage")}</span>
+                  <span className="sdb-storage-value" style={{ color: newEngine === "postgres" ? "#336791" : "#00758f" }}>{newSpaceMb} MB</span>
                 </div>
                 {planDiskLimitMb > 0 && (
                   <div className="al-disk-bar">
@@ -662,18 +662,18 @@ export function SubscriptionDatabasesPage() {
                   </div>
                 )}
                 <input type="range" min={128} max={maxSpaceMb} step={128} value={Math.min(Number(newSpaceMb), maxSpaceMb)} onChange={e => setNewSpaceMb(e.target.value)} disabled={submitting} className="al-slider" style={{ "--slider-color": newEngine === "postgres" ? "#336791" : "#00758f" } as any} />
-                <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.75rem", color: "var(--text-muted)" }}>
+                <div className="sdb-range-labels">
                   <span>128 MB</span>
                   <span>
                     {maxSpaceMb >= 1024 ? `${(maxSpaceMb / 1024).toFixed(maxSpaceMb % 1024 === 0 ? 0 : 1)} GB` : `${maxSpaceMb} MB`}
-                    {planDiskLimitMb > 0 && <span style={{ marginLeft: 4 }}>{t("remaining", "remaining")}</span>}
+                    {planDiskLimitMb > 0 && <span className="sdb-range-remaining">{t("remaining", "remaining")}</span>}
                   </span>
                 </div>
               </div>
 
               <div className="db2-modal__footer">
                 <button type="button" className="al-hero__btn al-hero__btn--secondary" onClick={() => setIsModalOpen(false)} disabled={submitting}>{t("Cancel", "Cancel")}</button>
-                <button type="submit" className="primary-button" style={{ background: newEngine === "postgres" ? "#336791" : "#00758f" }} disabled={submitting}>
+                <button type="submit" className="primary-button sdb-submit-btn" style={{ background: newEngine === "postgres" ? "#336791" : "#00758f" }} disabled={submitting}>
                   {submitting ? t("Creating...", "Creating...") : `${t("Create", "Create")} ${engineLabel(newEngine)}`}
                 </button>
               </div>
@@ -685,37 +685,37 @@ export function SubscriptionDatabasesPage() {
       {/* ── Change Password Modal ── */}
       {passwordModalDatabase && (
         <div className="db2-overlay" onClick={() => !rotatingPassword && setPasswordModalDatabase(null)}>
-          <div className="db2-modal" style={{ maxWidth: 460 }} onClick={e => e.stopPropagation()}>
+          <div className="db2-modal sdb-modal--narrow" onClick={e => e.stopPropagation()}>
             <div className="db2-modal__head">
               <div>
                 <h2 className="db2-modal__title">{t("Change Password", "Change Password")}</h2>
-                <p className="db2-modal__sub" style={{ margin: 0 }}>
-                  <span className="db2-card__engine-tag" style={{ background: `${engineColor(passwordModalDatabase.engine)}12`, color: engineColor(passwordModalDatabase.engine), fontSize: "0.75rem", padding: "2px 8px", borderRadius: 999, fontWeight: 600, display: "inline-block" }}>
+                <p className="db2-modal__sub sdb-modal-desc">
+                  <span className="sdb-engine-chip" style={{ background: `${engineColor(passwordModalDatabase.engine)}12`, color: engineColor(passwordModalDatabase.engine) }}>
                     {engineLabel(passwordModalDatabase.engine)}
                   </span>
                   {" "}{passwordModalDatabase.databaseName}
                 </p>
               </div>
-              <button type="button" className="al-modal-close" onClick={() => setPasswordModalDatabase(null)} disabled={rotatingPassword}><X size={16} /></button>
+              <button type="button" className="al-modal-close" onClick={() => setPasswordModalDatabase(null)} disabled={rotatingPassword} aria-label="Close"><X size={16} /></button>
             </div>
-            <p className="muted" style={{ fontSize: "0.82rem", lineHeight: 1.5, marginTop: 0 }}>{t("The new password will be applied on the database server. Your connection string updates automatically once complete.", "The new password will be applied on the database server. Your connection string updates automatically once complete.")}</p>
+            <p className="muted sdb-pw-desc">{t("The new password will be applied on the database server. Your connection string updates automatically once complete.", "The new password will be applied on the database server. Your connection string updates automatically once complete.")}</p>
             {rotatePasswordError && <div className="inline-message inline-message--error">{rotatePasswordError}</div>}
             <form className="stack-sm" onSubmit={e => void handleRotatePassword(e)}>
-              <label style={{ display: "grid", gap: "6px" }}>
+              <label className="sdb-form-field">
                 <span className="db2-form-label">{t("New Password", "New Password")}</span>
                 <div className="al-password-wrapper" style={{ "--focused-color": passwordModalDatabase.engine === "postgres" ? "#336791" : "#00758f", "--focused-glow": passwordModalDatabase.engine === "postgres" ? "rgba(51,103,145,0.15)" : "rgba(0,117,143,0.15)" } as any}>
                   <input type={showRotatePassword ? "text" : "password"} value={rotatePasswordValue} onChange={e => setRotatePasswordValue(e.target.value)} disabled={rotatingPassword} required minLength={12} className="al-password-input" />
                   <div className="al-password-actions">
-                    <button type="button" className="al-password-action-btn" onClick={() => setShowRotatePassword(!showRotatePassword)} disabled={rotatingPassword}>{showRotatePassword ? <EyeOff size={15} /> : <Eye size={15} />}</button>
-                    <button type="button" className="al-password-action-btn" onClick={() => void handleCopyPassword(rotatePasswordValue, setCopiedRotatePassword)} disabled={rotatingPassword}>{copiedRotatePassword ? <CheckCircle2 size={15} style={{ color: "#10b981" }} /> : <Copy size={15} />}</button>
-                    <button type="button" className="al-password-action-btn" onClick={() => setRotatePasswordValue(generateStrongDatabasePassword())} disabled={rotatingPassword}><Sparkles size={15} /></button>
+                    <button type="button" className="al-password-action-btn" onClick={() => setShowRotatePassword(!showRotatePassword)} disabled={rotatingPassword} aria-label={showRotatePassword ? "Hide password" : "Show password"}>{showRotatePassword ? <EyeOff size={15} /> : <Eye size={15} />}</button>
+                    <button type="button" className="al-password-action-btn" onClick={() => void handleCopyPassword(rotatePasswordValue, setCopiedRotatePassword)} disabled={rotatingPassword} aria-label={copiedRotatePassword ? "Copied" : "Copy password"}>{copiedRotatePassword ? <CheckCircle2 size={15} style={{ color: "#10b981" }} /> : <Copy size={15} />}</button>
+                    <button type="button" className="al-password-action-btn" onClick={() => setRotatePasswordValue(generateStrongDatabasePassword())} disabled={rotatingPassword} aria-label="Regenerate password"><Sparkles size={15} /></button>
                   </div>
                 </div>
                 <span className="db2-form-hint">{t("Min 12 chars — uppercase, lowercase, numbers, and symbols.", "Min 12 chars — uppercase, lowercase, numbers, and symbols.")}</span>
               </label>
               <div className="db2-modal__footer">
                 <button type="button" className="al-hero__btn al-hero__btn--secondary" onClick={() => setPasswordModalDatabase(null)} disabled={rotatingPassword}>{t("Cancel", "Cancel")}</button>
-                <button type="submit" className="primary-button" style={{ background: passwordModalDatabase.engine === "postgres" ? "#336791" : "#00758f" }} disabled={rotatingPassword}>
+                <button type="submit" className="primary-button sdb-submit-btn" style={{ background: passwordModalDatabase.engine === "postgres" ? "#336791" : "#00758f" }} disabled={rotatingPassword}>
                   {rotatingPassword ? t("Saving...", "Saving...") : t("Save Password", "Save Password")}
                 </button>
               </div>

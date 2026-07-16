@@ -286,7 +286,7 @@ export function BuySubscriptionPage() {
 
   if (productType === "vps") {
     return (
-      <div className="stack" style={{ maxWidth: "1180px", margin: "0 auto" }}>
+      <div className="stack bs-wrapper--wide">
         {productSwitcher}
         <VpsPage />
       </div>
@@ -304,7 +304,7 @@ export function BuySubscriptionPage() {
   const noCatalog = !catalog || catalog.plans.length === 0 || catalog.regions.length === 0;
 
   return (
-    <div className="stack" style={{ maxWidth: "960px", margin: "0 auto" }}>
+    <div className="stack bs-wrapper">
       {productSwitcher}
       <section className="page-hero">
         <p className="eyebrow">{t("Store", "Store")}</p>
@@ -325,26 +325,17 @@ export function BuySubscriptionPage() {
           {/* Step 1 — Region (hidden in upgrade mode — locked to current region) */}
           {!isUpgradeMode ? <div className="card stack-sm">
             <div className="section-head">
-              <h3 style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <h3 className="bs-head-icon">
                 <Globe size={18} /> {t("1. Select Region", "1. Select Region")}
               </h3>
             </div>
-            <div className="two-up-grid" style={{ marginTop: "12px" }}>
+            <div className="two-up-grid bs-region-grid">
               {catalog!.regions.map((region) => {
                 const active = selectedRegion === region.slug;
                 return (
                   <label
                     key={region.slug}
-                    style={{
-                      display: "flex",
-                      alignItems: "flex-start",
-                      gap: "12px",
-                      padding: "16px",
-                      cursor: "pointer",
-                      border: active ? "2px solid var(--primary)" : "1px solid var(--border)",
-                      borderRadius: "16px",
-                      background: active ? "var(--primary-soft)" : "transparent",
-                    }}
+                    className={`bs-region-card${active ? " bs-region-card--active" : ""}`}
                   >
                     <input
                       type="radio"
@@ -352,11 +343,11 @@ export function BuySubscriptionPage() {
                       value={region.slug}
                       checked={active}
                       onChange={(event) => setSelectedRegion(event.target.value)}
-                      style={{ marginTop: "4px" }}
+                      className="bs-region-card__radio"
                     />
                     <div>
-                      <h4 style={{ margin: 0 }}>{region.name}</h4>
-                      <p className="muted" style={{ margin: "4px 0 0", fontSize: "0.85rem" }}>
+                      <h4 className="bs-region-card__name">{region.name}</h4>
+                      <p className="muted bs-region-card__desc">
                         {t("{region} · {count} node(s) available", "{region} · {count} node(s) available").replace("{region}", region.slug.toUpperCase()).replace("{count}", String(region.availableNodeCount))}
                       </p>
                     </div>
@@ -368,21 +359,15 @@ export function BuySubscriptionPage() {
 
           {/* Step 2 — Plan comparison cards */}
           <div
-            className="card stack-sm"
-            style={{ opacity: selectedRegion ? 1 : 0.5, pointerEvents: selectedRegion ? "auto" : "none" }}
+            className={`card stack-sm bs-plans-wrapper${!selectedRegion ? " bs-plans-wrapper--dimmed" : ""}`}
           >
             <div className="section-head">
-              <h3 style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <h3 className="bs-head-icon">
                 <Server size={18} /> {t("2. Select Plan", "2. Select Plan")}
               </h3>
             </div>
             <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-                gap: "14px",
-                marginTop: "12px",
-              }}
+              className="bs-plans-grid"
             >
               {sortedPlans.map((plan) => {
                 const isCurrent = isUpgradeMode && plan.slug === upgradePlanSlug;
@@ -404,15 +389,15 @@ export function BuySubscriptionPage() {
           </div>
 
           {/* Step 3 — Coupon */}
-          <div className="card stack-sm" style={{ opacity: selectedPlanDetails ? 1 : 0.5, pointerEvents: selectedPlanDetails ? "auto" : "none" }}>
+          <div className={`card stack-sm bs-coupon-wrapper${!selectedPlanDetails ? " bs-coupon-wrapper--dimmed" : ""}`}>
             <div className="section-head">
-              <h3 style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <h3 className="bs-head-icon">
                 <Tag size={18} /> {t("3. Coupon (optional)", "3. Coupon (optional)")}
               </h3>
             </div>
             {appliedCoupon ? (
-              <div className="billing-list-row" style={{ marginTop: "12px" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <div className="billing-list-row bs-coupon-applied-mt">
+                <div className="bs-coupon-applied-row">
                   <Check size={16} color="var(--primary)" />
                   <strong>{appliedCoupon.code}</strong>
                   <span className="muted">−{formatCurrency(discount, currency)}</span>
@@ -422,12 +407,12 @@ export function BuySubscriptionPage() {
                 </button>
               </div>
             ) : (
-              <div style={{ display: "flex", gap: "10px", marginTop: "12px", flexWrap: "wrap" }}>
+              <div className="bs-coupon-input-row">
                 <input
                   value={couponInput}
                   onChange={(event) => setCouponInput(event.target.value.toUpperCase())}
                   placeholder={t("Enter coupon code", "Enter coupon code")}
-                  style={{ flex: "1 1 200px" }}
+                  className="bs-coupon-input"
                   onKeyDown={(event) => {
                     if (event.key === "Enter") {
                       event.preventDefault();
@@ -445,9 +430,9 @@ export function BuySubscriptionPage() {
                 </button>
               </div>
             )}
-            {couponError ? <div className="inline-message inline-message--error" style={{ marginTop: "10px" }}>{couponError}</div> : null}
+            {couponError ? <div className="inline-message inline-message--error bs-coupon-msg">{couponError}</div> : null}
             {referralDiscountActive && selectedPlanDetails ? (
-              <div className="inline-message inline-message--success" style={{ marginTop: "10px", display: "flex", alignItems: "center", gap: "8px" }}>
+              <div className="inline-message inline-message--success bs-coupon-msg bs-referral-msg">
                 <Gift size={16} />
                 {t("Referral reward: {percent}% off your first order will be applied automatically at checkout.", "Referral reward: {percent}% off your first order will be applied automatically at checkout.")
                   .replace("{percent}", String(referralDiscount?.percent ?? 0))}
@@ -462,30 +447,29 @@ export function BuySubscriptionPage() {
             </div>
 
             {isUpgradeMode && upgradePreview?.success && selectedPlanDetails ? (
-              <div className="stack-sm" style={{ marginTop: "8px" }}>
+              <div className="stack-sm bs-summary-section">
                 <SummaryRow label={t("Current: {name}", "Current: {name}").replace("{name}", upgradePreview.oldPlanName)} value={`${formatCurrency(upgradePreview.oldMonthlyPrice, currency)}/mo`} />
                 <SummaryRow label={t("New: {name}", "New: {name}").replace("{name}", upgradePreview.newPlanName)} value={`${formatCurrency(upgradePreview.newMonthlyPrice, currency)}/mo`} />
                 <SummaryRow label={t("Remaining in cycle", "Remaining in cycle")} value={t("{remaining} of {total} days", "{remaining} of {total} days").replace("{remaining}", String(upgradePreview.remainingDays)).replace("{total}", String(upgradePreview.totalDays))} />
                 <SummaryRow label={t("Credit for unused {name}", "Credit for unused {name}").replace("{name}", upgradePreview.oldPlanName)} value={`−${formatCurrency(upgradePreview.prorationCredit, currency)}`} tone="positive" />
                 <SummaryRow label={t("{name} for {days} days", "{name} for {days} days").replace("{name}", upgradePreview.newPlanName).replace("{days}", String(upgradePreview.remainingDays))} value={formatCurrency(upgradePreview.prorationCharge, currency)} />
-                <div style={{ height: 1, background: "var(--border)", margin: "4px 0" }} />
+                <div className="bs-divider" />
                 <SummaryRow label={t("Upgrade cost", "Upgrade cost")} value={formatCurrency(upgradePreview.upgradeTotal, currency)} strong />
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "10px", marginTop: "4px" }}>
-                  <span className="muted" style={{ fontSize: "0.9rem" }}>
+                <div className="bs-payment-info">
+                  <span className="muted bs-payment-info__text">
                     {willPayByCard ? t("Paid by card", "Paid by card") : t("Paid from account balance", "Paid from account balance")}
                   </span>
                   <span className={`badge ${willPayByCard ? "" : "badge--success"}`}>
                     {willPayByCard ? t("Card checkout", "Card checkout") : t("Account balance", "Account balance")}
                   </span>
                 </div>
-                <p className="muted" style={{ fontSize: "0.85rem", margin: 0 }}>
+                <p className="muted bs-balance-note">
                   {t("Your next renewal date stays the same. Future renewals will be at the new plan rate.", "Your next renewal date stays the same. Future renewals will be at the new plan rate.")}
-                </p>
               </div>
             ) : isUpgradeMode && selectedPlan && !upgradePreview?.success ? (
-              <p className="muted" style={{ marginTop: "8px" }}>{upgradePreview?.message || t("Select a plan above to see upgrade pricing.", "Select a plan above to see upgrade pricing.")}</p>
+              <p className="muted bs-placeholder-text">{upgradePreview?.message || t("Select a plan above to see upgrade pricing.", "Select a plan above to see upgrade pricing.")}</p>
             ) : selectedPlanDetails && !isUpgradeMode ? (
-              <div className="stack-sm" style={{ marginTop: "8px" }}>
+              <div className="stack-sm bs-summary-section">
                 <SummaryRow label={t("{name} · monthly", "{name} · monthly").replace("{name}", selectedPlanDetails.name)} value={formatCurrency(selectedPlanDetails.monthlyPrice, currency)} />
                 {discount > 0 ? (
                   <SummaryRow
@@ -496,30 +480,29 @@ export function BuySubscriptionPage() {
                     tone="positive"
                   />
                 ) : null}
-                <div style={{ height: 1, background: "var(--border)", margin: "4px 0" }} />
+                <div className="bs-divider" />
                 <SummaryRow label={t("Total due today", "Total due today")} value={formatCurrency(total, currency)} strong />
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "10px", marginTop: "4px" }}>
-                  <span className="muted" style={{ fontSize: "0.9rem" }}>
+                <div className="bs-payment-info">
+                  <span className="muted bs-payment-info__text">
                     {willPayByCard ? t("Paid by card · saved for automatic renewals", "Paid by card · saved for automatic renewals") : t("Paid from account balance", "Paid from account balance")}
                   </span>
                   <span className={`badge ${willPayByCard ? "" : "badge--success"}`}>
                     {willPayByCard ? t("Card checkout", "Card checkout") : t("Account balance", "Account balance")}
                   </span>
                 </div>
-                <p className="muted" style={{ fontSize: "0.85rem", margin: 0 }}>
+                <p className="muted bs-balance-note">
                   {t("Available balance: {balance} · Renews monthly at {total}.", "Available balance: {balance} · Renews monthly at {total}.").replace("{balance}", formatCurrency(availableBalance, currency)).replace("{total}", formatCurrency(total, currency))}
                 </p>
               </div>
             ) : (
-              <p className="muted" style={{ marginTop: "8px" }}>{t("Choose a plan to see your total.", "Choose a plan to see your total.")}</p>
+              <p className="muted bs-placeholder-text">{t("Choose a plan to see your total.", "Choose a plan to see your total.")}</p>
             )}
 
-            <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "12px" }}>
+            <div className="bs-btn-row">
               <button
                 type="submit"
-                className="primary-button"
+                className="primary-button bs-submit-btn"
                 disabled={!canPurchase || isSubmitting}
-                style={{ padding: "0 32px", fontSize: "1.05rem" }}
               >
                 {isSubmitting
                   ? t("Processing...", "Processing...")
@@ -602,17 +585,7 @@ function PlanCard({
   const { t } = useLocalization();
   return (
     <label
-      style={{
-        position: "relative",
-        display: "block",
-        padding: "18px",
-        opacity: disabled ? 0.5 : 1,
-        pointerEvents: disabled ? "none" : "auto",
-        cursor: "pointer",
-        border: selected ? "2px solid var(--primary)" : "1px solid var(--border)",
-        borderRadius: "18px",
-        background: selected ? "var(--primary-soft)" : "transparent",
-      }}
+      className={`bs-plan-card${selected ? " bs-plan-card--selected" : ""}${disabled ? " bs-plan-card--disabled" : ""}`}
     >
       <input
         type="radio"
@@ -620,35 +593,29 @@ function PlanCard({
         value={plan.slug}
         checked={selected}
         onChange={onSelect}
-        style={{ position: "absolute", opacity: 0, pointerEvents: "none" }}
+        className="bs-plan-card__radio"
       />
       {isCurrent ? (
-        <span
-          className="badge"
-          style={{ position: "absolute", top: "-10px", right: "14px" }}
-        >
+        <span className="badge bs-plan-card__badge">
           {t("Current plan", "Current plan")}
         </span>
       ) : popular ? (
-        <span
-          className="badge badge--success"
-          style={{ position: "absolute", top: "-10px", right: "14px", display: "inline-flex", alignItems: "center", gap: "4px" }}
-        >
+        <span className="badge badge--success bs-plan-card__badge">
           <Sparkles size={12} /> {t("Most popular", "Most popular")}
         </span>
       ) : null}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "8px" }}>
-        <h4 style={{ margin: 0 }}>{plan.name}</h4>
+      <div className="bs-plan-card__header">
+        <h4 className="bs-plan-card__name">{plan.name}</h4>
         {selected ? <Check size={18} color="var(--primary)" /> : null}
       </div>
-      <div style={{ marginTop: "6px", color: "var(--primary)", fontWeight: 700, fontSize: "1.35rem" }}>
+      <div className="bs-plan-card__price">
         {formatCurrency(plan.monthlyPrice, currency)}
-        <span style={{ fontSize: "0.8rem", color: "var(--muted)", fontWeight: 400 }}> /mo</span>
+        <span className="bs-plan-card__price-unit"> /mo</span>
       </div>
       {plan.description ? (
-        <p className="muted" style={{ margin: "6px 0 0", fontSize: "0.85rem" }}>{t(plan.description, plan.description)}</p>
+        <p className="muted bs-plan-card__desc">{t(plan.description, plan.description)}</p>
       ) : null}
-      <div className="stack-sm" style={{ marginTop: "12px", gap: "6px" }}>
+      <div className="stack-sm bs-plan-card__specs">
         <SpecRow icon={<Layers size={14} />} text={t("Up to {count} site(s)", "Up to {count} site(s)").replace("{count}", String(plan.recommendedSiteLimit))} />
         <SpecRow icon={<HardDrive size={14} />} text={t("{size} disk", "{size} disk").replace("{size}", formatStorage(plan.diskLimitMb))} />
         <SpecRow icon={<FileText size={14} />} text={t("{count} files", "{count} files").replace("{count}", plan.fileLimitCount.toLocaleString(getActiveLocale()))} />
@@ -661,8 +628,8 @@ function PlanCard({
 
 function SpecRow({ icon, text }: { icon: React.ReactNode; text: string }) {
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "0.85rem", color: "var(--text)" }}>
-      <span style={{ color: "var(--primary)", display: "inline-flex" }}>{icon}</span>
+    <div className="bs-spec-row">
+      <span className="bs-spec-row__icon">{icon}</span>
       <span>{text}</span>
     </div>
   );
@@ -680,17 +647,11 @@ function SummaryRow({
   tone?: "positive";
 }) {
   return (
-    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "10px" }}>
-      <span className={strong ? "" : "muted"} style={{ fontSize: strong ? "1rem" : "0.9rem", fontWeight: strong ? 700 : 400 }}>
+    <div className="bs-summary-row">
+      <span className={strong ? "bs-summary-row__label--strong" : "muted bs-summary-row__label"}>
         {label}
       </span>
-      <span
-        style={{
-          fontSize: strong ? "1.15rem" : "0.95rem",
-          fontWeight: strong ? 700 : 500,
-          color: tone === "positive" ? "var(--primary)" : strong ? "var(--primary-ink)" : "var(--text)",
-        }}
-      >
+      <span className={`bs-summary-row__value${strong ? " bs-summary-row__value--strong" : ""}${tone === "positive" ? " bs-summary-row__value--positive" : ""}`}>
         {value}
       </span>
     </div>

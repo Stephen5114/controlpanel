@@ -1,0 +1,87 @@
+/* ── Subscription Databases Page (overrides for inline styles) ── */
+
+.sdb-spin-icon {
+  display: inline;
+  vertical-align: middle;
+  margin-right: 6px;
+  animation: spin 1.2s linear infinite;
+}
+
+/* Engine card overrides */
+.sdb-eng-name {
+  font-weight: 700;
+  font-size: 0.95rem;
+  display: block;
+  margin-bottom: 2px;
+}
+
+.sdb-eng-version {
+  font-size: 0.75rem;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.sdb-eng-desc {
+  margin: 0;
+  font-size: 0.76rem;
+  line-height: 1.4;
+}
+
+/* Form label */
+.sdb-form-field {
+  display: grid;
+  gap: 6px;
+}
+
+.sdb-storage-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.sdb-storage-label {
+  margin: 0;
+}
+
+.sdb-storage-value {
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.sdb-range-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+}
+
+.sdb-range-remaining {
+  margin-left: 4px;
+}
+
+/* Submit button */
+.sdb-submit-btn {
+  border: none;
+}
+
+/* Change password modal */
+.sdb-modal--narrow {
+  max-width: 460px;
+}
+
+.sdb-modal-desc {
+  margin: 0;
+}
+
+.sdb-engine-chip {
+  font-size: 0.75rem;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-weight: 600;
+  display: inline-block;
+}
+
+.sdb-pw-desc {
+  font-size: 0.82rem;
+  line-height: 1.5;
+  margin-top: 0;
+}

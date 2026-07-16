@@ -1,0 +1,795 @@
+/* ── Publish Dialog ────────────────────────────────── */
+
+.pd-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(15, 23, 42, 0.72);
+  backdrop-filter: blur(6px);
+}
+
+.pd-modal {
+  width: min(640px, 100%);
+  padding: 28px;
+}
+
+.pd-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.pd-title {
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.35rem;
+  font-weight: 700;
+}
+
+.pd-title-icon {
+  color: var(--primary);
+}
+
+.pd-domain {
+  margin: 4px 0 0 0;
+  font-size: 0.85rem;
+}
+
+.pd-close-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--muted);
+  padding: 8px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  transition: all 150ms ease;
+  flex-shrink: 0;
+}
+
+.pd-close-btn:hover {
+  background: var(--surface-soft);
+  color: var(--text);
+}
+
+/* ── Status banners ────────────────────────────────── */
+
+.pd-status-spacer {
+  margin-bottom: 16px;
+}
+
+.pd-progress-card {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 16px;
+}
+
+.pd-progress-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  color: #1e40af;
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.pd-progress-bar-track {
+  height: 6px;
+  border-radius: 999px;
+  background: #bfdbfe;
+  overflow: hidden;
+}
+
+.pd-progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #2563eb, #60a5fa);
+  border-radius: 999px;
+  transition: width 0.8s ease;
+}
+
+.pd-progress-steps {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 6px;
+  font-size: 0.68rem;
+  color: #3b82f6;
+}
+
+.pd-progress-step {
+  font-weight: 400;
+  opacity: 0.45;
+}
+
+.pd-progress-step--done {
+  font-weight: 700;
+  opacity: 1;
+}
+
+.pd-publish-success {
+  background: #ecfdf5;
+  color: #065f46;
+  border-color: #a7f3d0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.pd-open-site-link {
+  color: #065f46;
+  font-weight: 600;
+  text-decoration: underline;
+  white-space: nowrap;
+}
+
+.pd-publish-info {
+  background: #ecfdf5;
+  color: #065f46;
+  border-color: #a7f3d0;
+  margin-bottom: 16px;
+}
+
+/* ── Stack selection ───────────────────────────────── */
+
+.pd-stack-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 12px;
+}
+
+.pd-stack-card {
+  text-align: left;
+  padding: 16px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: all 150ms ease;
+  box-shadow: none;
+  font-family: inherit;
+  width: 100%;
+}
+
+.pd-stack-card:hover:not(:disabled) {
+  border-color: var(--primary);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.08);
+}
+
+.pd-stack-card--selected {
+  border: 2.5px solid var(--primary);
+  background: rgba(37, 99, 235, 0.03);
+  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.06);
+}
+
+.pd-stack-card:disabled {
+  background: #f8fafc;
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.pd-stack-card-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+.pd-stack-card-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: #e2e8f0;
+  color: var(--muted);
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.pd-stack-card-icon--selected {
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+
+.pd-stack-card-check {
+  margin-left: auto;
+  color: var(--primary);
+  flex-shrink: 0;
+}
+
+.pd-stack-card-name {
+  font-size: 0.95rem;
+  color: var(--text);
+  margin-top: 6px;
+}
+
+.pd-stack-card-desc {
+  font-size: 0.78rem;
+  color: var(--muted);
+  line-height: 1.3;
+}
+
+.pd-stack-card-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--muted);
+  background: #e2e8f0;
+  padding: 3px 8px;
+  border-radius: 999px;
+  display: inline-block;
+  width: fit-content;
+  margin-top: 4px;
+}
+
+/* ── Form fields ───────────────────────────────────── */
+
+.pd-field {
+  display: grid;
+  gap: 6px;
+}
+
+.pd-field__label {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.pd-field__hint {
+  font-size: 0.76rem;
+  color: var(--muted);
+}
+
+.pd-input {
+  width: 100%;
+  min-height: 42px;
+  padding: 0 14px;
+  border-radius: 10px;
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  font-size: 0.88rem;
+  outline: none;
+  box-sizing: border-box;
+  color: var(--text);
+  font-family: inherit;
+}
+
+.pd-input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.pd-input--lg {
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: 12px;
+}
+
+.pd-input--tall {
+  min-height: 46px;
+  padding: 0 16px;
+  border-radius: 12px;
+}
+
+.pd-select {
+  width: 100%;
+  min-height: 42px;
+  padding: 0 14px;
+  border-radius: 10px;
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  font-size: 0.88rem;
+  outline: none;
+  color: var(--text);
+  font-family: inherit;
+}
+
+.pd-select--lg {
+  min-height: 46px;
+  padding: 0 16px;
+  border-radius: 12px;
+}
+
+/* ── Panels ─────────────────────────────────────────── */
+
+.pd-panel {
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: var(--surface-soft);
+}
+
+.pd-panel--padded {
+  padding: 16px;
+}
+
+.pd-panel--compact {
+  padding: 12px 14px;
+}
+
+.pd-panel-title {
+  margin: 0 0 12px 0;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.pd-panel-text {
+  margin: 0 0 14px 0;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.pd-panel--info {
+  padding: 18px;
+  border-radius: 14px;
+  border: 1px solid #c7d2fe;
+  border-left: 4px solid var(--primary);
+  background: linear-gradient(180deg, #f5f7ff 0%, #eef2ff 100%);
+}
+
+.pd-panel--grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 14px;
+  background: var(--surface-soft);
+  border: 1px solid var(--border);
+  font-size: 0.85rem;
+}
+
+/* ── Deploy mode tabs ───────────────────────────────── */
+
+.pd-mode-tabs {
+  display: flex;
+  gap: 0;
+  background: var(--surface-soft);
+  border-radius: 10px;
+  padding: 3px;
+  border: 1px solid var(--border);
+  margin-bottom: 4px;
+}
+
+.pd-mode-tab {
+  flex: 1;
+  padding: 7px 14px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.82rem;
+  transition: all 140ms ease;
+  background: transparent;
+  color: var(--muted);
+  font-family: inherit;
+}
+
+.pd-mode-tab--active {
+  background: var(--primary);
+  color: #fff;
+}
+
+/* ── GitHub section ─────────────────────────────────── */
+
+.pd-gh-connected-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #dcfce7;
+  color: #15803d;
+  border-radius: 8px;
+  padding: 5px 12px;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.pd-gh-disconnect-btn {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 5px 12px;
+  font-size: 0.78rem;
+  color: var(--muted);
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.pd-gh-connect-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #24292e;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 18px;
+  font-weight: 700;
+  font-size: 0.88rem;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.pd-gh-connect-btn:disabled {
+  opacity: 0.7;
+}
+
+.pd-repo-dropdown {
+  position: relative;
+}
+
+.pd-repo-trigger {
+  width: 100%;
+  min-height: 42px;
+  padding: 0 14px;
+  border-radius: 10px;
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  font-size: 0.88rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  color: var(--text);
+}
+
+.pd-repo-trigger-placeholder {
+  color: var(--muted);
+}
+
+.pd-repo-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 99;
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  overflow: hidden;
+}
+
+.pd-repo-search {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pd-repo-search input {
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 0.85rem;
+  width: 100%;
+  color: var(--text);
+  font-family: inherit;
+}
+
+.pd-repo-list {
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.pd-repo-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 9px 14px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  text-align: left;
+  font-size: 0.85rem;
+  color: var(--text);
+  font-family: inherit;
+}
+
+.pd-repo-item:hover {
+  background: var(--surface-soft);
+}
+
+.pd-repo-item__name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pd-repo-item__private {
+  font-size: 0.68rem;
+  background: #f1f5f9;
+  color: #64748b;
+  border-radius: 4px;
+  padding: 1px 5px;
+  flex-shrink: 0;
+}
+
+/* ── Webhook section ────────────────────────────────── */
+
+.pd-webhook-card {
+  margin-top: 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+
+.pd-webhook-card p {
+  margin: 0;
+  font-size: 0.76rem;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.pd-webhook-row {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.pd-webhook-code {
+  font-size: 0.72rem;
+  background: #f1f5f9;
+  padding: 4px 8px;
+  border-radius: 6px;
+  word-break: break-all;
+  flex: 1;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+}
+
+.pd-webhook-code--secret {
+  background: #fef2f2;
+}
+
+.pd-webhook-copy-btn {
+  min-width: 30px;
+  min-height: 30px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: none;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+/* ── Deploy log ─────────────────────────────────────── */
+
+.pd-deploy-log {
+  background: #0f172a;
+  color: #94a3b8;
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  font-size: 0.75rem;
+  max-height: 220px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  line-height: 1.5;
+}
+
+/* ── Runtime info ───────────────────────────────────── */
+
+.pd-runtime-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 14px;
+  background: var(--surface-soft);
+  border: 1px solid var(--border);
+  font-size: 0.85rem;
+}
+
+.pd-runtime-grid .span-2 {
+  grid-column: span 2;
+}
+
+.pd-runtime-label {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--muted);
+  font-weight: 500;
+  margin-bottom: 2px;
+}
+
+.pd-runtime-value {
+  color: var(--text);
+  font-weight: 700;
+}
+
+/* ── Action buttons bar ─────────────────────────────── */
+
+.pd-actions-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 16px;
+  gap: 8px;
+}
+
+.pd-actions-right {
+  display: flex;
+  gap: 12px;
+}
+
+/* ── Details / collapsible ──────────────────────────── */
+
+.pd-details {
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--surface-soft);
+  overflow: hidden;
+}
+
+.pd-details summary {
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text);
+  padding: 10px 14px;
+  user-select: none;
+}
+
+.pd-details-body {
+  padding: 0 14px 14px;
+  border-top: 1px solid var(--border);
+}
+
+.pd-details--dashed {
+  border: 1px dashed var(--border);
+  padding: 12px 16px;
+  transition: all 150ms ease;
+}
+
+.pd-details--dashed summary {
+  padding: 0;
+}
+
+/* ── FTP info ───────────────────────────────────────── */
+
+.pd-ftp-step-list {
+  margin: 10px 0 0 18px;
+  padding: 0;
+  font-size: 0.82rem;
+  color: #334155;
+  line-height: 1.6;
+}
+
+.pd-ftp-host-row {
+  margin-top: 6px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  font-size: 0.8rem;
+}
+
+.pd-ftp-chip {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+/* ── Connect GitHub check ──────────────────────────── */
+
+.pd-gh-checking {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+/* ── Loading branches ─────────────────────────────── */
+
+.pd-gh-loading {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+/* ── No repos ──────────────────────────────────────── */
+
+.pd-gh-no-repos {
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.82rem;
+  padding: 16px 0;
+}
+
+/* ── Save connection button row ────────────────────── */
+
+.pd-save-row {
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* ── Toggle auto-deploy ───────────────────────────── */
+
+.pd-auto-deploy {
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--surface-soft);
+  padding: 12px 14px;
+}
+
+.pd-auto-deploy-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.pd-auto-deploy-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pd-auto-deploy-text {
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.pd-auto-deploy-badge {
+  font-size: 0.70rem;
+  font-weight: 700;
+  background: #dcfce7;
+  color: #15803d;
+  border-radius: 4px;
+  padding: 1px 6px;
+}
+
+.pd-toggle-btn {
+  min-height: 30px;
+  padding: 0 14px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-weight: 600;
+  font-family: inherit;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.pd-toggle-btn--enabled {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.pd-toggle-btn--disabled {
+  background: var(--primary);
+  color: #fff;
+}
+
+.pd-auto-deploy-note {
+  margin: 6px 0 0 22px;
+  font-size: 0.76rem;
+  color: var(--muted);
+}

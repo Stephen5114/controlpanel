@@ -36,25 +36,25 @@ export function TopupPage() {
   }
 
   return (
-    <div className="stack" style={{ maxWidth: "520px", margin: "0 auto" }}>
-      <Link to="/" className="text-button" style={{ display: "inline-flex", alignItems: "center", gap: "6px", fontSize: "0.9rem" }}>
+    <div className="stack tp-wrapper">
+      <Link to="/" className="text-button tp-back-link">
         <ArrowLeft size={16} /> {t("Back to Dashboard", "Back to Dashboard")}
       </Link>
 
-      <section className="card" style={{ padding: "32px" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "8px" }}>
-          <div style={{ width: "44px", height: "44px", borderRadius: "14px", background: "var(--primary-soft)", color: "var(--primary)", display: "grid", placeItems: "center" }}>
+      <section className="card tp-card">
+        <div className="tp-header">
+          <div className="tp-icon-box">
             <Wallet size={22} />
           </div>
           <div>
-            <h1 style={{ margin: 0, fontSize: "1.5rem" }}>{t("Add Account Credit", "Add Account Credit")}</h1>
-            <p className="muted" style={{ margin: 0, fontSize: "0.9rem" }}>{t("Top up your prepaid balance via secure card checkout.", "Top up your prepaid balance via secure card checkout.")}</p>
+            <h1 className="tp-title">{t("Add Account Credit", "Add Account Credit")}</h1>
+            <p className="muted tp-subtitle">{t("Top up your prepaid balance via secure card checkout.", "Top up your prepaid balance via secure card checkout.")}</p>
           </div>
         </div>
 
-        {error ? <div className="inline-message inline-message--error" style={{ marginTop: "16px" }}>{error}</div> : null}
+        {error ? <div className="inline-message inline-message--error tp-error-msg">{error}</div> : null}
 
-        <div className="topup-presets" style={{ marginTop: "24px" }}>
+        <div className="topup-presets tp-presets-wrap">
           {PRESETS.map((preset) => (
             <button
               key={preset}
@@ -67,33 +67,32 @@ export function TopupPage() {
           ))}
         </div>
 
-        <label className="field" style={{ marginTop: "16px" }}>
+        <label className="field tp-custom-field">
           <span>{t("Custom amount (USD)", "Custom amount (USD)")}</span>
           <input
             inputMode="decimal"
             value={amount}
             onChange={(e) => setAmount(e.target.value.replace(/[^0-9.]/g, ""))}
             placeholder="25.00"
-            style={{ fontSize: "1.2rem", fontWeight: 700, textAlign: "center" }}
+            className="tp-custom-input"
             onKeyDown={(e) => { if (e.key === "Enter") void handleTopup(); }}
           />
         </label>
 
         {!valid && amount.length > 0 ? (
-          <p style={{ margin: "8px 0 0", fontSize: "0.85rem", color: "var(--error)" }}>{t("Minimum $0.50", "Minimum $0.50")}</p>
+          <p className="tp-min-error">{t("Minimum $0.50", "Minimum $0.50")}</p>
         ) : null}
 
         <button
           type="button"
-          className="primary-button"
-          style={{ width: "100%", marginTop: "20px", padding: "14px", fontSize: "1.05rem", justifyContent: "center" }}
+          className="primary-button tp-submit-btn"
           disabled={!valid || busy}
           onClick={() => void handleTopup()}
         >
           {busy ? t("Opening checkout...", "Opening checkout...") : t("Add ${amount} credit", "Add ${amount} credit").replace("{amount}", valid ? parsed.toFixed(2) : "—")}
         </button>
 
-        <p className="muted" style={{ margin: "14px 0 0", fontSize: "0.82rem", textAlign: "center" }}>
+        <p className="muted tp-footnote">
           {t("You'll be redirected to Stripe's secure checkout. Your card will also be saved for automatic renewals.", "You'll be redirected to Stripe's secure checkout. Your card will also be saved for automatic renewals.")}
         </p>
       </section>

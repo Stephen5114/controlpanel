@@ -14,6 +14,7 @@ import {
 import { formatRegionLabel } from "../lib/display";
 import { getCustomerSession } from "../lib/customer-session";
 import { getActiveLocale, useLocalization } from "../lib/i18n";
+import { Badge, EmptyState, Button } from "../components";
 
 type DashboardState = {
   subs: HostingSubscription[];
@@ -43,20 +44,20 @@ function daysUntil(value: string | null | undefined): number | null {
   return Math.ceil((date.getTime() - Date.now()) / 86_400_000);
 }
 
-function statusBadgeClass(status: string) {
+function badgeTone(status: string): "success" | "warning" | "danger" | "default" {
   switch (status) {
     case "active":
-      return "badge--success";
+      return "success";
     case "grace_period":
     case "past_due":
     case "draft":
     case "checkout_pending":
-      return "badge--warning";
+      return "warning";
     case "suspended":
     case "canceled":
-      return "badge--danger";
+      return "danger";
     default:
-      return "";
+      return "default";
   }
 }
 
@@ -274,32 +275,19 @@ export function DashboardPage() {
       <section className="stat-grid">
         {stats.map((stat) => (
           <article className="card stat-card" key={stat.label}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+            <div className="stat-card__header">
               <div>
-                <p className="label" style={{ margin: 0, fontSize: "0.85rem", fontWeight: "500" }}>{stat.label}</p>
-                <h2 style={{ fontSize: "1.75rem", fontWeight: "700", margin: "6px 0 2px", letterSpacing: "-0.02em" }}>{stat.value}</h2>
+                <p className="stat-card__label">{stat.label}</p>
+                <h2 className="stat-card__value">{stat.value}</h2>
               </div>
-              <div style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                width: "36px",
-                height: "36px",
-                borderRadius: "10px",
-                background: "var(--background-muted, #f1f5f9)",
-                color: "var(--primary-ink, #0f172a)",
-                border: "1px solid var(--border)",
-                boxShadow: "0 1px 2px rgba(0,0,0,0.05)"
-              }}>
+              <div className="stat-card__icon-box">
                 {stat.icon}
               </div>
             </div>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "2px" }}>
-              <p className="muted" style={{ margin: 0, fontSize: "0.8rem", color: "var(--muted)" }}>{stat.detail}</p>
+            <div className="stat-card__footer">
+              <p className="muted" style={{ margin: 0 }}>{stat.detail}</p>
               {stat.actionLabel && stat.actionTo ? (
-                <Link to={stat.actionTo} className="text-button" style={{ fontSize: "0.8rem", fontWeight: 600, padding: "4px 10px", borderRadius: "8px", background: "var(--primary-soft)", color: "var(--primary)", textDecoration: "none" }}>
-                  + {stat.actionLabel}
-                </Link>
+                <Link to={stat.actionTo} className="stat-card__action">+ {stat.actionLabel}</Link>
               ) : null}
             </div>
           </article>
@@ -309,15 +297,14 @@ export function DashboardPage() {
       <section className="stack-sm">
         <div className="section-head">
           <div>
-            <h3 style={{ margin: 0 }}>{t("Your Subscriptions", "Your Subscriptions")}</h3>
-            <p className="muted" style={{ margin: 0 }}>{t("Select a subscription plan to manage its assigned websites and resources.", "Select a subscription plan to manage its assigned websites and resources.")}</p>
+            <h3 className="sub-section__title">{t("Your Subscriptions", "Your Subscriptions")}</h3>
+            <p className="muted sub-section__desc">{t("Select a subscription plan to manage its assigned websites and resources.", "Select a subscription plan to manage its assigned websites and resources.")}</p>
           </div>
-          <label style={{ display: "flex", alignItems: "center", gap: "6px", flexShrink: 0, fontSize: "0.85rem", color: "var(--muted)" }}>
+          <label className="sub-sort">
             <ArrowUpDown size={14} />
             <select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
-              style={{ minHeight: "auto", height: "34px", padding: "0 10px", fontSize: "0.85rem", borderRadius: "8px", border: "1px solid var(--border)", background: "var(--surface)", color: "var(--text)", cursor: "pointer" }}
             >
               <option value="name-asc">{t("Name A → Z", "Name A → Z")}</option>
               <option value="name-desc">{t("Name Z → A", "Name Z → A")}</option>
@@ -330,16 +317,16 @@ export function DashboardPage() {
         {loading && visibleSubs.length === 0 ? <div className="empty-panel">{t("Loading subscriptions...", "Loading subscriptions...")}</div> : null}
 
         {!loading && visibleSubs.length === 0 ? (
-          <div className="empty-state">
-            <div style={{ padding: "40px", background: "white", borderRadius: "24px", border: "1px solid var(--border)", boxShadow: "var(--shadow)" }}>
-              <h2>{t("No subscriptions yet", "No subscriptions yet")}</h2>
-              <p className="muted" style={{ marginBottom: "24px" }}>{t("Choose a hosting plan to get your first site online.", "Choose a hosting plan to get your first site online.")}</p>
+          <EmptyState
+            title={t("No subscriptions yet", "No subscriptions yet")}
+            description={t("Choose a hosting plan to get your first site online.", "Choose a hosting plan to get your first site online.")}
+            action={
               <Link className="primary-button" to="/buy">
                 <Plus size={18} />
                 <span>{t("Buy Hosting Subscription", "Buy Hosting Subscription")}</span>
               </Link>
-            </div>
-          </div>
+            }
+          />
         ) : null}
 
         {visibleSubs.length > 0 ? (
@@ -373,28 +360,19 @@ export function DashboardPage() {
                 <div
                   key={sub.id}
                   className="card project-card"
-                  style={{ cursor: "pointer", transition: "transform 200ms, box-shadow 200ms" }}
                   onClick={() => navigate(`/subscription/${sub.id}/overview`)}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = "translateY(-4px)";
-                    e.currentTarget.style.boxShadow = "0 32px 64px rgba(43, 73, 125, 0.12)";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = "translateY(0)";
-                    e.currentTarget.style.boxShadow = "var(--shadow)";
-                  }}
                 >
-                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "16px" }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                      <div style={{ width: "42px", height: "42px", borderRadius: "12px", background: "linear-gradient(135deg, #1e293b, #0f172a)", color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "bold", fontSize: "1.2rem" }}>
+                  <div className="project-card__header">
+                    <div className="project-card__identity">
+                      <div className="project-card__icon">
                         <Server size={20} />
                       </div>
                       <div>
-                        <h3 style={{ margin: 0, fontSize: "1.2rem" }}>{sub.name}</h3>
-                        <p className="muted" style={{ margin: 0, fontSize: "0.9rem" }}>{sub.planSlug.toUpperCase()} {t("Plan", "Plan")}</p>
+                        <h3 className="project-card__name">{sub.name}</h3>
+                        <p className="muted project-card__plan">{sub.planSlug.toUpperCase()} {t("Plan", "Plan")}</p>
                       </div>
                     </div>
-                    <span className={`badge ${statusBadgeClass(effectiveStatus)}`}>{statusLabel(effectiveStatus)}</span>
+                    <Badge tone={badgeTone(effectiveStatus)}>{statusLabel(effectiveStatus)}</Badge>
                   </div>
 
                   {isPending ? (
@@ -441,10 +419,10 @@ export function DashboardPage() {
                     </div>
                   )}
 
-                  <div style={{ display: "flex", gap: "16px", marginTop: "16px", paddingTop: "16px", borderTop: "1px solid var(--border)", fontSize: "0.85rem", color: "var(--muted)" }}>
-                    <span style={{ display: "flex", alignItems: "center", gap: "6px" }}><Globe size={14} /> {formatRegionLabel(sub.regionSlug)}</span>
-                    <span style={{ display: "flex", alignItems: "center", gap: "6px" }}><Activity size={14} /> {sub.usedSites} / {sub.siteQuota} {t("Sites", "Sites")}</span>
-                    <span style={{ display: "flex", alignItems: "center", gap: "6px" }}><Database size={14} /> {sub.usedDatabases} / {sub.databaseQuota} {t("Databases", "Databases")}</span>
+                  <div className="project-card__meta">
+                    <span className="project-card__meta-item"><Globe size={14} /> {formatRegionLabel(sub.regionSlug)}</span>
+                    <span className="project-card__meta-item"><Activity size={14} /> {sub.usedSites} / {sub.siteQuota} {t("Sites", "Sites")}</span>
+                    <span className="project-card__meta-item"><Database size={14} /> {sub.usedDatabases} / {sub.databaseQuota} {t("Databases", "Databases")}</span>
                   </div>
 
                   {!isPending ? (
@@ -470,27 +448,20 @@ export function DashboardPage() {
       </section>
 
       {confirmRenew ? (
-        <div
-          style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.45)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000 }}
-          onClick={() => setConfirmRenew(null)}
-        >
-          <div
-            style={{ background: "white", borderRadius: "16px", padding: "32px", maxWidth: "420px", width: "90%", boxShadow: "0 24px 64px rgba(0,0,0,0.18)" }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <h3 style={{ margin: "0 0 8px", fontSize: "1.1rem" }}>{t("Confirm Renewal", "Confirm Renewal")}</h3>
-            <p style={{ margin: "0 0 24px", color: "var(--muted)", fontSize: "0.95rem" }}>
+        <div className="confirm-overlay" onClick={() => setConfirmRenew(null)}>
+          <div className="confirm-modal" onClick={(e) => e.stopPropagation()}>
+            <h3 className="confirm-modal__title">{t("Confirm Renewal", "Confirm Renewal")}</h3>
+            <p className="confirm-modal__body">
               {t("Renew", "Renew")} <strong>{confirmRenew.sub.name}</strong>
               {confirmRenew.billing ? ` · ${formatCurrency(confirmRenew.billing.monthlyAmount, confirmRenew.billing.currency)}/mo` : ""}?
               {" "}{t("Your next renewal date will be extended by 1 month.", "Your next renewal date will be extended by 1 month.")}
             </p>
-            <div style={{ display: "flex", gap: "12px", justifyContent: "flex-end" }}>
-              <button type="button" className="secondary-button" onClick={() => setConfirmRenew(null)}>
+            <div className="confirm-modal__actions">
+              <Button variant="secondary" onClick={() => setConfirmRenew(null)}>
                 {t("Cancel", "Cancel")}
-              </button>
-              <button
-                type="button"
-                className="primary-button"
+              </Button>
+              <Button
+                variant="primary"
                 disabled={busyKey === `renew-${confirmRenew.sub.id}`}
                 onClick={() => {
                   const sub = confirmRenew.sub;
@@ -498,9 +469,9 @@ export function DashboardPage() {
                   void handleRenew(sub);
                 }}
               >
-                <RefreshCw size={14} style={{ marginRight: "6px" }} />
+                <RefreshCw size={14} />
                 {t("Confirm Renewal", "Confirm Renewal")}
-              </button>
+              </Button>
             </div>
           </div>
         </div>

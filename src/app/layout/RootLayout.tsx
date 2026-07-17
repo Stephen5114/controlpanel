@@ -18,7 +18,11 @@ const navigation = [
   { name: "Settings", path: "/settings", icon: Settings },
 ];
 
-function Sidebar({ navigation, mobileOpen, onNavClick, theme, ThemeIcon, setThemeMenuOpen }: any) {
+function Sidebar({
+  navigation, mobileOpen, onNavClick, theme, ThemeIcon, setThemeMenuOpen,
+  avatarDropdownOpen, setAvatarDropdownOpen, username, session,
+  accountBalance, accountBalanceTone, handleSignOut, t
+}: any) {
   return (
     <aside className={`sidebar${mobileOpen ? " sidebar--open" : ""}`}>
       <div className="sidebar__header">
@@ -44,15 +48,27 @@ function Sidebar({ navigation, mobileOpen, onNavClick, theme, ThemeIcon, setThem
       </nav>
 
       <div className="sidebar__footer">
-        <button
-          className="sidebar__theme-btn"
-          onClick={() => setThemeMenuOpen((o: boolean) => !o)}
-          type="button"
-          title="Choose theme"
-        >
-          <ThemeIcon size={16} />
-          <span>{theme === "day" ? "Day" : theme === "dark" ? "Dark" : "Classic"}</span>
-        </button>
+        <div className="account__avatar-wrapper" style={{ position: "relative" }}>
+          <button className="avatar" onClick={() => setAvatarDropdownOpen((v: boolean) => !v)} type="button" aria-label={t("Account menu", "Account menu")}>
+            <User size={18} />
+          </button>
+          <span className="account__avatar-name">{username ?? session?.email ?? "Signed in"}</span>
+          {avatarDropdownOpen && (
+            <div className="account__dropdown account__dropdown--sidebar">
+              <div className="account__dropdown-header">
+                <div className="account__dropdown-name">{username ?? session?.email ?? "Signed in"}</div>
+              </div>
+              <div className={`account__dropdown-balance ${accountBalanceTone}`}>
+                <span>{t("Balance", "Balance")}</span>
+                <strong>{accountBalance ? formatCurrency(accountBalance.amount, accountBalance.currency) : "..."}</strong>
+              </div>
+              <div className="account__dropdown-divider" />
+              <button className="account__dropdown-item" onClick={() => { handleSignOut(); setAvatarDropdownOpen(false); }} type="button">
+                {t("Sign out", "Sign out")}
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </aside>
   );
@@ -78,14 +94,14 @@ export function RootLayout() {
 
   const ThemeIcon = useMemo(() => {
     if (theme === "dark") return Moon;
-    if (theme === "classic") return Palette;
+    if (theme === "warm") return Sun;
     return Sun;
   }, [theme]);
 
   const themeOptions = [
-    { value: "day" as const, label: t("Day", "Day"), description: t("Bright cream and orange", "Bright cream and orange"), icon: Sun },
-    { value: "dark" as const, label: t("Dark", "Dark"), description: t("Warm charcoal with soft contrast", "Warm charcoal with soft contrast"), icon: Moon },
-    { value: "classic" as const, label: t("Classic", "Classic"), description: t("Oatmeal and terracotta", "Oatmeal and terracotta"), icon: Palette },
+    { value: "white" as const, label: t("日间", "Day"), description: t("纯净白色，清晰简洁", "Clean white, crisp and minimal"), icon: Sun },
+    { value: "dark" as const, label: t("夜间", "Night"), description: t("深色背景，减少眩光", "Dark background, reduced glare"), icon: Moon },
+    { value: "warm" as const, label: t("护眼", "Warm"), description: t("暖色护眼，柔和舒适", "Warm tones, gentle on eyes"), icon: Sun },
   ];
 
   useEffect(() => {
@@ -197,6 +213,14 @@ export function RootLayout() {
           theme={theme}
           ThemeIcon={ThemeIcon}
           setThemeMenuOpen={setThemeMenuOpen}
+          avatarDropdownOpen={avatarDropdownOpen}
+          setAvatarDropdownOpen={setAvatarDropdownOpen}
+          username={username}
+          session={session}
+          accountBalance={accountBalance}
+          accountBalanceTone={accountBalanceTone}
+          handleSignOut={handleSignOut}
+          t={t}
         />
 
         {/* Main area: topbar + content */}
@@ -224,27 +248,6 @@ export function RootLayout() {
                 <span>{currentLang}</span>
               </button>
 
-              <div className="account__avatar-wrapper" style={{ position: "relative" }}>
-                <button className="avatar" onClick={() => setAvatarDropdownOpen((v) => !v)} type="button" aria-label={t("Account menu", "Account menu")}>
-                  <User size={18} />
-                </button>
-                {avatarDropdownOpen && (
-                  <div className="account__dropdown">
-                    <div className="account__dropdown-header">
-                      <div className="account__dropdown-name">{username ?? session?.email ?? "Signed in"}</div>
-                    </div>
-                    <div className={`account__dropdown-balance ${accountBalanceTone}`}>
-                      <span>{t("Balance", "Balance")}</span>
-                      <strong>{accountBalance ? formatCurrency(accountBalance.amount, accountBalance.currency) : "..."}</strong>
-                    </div>
-                    <div className="account__dropdown-divider" />
-                    <button className="account__dropdown-item" onClick={() => { handleSignOut(); setAvatarDropdownOpen(false); }} type="button">
-                      {t("Sign out", "Sign out")}
-                    </button>
-                  </div>
-                )}
-              </div>
-
               <div className="theme-selector">
                 <button
                   className="theme-toggle-btn"
@@ -255,7 +258,7 @@ export function RootLayout() {
                   title={t("Choose theme", "Choose theme")}
                 >
                   <span className={`theme-toggle-btn__preview theme-toggle-btn__preview--${theme}`}><ThemeIcon size={14} /></span>
-                  <span>{theme === "day" ? "Day" : theme === "dark" ? "Dark" : "Classic"}</span>
+                  <span>{theme === "white" ? "日间" : theme === "dark" ? "夜间" : "护眼"}</span>
                   <ChevronDown className="theme-toggle-btn__chevron" size={14} />
                 </button>
 

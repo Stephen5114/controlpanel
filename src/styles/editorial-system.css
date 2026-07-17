@@ -31,51 +31,7 @@
   --input-border: #24221d;
 }
 
-:root.theme-classic {
-  --bg: #e9dfd0;
-  --surface: #fbf1e2;
-  --surface-soft: #ddd0bd;
-  --border: #493d32;
-  --text: #2d251f;
-  --muted: #74675b;
-  --primary: #bd553d;
-  --primary-soft: #eacbbd;
-  --success: #526b50;
-  --success-soft: #dce5d6;
-  --warning: #956525;
-  --warning-soft: #eeddbb;
-  --error: #9a4038;
-  --error-soft: #ecd0c8;
-  --shadow: 4px 4px 0 #493d32;
-  --topbar-bg: #fbf1e2;
-  --topbar-border: #493d32;
-  --input-bg: #fff8ee;
-  --input-border: #493d32;
-}
-
-:root.theme-dark {
-  --bg: #12110f;
-  --surface: #1e1c19;
-  --surface-soft: #2c2924;
-  --border: #655e53;
-  --text: #f3eadc;
-  --muted: #b0a79a;
-  --primary: #ff704d;
-  --primary-soft: #4a2b22;
-  --success: #a3bd96;
-  --success-soft: #273328;
-  --warning: #e0b873;
-  --warning-soft: #3a3021;
-  --error: #ed9182;
-  --error-soft: #422621;
-  --shadow: 4px 4px 0 #050504;
-  --topbar-bg: #1c1b18;
-  --topbar-border: #514b42;
-  --card-bg-top: #1c1b18;
-  --card-bg-bottom: #1c1b18;
-  --input-bg: #1c1b18;
-  --input-border: #655e53;
-}
+/* Theme variables are now centralized in variables.css */
 
 body {
   background: var(--bg);

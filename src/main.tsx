@@ -27,7 +27,7 @@ import "./styles/subscription-databases.css";
 import "./styles/site-settings.css";
 import "./styles/topup.css";
 import "./styles/node-deploy-guide.css";
-import "./styles/editorial-system.css";
+
 import "./styles/landing.css";
 import "./styles/status.css";
 import "driver.js/dist/driver.css";
@@ -42,8 +42,8 @@ function AuthLoadingFallback() {
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
           aria-hidden="true"
-          width={36}
-          height={36}
+          width={56}
+          height={56}
           style={{ color: "#818cf8" }}
         >
           <defs>
@@ -61,10 +61,12 @@ function AuthLoadingFallback() {
         <div className="auth-brand-loading-bar">
           <div className="auth-brand-loading-bar-fill" />
         </div>
+
       </div>
     </div>
   );
 }
+
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>

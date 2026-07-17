@@ -81,3 +81,58 @@
 - ✅ 登录页品牌面板与官网视觉一致
 - ✅ 加载状态正常显示
 - ✅ 移除了 900+ 行无用 CSS 动画代码
+
+---
+
+| 3.5 | 控制面板现代极简风改造 | ✅ | 2026-07-17 | 移除 editorial-system.css，统一主题系统，修复硬编码颜色 |
+
+## 改动文件汇总（Phase 3 第三次迭代 — 控制面板极简风）
+
+### 背景
+
+用户要求控制面板与登录输入窗口风格统一 → **现代极简风**（日间/夜间/护眼三主题）。此前存在的 `editorial-system.css`（暴力风：粗边框、offset 阴影、小圆角、红品牌色）与极简目标完全冲突。
+
+### 修改文件（4 个）
+
+#### 1. `src/main.tsx`
+- **移除** `import "./styles/editorial-system.css"` — 该文件的暴力风格（2px 边框、`3px 3px 0` 阴影偏移、`border-radius: 3px`、红 `--primary: #ff5a36`、衬线字体标题）覆盖所有极简样式，是最大冲突源
+
+#### 2. `src/styles/index.css`
+- **主题按钮预着色**：将 `.theme-toggle-btn__preview--day/classic` 改为 `--white/--warm`，适配新主题命名
+- **主题菜单色块**：`.theme-menu__swatch--day/classic` 改为 `--white/--warm`
+- **修复硬编码蓝色值**（所有 `#2563eb` / `#3b82f6` / `rgba(37,99,235,*)` → `var(--primary)` / `var(--primary-soft)`）：
+  - `.primary-button` — 移除 `rgba(37,99,235,0.22)` 蓝色阴影
+  - `.btn--primary` — 渐变色 → `var(--primary)` 纯色，移除蓝色阴影，hover/active 简化为透明度调节
+  - `.interactive-card:hover/focus-visible` — 蓝色边框和阴影 → `var(--primary)` / `var(--primary-soft)`
+  - `.icon-button:focus-visible` — 蓝色阴影 → `var(--primary-soft)`
+  - `.badge--info` — 蓝色背景 → `var(--primary-soft)`
+  - `.dashboard-alert:hover` / `.project-card:hover` — 移除硬编码蓝色阴影
+- **移植 editorial-system.css 必要样式**（主题菜单、推广链接、affiliate-nav-promo 响应式）到 index.css，确保功能完整
+
+#### 3. `src/styles/dashboard.css`
+- `.al-sidebar__link.is-active` — 移除 `rgba(46,91,255,0.2)` 蓝色阴影
+- `.al-searchbar__input-wrap:focus-within` — 蓝色阴影 → `var(--primary-soft)`
+- `.files-workbench__pathbar-button:hover` — 移除 `rgba(37,99,235,0.5)` 蓝色阴影
+
+#### 4. `src/styles/auth.css`
+- 更新注释：移除对 editorial-system.css 的引用（已删除）
+
+### 主题系统状态
+
+| 主题 | CSS 类 | 变量值 | 说明 |
+|------|--------|--------|------|
+| 日间 White | `:root`（无 class） | `--bg: #f5f5f7`, `--primary: #6366f1` | 纯净白色极简 |
+| 夜间 Dark | `:root.theme-dark` | `--bg: #0b0b0e`, `--primary: #818cf8` | 深色低眩光 |
+| 护眼 Warm | `:root.theme-warm` | `--bg: #f4efe8`, `--primary: #a67c52` | 暖色调护眼 |
+
+### 设计统一要点
+- 控制面板所有主色引用 `var(--primary)`，不再有硬编码蓝色
+- 按钮扁平化：无渐变色、无大阴影、hover 仅透明度变化
+- 主题切换器标签：日间/夜间/护眼（中文），Day/Night/Warm（英文）
+- 浏览器自动填充覆盖：`-webkit-box-shadow: 0 0 0 1000px var(--surface) inset` 解决灰色背景
+
+### 构建验证
+- ✅ `npm run build` 无 error、无 warning
+- ✅ 主题切换（日间/夜间/护眼）正常工作
+- ✅ 登录页白色极简风格完整保留
+- ✅ 控制面板风格与登录页一致

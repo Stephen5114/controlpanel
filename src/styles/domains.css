@@ -2014,9 +2014,8 @@
 
 .site-nav__link:hover,
 .site-nav__link.is-active {
-  background: var(--surface);
+  background: var(--surface-soft);
   color: var(--primary);
-  box-shadow: 0 4px 12px rgba(43, 73, 125, 0.05);
 }
 
 @media (max-width: 900px) {

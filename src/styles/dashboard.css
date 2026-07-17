@@ -2,9 +2,10 @@
 .al-shell {
   display: grid;
   grid-template-columns: 240px minmax(0, 1fr);
-  min-height: calc(100vh - 80px);
-  margin: -40px -24px -56px;
-  background: var(--bg);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
 }
 
 /* ── Sidebar ── */
@@ -63,7 +64,6 @@
   background: var(--primary);
   color: #fff;
   font-weight: 600;
-  box-shadow: 0 10px 22px rgba(46, 91, 255, 0.2);
 }
 
 .al-sidebar__footer {
@@ -80,20 +80,18 @@
   gap: 8px;
   min-height: 44px;
   border: 0;
-  border-radius: 14px;
+  border-radius: 10px;
   background: var(--primary);
   color: #fff;
-  font-weight: 700;
+  font-weight: 600;
   font-size: 0.92rem;
   text-decoration: none;
   cursor: pointer;
-  box-shadow: 0 10px 24px rgba(46, 91, 255, 0.28);
-  transition: transform 150ms, box-shadow 150ms;
+  transition: opacity 150ms;
 }
 
 .al-sidebar__deploy-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 14px 32px rgba(46, 91, 255, 0.35);
+  opacity: 0.9;
 }
 
 .al-sidebar__footer-links {
@@ -122,7 +120,7 @@
   min-width: 0;
   display: flex;
   flex-direction: column;
-  padding: 12px 18px 18px 0;
+  padding: 24px;
   overflow-y: auto;
 }
 
@@ -156,7 +154,7 @@
 
 .al-searchbar__input-wrap:focus-within {
   border-color: var(--primary);
-  box-shadow: 0 0 0 3px rgba(46, 91, 255, 0.12);
+  box-shadow: 0 0 0 3px var(--primary-soft);
 }
 
 .al-searchbar__input-wrap input {
@@ -296,12 +294,10 @@
 .al-hero__btn--primary {
   background: var(--primary);
   color: #fff;
-  box-shadow: 0 8px 20px rgba(46, 91, 255, 0.28);
 }
 
 .al-hero__btn--primary:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 12px 28px rgba(46, 91, 255, 0.35);
+  opacity: 0.9;
 }
 
 /* ── Metric cards ── */
@@ -316,9 +312,8 @@
 .al-metric-card {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 16px;
+  border-radius: 12px;
   padding: 20px;
-  box-shadow: var(--shadow);
 }
 
 .al-metric-card__header {
@@ -626,9 +621,8 @@
 .al-db-card {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 18px;
+  border-radius: 12px;
   padding: 20px;
-  box-shadow: var(--shadow);
 }
 
 .al-module-card--critical {
@@ -1379,7 +1373,6 @@
 .files-workbench__pathbar-button:hover:not(:disabled) {
   border-color: var(--primary);
   background: var(--surface-soft);
-  box-shadow: 0 10px 24px -20px rgba(37, 99, 235, 0.5);
 }
 
 .files-workbench__pathbar-button:disabled {

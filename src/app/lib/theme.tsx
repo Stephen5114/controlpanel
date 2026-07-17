@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 
-export type Theme = "day" | "dark" | "classic";
+export type Theme = "white" | "dark" | "warm";
 
 interface ThemeContextType {
   theme: Theme;
@@ -9,13 +9,18 @@ interface ThemeContextType {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
+/** 兼容旧版 "day" / "classic" → 新版映射 */
+function migrateLegacyTheme(saved: string | null): Theme {
+  if (saved === "white" || saved === "dark" || saved === "warm") return saved;
+  if (saved === "day") return "white";
+  if (saved === "classic") return "warm";
+  return "white";
+}
+
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setThemeState] = useState<Theme>(() => {
     const saved = localStorage.getItem("theme");
-    if (saved === "day" || saved === "dark" || saved === "classic") {
-      return saved as Theme;
-    }
-    return "day";
+    return migrateLegacyTheme(saved);
   });
 
   const setTheme = (newTheme: Theme) => {
@@ -25,8 +30,10 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const root = document.documentElement;
-    root.classList.remove("theme-day", "theme-dark", "theme-classic");
-    root.classList.add(`theme-${theme}`);
+    root.classList.remove("theme-dark", "theme-warm");
+    if (theme !== "white") {
+      root.classList.add(`theme-${theme}`);
+    }
   }, [theme]);
 
   return (

@@ -1,4 +1,4 @@
-import { ChevronDown, CreditCard, Gift, Globe2, Headphones, LayoutDashboard, Menu, Package, Server, Settings, User, X, Sun, Moon, Palette } from "lucide-react";
+import { ChevronDown, CreditCard, Gift, Globe2, Headphones, LayoutDashboard, Menu, Package, Server, Settings, User, X, Sun, Moon, Palette, Eye } from "lucide-react";
 import { Logo } from "../components/Logo";
 import { useEffect, useMemo, useState } from "react";
 import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
@@ -41,7 +41,7 @@ function Sidebar({
               onClick={onNavClick}
             >
               <Icon size={18} />
-              <span>{item.name}</span>
+              <span>{t(item.name, item.name)}</span>
             </NavLink>
           );
         })}
@@ -92,14 +92,14 @@ export function RootLayout() {
 
   const ThemeIcon = useMemo(() => {
     if (theme === "dark") return Moon;
-    if (theme === "warm") return Sun;
+    if (theme === "warm") return Eye;
     return Sun;
   }, [theme]);
 
   const themeOptions = [
     { value: "white" as const, label: t("日间", "Day"), description: t("纯净白色，清晰简洁", "Clean white, crisp and minimal"), icon: Sun },
     { value: "dark" as const, label: t("夜间", "Night"), description: t("深色背景，减少眩光", "Dark background, reduced glare"), icon: Moon },
-    { value: "warm" as const, label: t("护眼", "Warm"), description: t("暖色护眼，柔和舒适", "Warm tones, gentle on eyes"), icon: Sun },
+    { value: "warm" as const, label: t("护眼", "Warm"), description: t("暖色护眼，柔和舒适", "Warm tones, gentle on eyes"), icon: Eye },
   ];
 
   useEffect(() => {
@@ -256,7 +256,6 @@ export function RootLayout() {
                   title={t("Choose theme", "Choose theme")}
                 >
                   <span className={`theme-toggle-btn__preview theme-toggle-btn__preview--${theme}`}><ThemeIcon size={14} /></span>
-                  <span>{theme === "white" ? "日间" : theme === "dark" ? "夜间" : "护眼"}</span>
                   <ChevronDown className="theme-toggle-btn__chevron" size={14} />
                 </button>
 

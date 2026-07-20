@@ -330,9 +330,9 @@ export function AffiliatePage() {
             <div className="affiliate-share-row">
               <span>{t("Share via", "Share via")}</span>
               <a href={shareLinks.email}><Mail size={17} />{t("Email", "Email")}</a>
-              <a href={shareLinks.whatsapp} target="_blank" rel="noreferrer">WhatsApp</a>
-              <a href={shareLinks.x} target="_blank" rel="noreferrer">X</a>
-              <a href={shareLinks.facebook} target="_blank" rel="noreferrer">Facebook</a>
+              <a href={shareLinks.whatsapp} target="_blank" rel="noreferrer">{t("WhatsApp", "WhatsApp")}</a>
+              <a href={shareLinks.x} target="_blank" rel="noreferrer">{t("X", "X")}</a>
+              <a href={shareLinks.facebook} target="_blank" rel="noreferrer">{t("Facebook", "Facebook")}</a>
               <button type="button" onClick={() => void copyToClipboard(overview.code, "code")}>
                 {copied === "code" ? <Check size={16} /> : <Copy size={16} />}
                 {t("Copy code", "Copy code")}
@@ -493,7 +493,7 @@ export function AffiliatePage() {
                 <p>{t("Withdraw your available balance using your preferred payout method.", "Withdraw your available balance using your preferred payout method.")}</p>
                 <div className="affiliate-payout-form-row">
                   <label className="field"><span>{t("Amount", "Amount")}</span><input inputMode="decimal" value={cashAmount} onChange={(event) => setCashAmount(event.target.value.replace(/[^0-9.]/g, ""))} placeholder={overview.minPayoutAmount.toFixed(2)} /></label>
-                  <label className="field"><span>{t("Method", "Method")}</span><select value={cashMethod} onChange={(event) => setCashMethod(event.target.value)}><option value="paypal">PayPal</option><option value="alipay">{t("Alipay", "Alipay")}</option><option value="bank">{t("Bank transfer", "Bank transfer")}</option></select></label>
+                  <label className="field"><span>{t("Method", "Method")}</span><select value={cashMethod} onChange={(event) => setCashMethod(event.target.value)}><option value="paypal">{t("PayPal", "PayPal")}</option><option value="alipay">{t("Alipay", "Alipay")}</option><option value="bank">{t("Bank transfer", "Bank transfer")}</option></select></label>
                 </div>
                 <label className="field"><span>{t("Payout account details", "Payout account details")}</span><textarea rows={2} value={cashDetails} onChange={(event) => setCashDetails(event.target.value)} placeholder={t("PayPal email / Alipay account / bank details", "PayPal email / Alipay account / bank details")} /></label>
                 <MagneticButton className="affiliate-action-button" disabled={busy || !canRequestCash || !Number.parseFloat(cashAmount) || cashDetails.trim().length === 0} onClick={() => void submitPayout("cash")}>{t("Request payout", "Request payout")}</MagneticButton>

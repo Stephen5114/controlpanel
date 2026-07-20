@@ -65,25 +65,25 @@ function VpsHome() {
     </section> : null}
     <section className="vps-section">
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: "40px" }}>
-        <div className="vps-section__heading"><div><span className="vps-section__kicker">Monthly plans</span><h2>{t("Choose your Windows VPS", "Choose your Windows VPS")}</h2><p>{t("No setup fee. Upgrade at your next renewal.", "No setup fee. Upgrade at your next renewal.")}</p></div></div>
+        <div className="vps-section__heading"><div><span className="vps-section__kicker">{t("Monthly plans", "Monthly plans")}</span><h2>{t("Choose your Windows VPS", "Choose your Windows VPS")}</h2><p>{t("No setup fee. Upgrade at your next renewal.", "No setup fee. Upgrade at your next renewal.")}</p></div></div>
         <ul className="vps-hero__assurances" aria-label="VPS service highlights">
-          <li><Check size={16} /> One static IP included</li>
-          <li><Check size={16} /> Unlimited data transfer</li>
-          <li><Check size={16} /> Ready within 24 hours</li>
+          <li><Check size={16} /> {t("One static IP included", "One static IP included")}</li>
+          <li><Check size={16} /> {t("Unlimited data transfer", "Unlimited data transfer")}</li>
+          <li><Check size={16} /> {t("Ready within 24 hours", "Ready within 24 hours")}</li>
         </ul>
       </div>
       {plans.length === 0 && !loading ? <div className="empty-panel">{t("No VPS plans are available right now.", "No VPS plans are available right now.")}</div> : null}
       <div className="vps-plan-grid">{plans.map((plan, index) => <article className={`vps-plan-card${index === 1 ? " vps-plan-card--featured" : ""}`} key={plan.id}>
-        {index === 1 ? <div className="vps-popular">Most popular</div> : null}
-        <div className="vps-plan-card__head"><span className="vps-region">Windows VPS</span><h3>{plan.name}</h3><p>{plan.description}</p></div>
-        <div className="vps-price"><strong>{formatMoney(plan.monthlyPrice, plan.currency)}</strong><span>/ month</span><small>Billed monthly</small></div>
+        {index === 1 ? <div className="vps-popular">{t("Most popular", "Most popular")}</div> : null}
+        <div className="vps-plan-card__head"><span className="vps-region">{t("Windows VPS", "Windows VPS")}</span><h3>{plan.name}</h3><p>{plan.description}</p></div>
+        <div className="vps-price"><strong>{formatMoney(plan.monthlyPrice, plan.currency)}</strong><span>{t("/ month", "/ month")}</span><small>{t("Billed monthly", "Billed monthly")}</small></div>
         <div className="vps-plan-divider" />
-        <div className="vps-specs"><span><Cpu size={17} /><span><strong>{plan.cpuCores} vCPU</strong><small>Processor cores</small></span></span><span><Database size={17} /><span><strong>{formatRam(plan.ramMb)} RAM</strong><small>Dedicated memory</small></span></span><span><HardDrive size={17} /><span><strong>{plan.storageGb} GB {plan.storageType}</strong><small>High-speed storage</small></span></span><span><Globe2 size={17} /><span><strong>{plan.bandwidth}</strong><small>Data transfer</small></span></span></div>
+        <div className="vps-specs"><span><Cpu size={17} /><span><strong>{plan.cpuCores} vCPU</strong><small>{t("Processor cores", "Processor cores")}</small></span></span><span><Database size={17} /><span><strong>{formatRam(plan.ramMb)} RAM</strong><small>{t("Dedicated memory", "Dedicated memory")}</small></span></span><span><HardDrive size={17} /><span><strong>{plan.storageGb} GB {plan.storageType}</strong><small>{t("High-speed storage", "High-speed storage")}</small></span></span><span><Globe2 size={17} /><span><strong>{plan.bandwidth}</strong><small>{t("Data transfer", "Data transfer")}</small></span></span></div>
         <label className="vps-os-label">{t("Operating system", "Operating system")}<select value={selectedOs[plan.id] ?? ""} onChange={(e) => setSelectedOs((old) => ({ ...old, [plan.id]: e.target.value }))}>{plan.operatingSystems.map((os) => <option value={os} key={os}>{os}</option>)}</select></label>
         <button className="primary-button vps-buy-button" onClick={() => void buy(plan)} disabled={busy === plan.id}><ShoppingCart size={16} />{busy === plan.id ? t("Opening checkout...", "Opening checkout...") : t("Choose plan", "Choose plan")}</button>
-        <p className="vps-fulfilment-note">Manual provisioning · Password sent by email</p>
+        <p className="vps-fulfilment-note">{t("Manual provisioning · Password sent by email", "Manual provisioning · Password sent by email")}</p>
       </article>)}</div>
-      <div className="vps-catalog-note"><strong>All plans include:</strong> full administrator access, a static IPv4 address, and your choice of supported Windows Server edition. This is an unmanaged service.</div>
+      <div className="vps-catalog-note"><strong>{t("All plans include:", "All plans include:")}</strong> {t("full administrator access, a static IPv4 address, and your choice of supported Windows Server edition. This is an unmanaged service.", "full administrator access, a static IPv4 address, and your choice of supported Windows Server edition. This is an unmanaged service.")}</div>
     </section>
   </div>;
 }
@@ -94,7 +94,7 @@ function VpsDetail({ serviceId }: { serviceId: string }) {
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  useEffect(() => { const session = getCustomerSession(); if (!session) return; getVpsService(session, serviceId).then(setService).catch((e) => setError(e instanceof Error ? e.message : "Failed to load VPS.")).finally(() => setLoading(false)); }, [serviceId]);
+  useEffect(() => { const session = getCustomerSession(); if (!session) return; getVpsService(session, serviceId).then(setService).catch((e) => setError(e instanceof Error ? e.message : t("Failed to load VPS.", "Failed to load VPS."))).finally(() => setLoading(false)); }, [serviceId]);
   const canRenew = useMemo(() => service && ["renewal_due", "expired"].includes(service.status), [service]);
   async function renew() { const session = getCustomerSession(); if (!session || !service) return; setBusy(true); setError(null); try { const r = await createVpsRenewalCheckout(session, service.id); if (r.checkoutUrl) window.location.assign(r.checkoutUrl); else if (r.success) window.location.reload(); else setError(r.message); } catch (e) { setError(e instanceof Error ? e.message : "Renewal checkout failed."); } finally { setBusy(false); } }
   if (loading) return <div className="empty-panel">{t("Loading server information...", "Loading server information...")}</div>;

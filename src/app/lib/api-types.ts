@@ -811,10 +811,14 @@ export type CustomerProfile = {
   status: string;
   createdUtc: string;
   assignedServerNodeId: string | null;
-  preferredPlanSlug: string;
-  preferredPlanName: string;
-  preferredRegionSlug: string;
-};
+    preferredPlanSlug: string;
+    preferredPlanName: string;
+    preferredRegionSlug: string;
+    hasAvatar: boolean;
+    avatarUpdatedUtc: string | null;
+    googleAvatarUrl: string | null;
+    usesGoogleSignIn: boolean;
+  };
 
 export type AddonPriceTier = {
   priceId: string;

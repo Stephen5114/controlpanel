@@ -60,6 +60,27 @@ export function getCustomerProfile(session: CustomerSession) {
   });
 }
 
+export function getCustomerAvatar(session: CustomerSession) {
+  return apiBinaryRequest("/api/me/avatar", { headers: withCustomerHeaders(session) });
+}
+
+export function uploadCustomerAvatar(session: CustomerSession, file: File) {
+  const form = new FormData();
+  form.append("file", file);
+  return apiRequest<{ success: boolean; message: string }>("/api/me/avatar", {
+    method: "POST",
+    headers: withCustomerHeaders(session),
+    body: form,
+  });
+}
+
+export function deleteCustomerAvatar(session: CustomerSession) {
+  return apiRequest<{ success: boolean; message: string }>("/api/me/avatar", {
+    method: "DELETE",
+    headers: withCustomerHeaders(session),
+  });
+}
+
 export function getCustomerAlerts(session: CustomerSession) {
   return apiRequest<CustomerAlert[]>("/api/me/alerts", {
     headers: withCustomerHeaders(session),

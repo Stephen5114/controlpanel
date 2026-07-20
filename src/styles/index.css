@@ -73,6 +73,7 @@ button:disabled {
 }
 
 .avatar {
+  position: relative;
   display: grid;
   place-items: center;
   width: 34px;
@@ -90,6 +91,40 @@ button:disabled {
 
 .avatar:hover {
   opacity: 0.85;
+}
+
+.avatar img {
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  object-fit: cover;
+}
+
+.avatar--default {
+  position: relative;
+  background: linear-gradient(145deg, #6366f1, #2563eb);
+  box-shadow: 0 3px 10px rgba(37, 99, 235, 0.25);
+}
+
+.avatar__initial {
+  font-size: 0.9rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.avatar__edit-badge {
+  position: absolute;
+  right: -4px;
+  bottom: -4px;
+  width: 16px;
+  height: 16px;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  background: #111827;
+  border: 2px solid var(--surface, #fff);
+  border-radius: 999px;
+  pointer-events: none;
 }
 
 .account__dropdown {
@@ -181,6 +216,13 @@ button:disabled {
 
 .account__dropdown-item:active {
   background: var(--border, #e5e7eb);
+}
+
+.account__dropdown-item--icon {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
 }
 
 /* ── Affiliate nav promo ── */

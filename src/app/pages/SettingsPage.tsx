@@ -1,8 +1,11 @@
-import { User, Mail, Calendar, Shield, Lock, RefreshCw } from "lucide-react";
-import { useEffect, useState } from "react";
+import { User, Mail, Calendar, Shield, Lock, RefreshCw, Camera, Trash2 } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import {
   changePassword,
+  deleteCustomerAvatar,
+  getCustomerAvatar,
   getCustomerProfile,
+  uploadCustomerAvatar,
   type CustomerProfile,
 } from "../lib/customer-api";
 import { getCustomerSession } from "../lib/customer-session";
@@ -23,6 +26,11 @@ export function SettingsPage() {
   const [profile, setProfile] = useState<CustomerProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [avatarSaving, setAvatarSaving] = useState(false);
+  const [avatarMessage, setAvatarMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
+  const avatarObjectUrlRef = useRef<string | null>(null);
 
   const [activeTab, setActiveTab] = useState<"profile" | "security">("profile");
 
@@ -32,6 +40,12 @@ export function SettingsPage() {
   const [pwSaving, setPwSaving] = useState(false);
   const [pwMessage, setPwMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
+  function replaceAvatarUrl(nextUrl: string | null) {
+    if (avatarObjectUrlRef.current) URL.revokeObjectURL(avatarObjectUrlRef.current);
+    avatarObjectUrlRef.current = nextUrl;
+    setAvatarUrl(nextUrl);
+  }
+
   useEffect(() => {
     let cancelled = false;
     async function load() {
@@ -40,6 +54,18 @@ export function SettingsPage() {
       try {
         const result = await getCustomerProfile(session);
         if (!cancelled) setProfile(result);
+        if (result.hasAvatar) {
+          try {
+            const response = await getCustomerAvatar(session);
+            const objectUrl = URL.createObjectURL(await response.blob());
+            if (cancelled) URL.revokeObjectURL(objectUrl);
+            else replaceAvatarUrl(objectUrl);
+          } catch {
+            if (!cancelled) replaceAvatarUrl(result.googleAvatarUrl);
+          }
+        } else if (!cancelled) {
+          replaceAvatarUrl(result.googleAvatarUrl);
+        }
       } catch (err) {
         if (!cancelled) setError(err instanceof Error ? err.message : t("Failed to load profile.", "Failed to load profile."));
       } finally {
@@ -49,6 +75,59 @@ export function SettingsPage() {
     load();
     return () => { cancelled = true; };
   }, []);
+
+  useEffect(() => () => {
+    if (avatarObjectUrlRef.current) URL.revokeObjectURL(avatarObjectUrlRef.current);
+  }, []);
+
+  async function handleAvatarFile(file: File | undefined) {
+    if (!file) return;
+    const supportedTypes = ["image/png", "image/jpeg", "image/webp"];
+    if (!supportedTypes.includes(file.type)) {
+      setAvatarMessage({ type: "error", text: t("Please choose a PNG, JPG, or WebP image.", "Please choose a PNG, JPG, or WebP image.") });
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      setAvatarMessage({ type: "error", text: t("The avatar must be 2 MB or smaller.", "The avatar must be 2 MB or smaller.") });
+      return;
+    }
+
+    const session = getCustomerSession();
+    if (!session) return;
+    setAvatarSaving(true);
+    setAvatarMessage(null);
+    try {
+      await uploadCustomerAvatar(session, file);
+      const response = await getCustomerAvatar(session);
+      replaceAvatarUrl(URL.createObjectURL(await response.blob()));
+      setProfile((current) => current ? { ...current, hasAvatar: true, avatarUpdatedUtc: new Date().toISOString() } : current);
+      setAvatarMessage({ type: "success", text: t("Avatar updated.", "Avatar updated.") });
+      window.dispatchEvent(new Event("avatar-changed"));
+    } catch (err) {
+      setAvatarMessage({ type: "error", text: err instanceof Error ? err.message : t("Failed to update avatar.", "Failed to update avatar.") });
+    } finally {
+      setAvatarSaving(false);
+      if (avatarInputRef.current) avatarInputRef.current.value = "";
+    }
+  }
+
+  async function handleDeleteAvatar() {
+    const session = getCustomerSession();
+    if (!session) return;
+    setAvatarSaving(true);
+    setAvatarMessage(null);
+    try {
+      await deleteCustomerAvatar(session);
+      replaceAvatarUrl(profile?.googleAvatarUrl ?? null);
+      setProfile((current) => current ? { ...current, hasAvatar: false, avatarUpdatedUtc: new Date().toISOString() } : current);
+      setAvatarMessage({ type: "success", text: t("Default avatar restored.", "Default avatar restored.") });
+      window.dispatchEvent(new Event("avatar-changed"));
+    } catch (err) {
+      setAvatarMessage({ type: "error", text: err instanceof Error ? err.message : t("Failed to remove avatar.", "Failed to remove avatar.") });
+    } finally {
+      setAvatarSaving(false);
+    }
+  }
 
   async function handleChangePassword(e: React.FormEvent) {
     e.preventDefault();
@@ -147,6 +226,39 @@ export function SettingsPage() {
               </div>
             </div>
 
+            <div className="st-avatar-editor">
+              <div className="st-avatar-preview" aria-hidden="true">
+                {avatarUrl ? <img src={avatarUrl} alt="" /> : <span className="st-avatar-initial">{(profile?.username || profile?.email || "U").trim().charAt(0).toUpperCase()}</span>}
+              </div>
+              <div className="st-avatar-content">
+                <strong>{t("Profile picture", "Profile picture")}</strong>
+                <span className="muted">{t("PNG, JPG, or WebP. Maximum 2 MB.", "PNG, JPG, or WebP. Maximum 2 MB.")}</span>
+                <div className="st-avatar-actions">
+                  <input
+                    ref={avatarInputRef}
+                    className="st-avatar-input"
+                    type="file"
+                    accept="image/png,image/jpeg,image/webp"
+                    onChange={(event) => void handleAvatarFile(event.target.files?.[0])}
+                  />
+                  <button className="secondary-button secondary-button--compact" type="button" disabled={avatarSaving} onClick={() => avatarInputRef.current?.click()}>
+                    {avatarSaving ? <RefreshCw size={15} className="spin" /> : <Camera size={15} />}
+                    {avatarUrl ? t("Change picture", "Change picture") : t("Upload picture", "Upload picture")}
+                  </button>
+                  {profile?.hasAvatar && (
+                    <button className="secondary-button secondary-button--compact secondary-button--danger" type="button" disabled={avatarSaving} onClick={() => void handleDeleteAvatar()}>
+                      <Trash2 size={15} /> {t("Remove", "Remove")}
+                    </button>
+                  )}
+                </div>
+                {avatarMessage && (
+                  <div className={`inline-message ${avatarMessage.type === "error" ? "inline-message--error" : "inline-message--success"} st-avatar-message`}>
+                    {avatarMessage.text}
+                  </div>
+                )}
+              </div>
+            </div>
+
             <div className="st-info-grid">
               <div className="st-info-row">
                 <span className="st-info-label">
@@ -189,6 +301,21 @@ export function SettingsPage() {
       {activeTab === "security" && (
         <div className="st-section-wrap--narrow">
           <article className="card">
+            {profile?.usesGoogleSignIn ? (
+              <div className="st-google-security">
+                <div className="st-google-security__icon" aria-hidden="true"><Shield size={24} /></div>
+                <div>
+                  <h3 className="st-section-title--lg">{t("Google sign-in account", "Google sign-in account")}</h3>
+                  <p className="muted st-google-security__copy">
+                    {t("This account is verified by Google and does not use a control panel password. Choose Continue with Google whenever you sign in.", "This account is verified by Google and does not use a control panel password. Choose Continue with Google whenever you sign in.")}
+                  </p>
+                  <a className="secondary-button st-google-security__link" href="https://myaccount.google.com/security" target="_blank" rel="noreferrer">
+                    {t("Manage Google account security", "Manage Google account security")}
+                  </a>
+                </div>
+              </div>
+            ) : (
+              <>
             <div className="section-head st-head-spacer--lg">
               <div>
                 <h3 className="st-section-title--lg">{t("Security Settings", "Security Settings")}</h3>
@@ -250,6 +377,8 @@ export function SettingsPage() {
                 )}
               </button>
             </form>
+              </>
+            )}
           </article>
         </div>
       )}

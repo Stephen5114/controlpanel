@@ -2,7 +2,7 @@ import { ArrowLeft, CalendarDays, Check, Clock3, Cpu, Database, Globe2, HardDriv
 import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { getCustomerSession } from "../lib/customer-session";
-import { createVpsCheckout, createVpsRenewalCheckout, getVpsCatalog, getVpsService, getVpsServices, type VpsPlan, type VpsService } from "../lib/api-vps";
+import { createVpsCheckout, createVpsRenewalCheckout, getVpsCatalog, getVpsService, type VpsPlan, type VpsService } from "../lib/api-vps";
 import { getActiveLocale, useLocalization } from "../lib/i18n";
 
 const pendingStatuses = new Set(["pending_purchase", "provisioning"]);
@@ -14,7 +14,6 @@ export function VpsPage() {
 
 function VpsHome() {
   const { t } = useLocalization();
-  const [services, setServices] = useState<VpsService[]>([]);
   const [plans, setPlans] = useState<VpsPlan[]>([]);
   const [selectedOs, setSelectedOs] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
@@ -24,9 +23,9 @@ function VpsHome() {
   useEffect(() => {
     const session = getCustomerSession();
     if (!session) return;
-    Promise.all([getVpsServices(session), getVpsCatalog(session)])
-      .then(([serviceRows, planRows]) => {
-        setServices(serviceRows); setPlans(planRows);
+    getVpsCatalog(session)
+      .then((planRows) => {
+        setPlans(planRows);
         setSelectedOs(Object.fromEntries(planRows.map((plan) => [plan.id, plan.operatingSystems[0] ?? ""])));
       })
       .catch((e) => setError(e instanceof Error ? e.message : t("Could not load VPS services.", "Could not load VPS services.")))
@@ -55,14 +54,6 @@ function VpsHome() {
     </section>
     {error ? <div className="inline-message inline-message--error">{error}</div> : null}
     {loading ? <div className="empty-panel">{t("Loading VPS services...", "Loading VPS services...")}</div> : null}
-    {!loading && services.length > 0 ? <section className="vps-section">
-      <div className="vps-section__heading"><div><h2>{t("Your servers", "Your servers")}</h2><p>{t("Server information and renewal status.", "Server information and renewal status.")}</p></div></div>
-      <div className="vps-service-grid">{services.map((service) => <Link className="vps-service-card" to={`/vps/${service.id}`} key={service.id}>
-        <div className="vps-service-card__top"><div className="vps-server-icon"><Server size={21} /></div><StatusBadge status={service.status} /></div>
-        <h3>{service.productName}</h3><p className="vps-login-id">{service.hostingLoginId}</p>
-        <div className="vps-card-meta"><span><Globe2 size={15} />{service.ipAddress || t("Pending assignment", "Pending assignment")}</span><span><CalendarDays size={15} />{formatDate(service.expiresUtc)}</span></div>
-      </Link>)}</div>
-    </section> : null}
     <section className="vps-section">
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: "40px" }}>
         <div className="vps-section__heading"><div><span className="vps-section__kicker">{t("Monthly plans", "Monthly plans")}</span><h2>{t("Choose your Windows VPS", "Choose your Windows VPS")}</h2><p>{t("No setup fee. Upgrade at your next renewal.", "No setup fee. Upgrade at your next renewal.")}</p></div></div>

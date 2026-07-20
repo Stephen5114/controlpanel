@@ -15,12 +15,18 @@ import { formatRegionLabel } from "../lib/display";
 import { getCustomerSession } from "../lib/customer-session";
 import { getActiveLocale, useLocalization } from "../lib/i18n";
 import { Badge, EmptyState, Button } from "../components";
+import { getVpsServices, type VpsService } from "../lib/api-vps";
 
 type DashboardState = {
   subs: HostingSubscription[];
+  vps: VpsService[];
   billing: BillingSubscriptionView[];
   summary: BillingSummary | null;
 };
+
+type DashboardResource =
+  | { kind: "hosting"; name: string; renewUtc?: string | null; service: HostingSubscription }
+  | { kind: "vps"; name: string; renewUtc?: string | null; service: VpsService };
 
 function formatCurrency(value: number, currency = "USD") {
   try {
@@ -52,6 +58,10 @@ function badgeTone(status: string): "success" | "warning" | "danger" | "default"
     case "past_due":
     case "draft":
     case "checkout_pending":
+    case "pending_purchase":
+    case "provisioning":
+    case "renewal_due":
+    case "renewal_paid":
       return "warning";
     case "suspended":
     case "canceled":
@@ -67,7 +77,7 @@ function statusLabel(status: string) {
 
 export function DashboardPage() {
   const { t } = useLocalization();
-  const [state, setState] = useState<DashboardState>({ subs: [], billing: [], summary: null });
+  const [state, setState] = useState<DashboardState>({ subs: [], vps: [], billing: [], summary: null });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [busyKey, setBusyKey] = useState<string | null>(null);
@@ -78,12 +88,13 @@ export function DashboardPage() {
   async function reload() {
     const session = getCustomerSession();
     if (!session) return;
-    const [subs, billing, summary] = await Promise.all([
+    const [subs, vps, billing, summary] = await Promise.all([
       getCustomerSubscriptions(session),
+      getVpsServices(session).catch(() => [] as VpsService[]),
       getBillingSubscriptions(session).catch(() => [] as BillingSubscriptionView[]),
       getBillingSummary(session).catch(() => null),
     ]);
-    setState({ subs, billing, summary });
+    setState({ subs, vps, billing, summary });
   }
 
   async function handleRenew(sub: HostingSubscription) {
@@ -155,13 +166,14 @@ export function DashboardPage() {
       setLoading(true);
       setError(null);
       try {
-        const [subs, billing, summary] = await Promise.all([
+        const [subs, vps, billing, summary] = await Promise.all([
           getCustomerSubscriptions(activeSession),
+          getVpsServices(activeSession).catch(() => [] as VpsService[]),
           getBillingSubscriptions(activeSession).catch(() => [] as BillingSubscriptionView[]),
           getBillingSummary(activeSession).catch(() => null),
         ]);
         if (!active) return;
-        setState({ subs, billing, summary });
+        setState({ subs, vps, billing, summary });
       } catch (requestError) {
         if (!active) return;
         setError(requestError instanceof Error ? requestError.message : "Cannot connect to backend.");
@@ -204,17 +216,37 @@ export function DashboardPage() {
     });
   }, [state.subs, billingByScope, sortBy]);
 
+  const dashboardResources = useMemo<DashboardResource[]>(() => {
+    const resources: DashboardResource[] = [
+      ...visibleSubs.map((service) => {
+        const billing = billingByScope.get(service.id.toLowerCase());
+        return { kind: "hosting" as const, name: service.name, renewUtc: billing?.nextInvoiceAtUtc ?? billing?.currentPeriodEndUtc, service };
+      }),
+      ...state.vps
+        .filter((service) => service.status !== "canceled")
+        .map((service) => ({ kind: "vps" as const, name: service.hostingLoginId, renewUtc: service.expiresUtc, service })),
+    ];
+
+    return resources.sort((a, b) => {
+      if (sortBy === "name-asc") return a.name.localeCompare(b.name, undefined, { numeric: true });
+      if (sortBy === "name-desc") return b.name.localeCompare(a.name, undefined, { numeric: true });
+      const aTime = a.renewUtc ? new Date(a.renewUtc).getTime() : Infinity;
+      const bTime = b.renewUtc ? new Date(b.renewUtc).getTime() : Infinity;
+      return sortBy === "renewal-asc" ? aTime - bTime : bTime - aTime;
+    });
+  }, [visibleSubs, state.vps, billingByScope, sortBy]);
+
   const currency = state.summary?.currency ?? "USD";
 
   const stats = useMemo(() => {
     const summary = state.summary;
 
     return [
-      { label: t("Subscriptions", "Subscriptions"), value: String(visibleSubs.length), detail: t("Hosting plans", "Hosting plans"), icon: <Server size={18} /> },
+      { label: t("Subscriptions", "Subscriptions"), value: String(dashboardResources.length), detail: t("Hosting and VPS", "Hosting and VPS"), icon: <Server size={18} /> },
       { label: t("Account Balance", "Account Balance"), value: summary ? formatCurrency(summary.creditBalance, currency) : "—", detail: t("Prepaid balance", "Prepaid balance"), icon: <Wallet size={18} />, actionLabel: t("Top up", "Top up"), actionTo: "/topup" },
       { label: t("Monthly Cost", "Monthly Cost"), value: summary ? formatCurrency(summary.totalMonthlyRecurring, currency) : "—", detail: t("Recurring total", "Recurring total"), icon: <CreditCard size={18} /> },
     ];
-  }, [visibleSubs, state.summary, currency, t]);
+  }, [dashboardResources, state.summary, currency, t]);
 
   // Subscriptions needing attention: past due, suspended, grace period, cancelling, or renewing within 7 days.
   const attention = useMemo(() => {
@@ -314,9 +346,9 @@ export function DashboardPage() {
           </label>
         </div>
 
-        {loading && visibleSubs.length === 0 ? <div className="empty-panel">{t("Loading subscriptions...", "Loading subscriptions...")}</div> : null}
+        {loading && dashboardResources.length === 0 ? <div className="empty-panel">{t("Loading subscriptions...", "Loading subscriptions...")}</div> : null}
 
-        {!loading && visibleSubs.length === 0 ? (
+        {!loading && dashboardResources.length === 0 ? (
           <EmptyState
             title={t("No subscriptions yet", "No subscriptions yet")}
             description={t("Choose a hosting plan to get your first site online.", "Choose a hosting plan to get your first site online.")}
@@ -329,9 +361,38 @@ export function DashboardPage() {
           />
         ) : null}
 
-        {visibleSubs.length > 0 ? (
+        {dashboardResources.length > 0 ? (
           <div className="two-up-grid">
-            {visibleSubs.map((sub) => {
+            {dashboardResources.map((resource) => {
+              if (resource.kind === "vps") {
+                const service = resource.service;
+                const days = daysUntil(service.expiresUtc);
+                const renewTone = days === null ? "muted" : days < 0 ? "dashboard-renew--danger" : days <= 7 ? "dashboard-renew--warn" : "muted";
+                return (
+                  <div key={`vps-${service.id}`} className="card project-card" onClick={() => navigate(`/vps/${service.id}`)}>
+                    <div className="project-card__header">
+                      <div className="project-card__identity">
+                        <div className="project-card__icon"><Server size={20} /></div>
+                        <div>
+                          <h3 className="project-card__name">{service.hostingLoginId}</h3>
+                          <p className="muted project-card__plan">{service.productName} · VPS</p>
+                        </div>
+                      </div>
+                      <Badge tone={badgeTone(service.status)}>{statusLabel(service.status)}</Badge>
+                    </div>
+                    <div className={`dashboard-renew ${renewTone}`}>
+                      <CalendarClock size={14} />
+                      <span>{service.expiresUtc ? `${t("Next Renewal", "Next Renewal")}: ${formatDate(service.expiresUtc)}` : t("Provisioning in progress", "Provisioning in progress")}</span>
+                    </div>
+                    <div className="project-card__meta">
+                      <span className="project-card__meta-item"><Globe size={14} /> {formatRegionLabel(service.region)}</span>
+                      <span className="project-card__meta-item"><Activity size={14} /> {service.ipAddress || t("Pending assignment", "Pending assignment")}</span>
+                      <span className="project-card__meta-item"><Database size={14} /> {service.operatingSystem || t("Operating system pending", "Operating system pending")}</span>
+                    </div>
+                  </div>
+                );
+              }
+              const sub = resource.service;
               const billing = billingByScope.get(sub.id.toLowerCase());
               const effectiveStatus = (billing?.status ?? sub.status).toLowerCase();
               const isPending = effectiveStatus === "draft" || effectiveStatus === "checkout_pending";

@@ -1,8 +1,8 @@
-import { ChevronDown, CreditCard, Gift, Globe2, Headphones, LayoutDashboard, Menu, Package, Server, Settings, User, X, Sun, Moon, Palette, Eye } from "lucide-react";
+import { Camera, ChevronDown, CreditCard, Gift, Globe2, Headphones, LayoutDashboard, Menu, Package, Server, Settings, X, Sun, Moon, Palette, Eye } from "lucide-react";
 import { Logo } from "../components/Logo";
 import { useEffect, useMemo, useState } from "react";
 import { Link, NavLink, Outlet, useNavigate } from "react-router-dom";
-import { getBillingSummary, getCustomerProfile } from "../lib/customer-api";
+import { getBillingSummary, getCustomerAvatar, getCustomerProfile } from "../lib/customer-api";
 import { clearCustomerSession, getCustomerSession } from "../lib/customer-session";
 import { getActiveLocale, useLocalization, LANGUAGES } from "../lib/i18n";
 import { useTheme } from "../lib/theme";
@@ -20,9 +20,10 @@ const navigation = [
 
 function Sidebar({
   navigation, mobileOpen, onNavClick, theme, ThemeIcon, setThemeMenuOpen,
-  avatarDropdownOpen, setAvatarDropdownOpen, username, session,
+  avatarDropdownOpen, setAvatarDropdownOpen, username, avatarUrl, session,
   accountBalance, accountBalanceTone, handleSignOut, t
 }: any) {
+  const avatarInitial = (username ?? session?.email ?? "U").trim().charAt(0).toUpperCase() || "U";
   return (
     <aside className={`sidebar${mobileOpen ? " sidebar--open" : ""}`}>
       <div className="sidebar__header">
@@ -48,9 +49,10 @@ function Sidebar({
       </nav>
 
       <div className="sidebar__footer">
-        <div className="account__avatar-wrapper" style={{ position: "relative" }} onClick={() => setAvatarDropdownOpen((v: boolean) => !v)}>
-          <button className="avatar" type="button" aria-label={t("Account menu", "Account menu")}>
-            <User size={18} />
+        <div className="account__avatar-wrapper" style={{ position: "relative" }}>
+          <button className={`avatar${avatarUrl ? " avatar--custom" : " avatar--default"}`} onClick={() => setAvatarDropdownOpen((v: boolean) => !v)} type="button" aria-label={t("Account menu", "Account menu")}>
+            {avatarUrl ? <img src={avatarUrl} alt="" /> : <span className="avatar__initial">{avatarInitial}</span>}
+            <span className="avatar__edit-badge" aria-hidden="true"><Camera size={9} /></span>
           </button>
           <span className="account__avatar-name">{username ?? session?.email ?? "Signed in"}</span>
           {avatarDropdownOpen && (
@@ -61,6 +63,9 @@ function Sidebar({
                 <strong>{accountBalance ? formatCurrency(accountBalance.amount, accountBalance.currency) : "..."}</strong>
               </div>
               <div className="account__dropdown-divider" />
+              <Link className="account__dropdown-item account__dropdown-item--icon" to="/settings" onClick={() => setAvatarDropdownOpen(false)}>
+                <Camera size={15} /> {t("Change profile picture", "Change profile picture")}
+              </Link>
               <button className="account__dropdown-item" onClick={() => { handleSignOut(); setAvatarDropdownOpen(false); }} type="button">
                 {t("Sign out", "Sign out")}
               </button>
@@ -79,6 +84,7 @@ export function RootLayout() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [accountBalance, setAccountBalance] = useState<{ amount: number; currency: string } | null>(null);
   const [username, setUsername] = useState<string | null>(null);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [avatarDropdownOpen, setAvatarDropdownOpen] = useState(false);
   const [themeMenuOpen, setThemeMenuOpen] = useState(false);
   const navigate = useNavigate();
@@ -169,18 +175,33 @@ export function RootLayout() {
     // Refresh immediately when another part of the app signals a balance change
     window.addEventListener("balance-changed", refreshBalance);
 
-    void getCustomerProfile(session)
-      .then((profile) => {
+    async function refreshProfile() {
+      try {
+        const profile = await getCustomerProfile(session!);
         if (cancelled) return;
         setUsername(profile.username);
-      })
-      .catch(() => {});
+        if (!profile.hasAvatar) {
+          setAvatarUrl((current) => { if (current?.startsWith("blob:")) URL.revokeObjectURL(current); return profile.googleAvatarUrl; });
+          return;
+        }
+        const response = await getCustomerAvatar(session!);
+        const nextUrl = URL.createObjectURL(await response.blob());
+        if (cancelled) { URL.revokeObjectURL(nextUrl); return; }
+        setAvatarUrl((current) => { if (current) URL.revokeObjectURL(current); return nextUrl; });
+      } catch {
+        if (!cancelled) setAvatarUrl((current) => { if (current?.startsWith("blob:")) URL.revokeObjectURL(current); return null; });
+      }
+    }
+
+    void refreshProfile();
+    window.addEventListener("avatar-changed", refreshProfile);
 
     return () => {
       cancelled = true;
       window.clearInterval(timer);
       window.removeEventListener("focus", refreshBalance);
       window.removeEventListener("balance-changed", refreshBalance);
+      window.removeEventListener("avatar-changed", refreshProfile);
     };
   }, [session?.customerId, session?.token]);
 
@@ -214,6 +235,7 @@ export function RootLayout() {
           avatarDropdownOpen={avatarDropdownOpen}
           setAvatarDropdownOpen={setAvatarDropdownOpen}
           username={username}
+          avatarUrl={avatarUrl}
           session={session}
           accountBalance={accountBalance}
           accountBalanceTone={accountBalanceTone}

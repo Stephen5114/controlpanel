@@ -1,4 +1,7 @@
 {
+  "Hosting and VPS": "ホスティングと VPS",
+  "Provisioning in progress": "プロビジョニング中",
+  "Operating system pending": "OS 設定待ち",
   "Virtual Private Servers": "仮想プライベートサーバー",
   "Simple unmanaged VPS with clear monthly pricing and personal delivery.": "明確な月額料金と個別納品のアンマネージド VPS。",
   "Your servers": "ご利用中のサーバー",
@@ -1009,9 +1012,7 @@
   "Use as account credit": "アカウントクレジットとして使用",
   "Apply earnings to your billing balance instantly for services and renewals.": "収益を即座に請求残高に適用してサービスや更新に使用できます。",
   "Withdraw your available balance using your preferred payout method.": "希望の支払い方法で利用可能残高を引き出します。",
-  "Share via": "共有方法"
-}
-
+  "Share via": "共有方法",
   "VPS": "VPS",
   "Refer & earn up to ${amount}/mo": "紹介して月最大${amount}獲得",
   "Open Refer & Earn": "紹介・収益を開く"

@@ -20,7 +20,10 @@ export {
 export {
   getHostingCatalog,
   getAssignedServer,
-  getCustomerProfile,
+    getCustomerProfile,
+    getCustomerAvatar,
+    uploadCustomerAvatar,
+    deleteCustomerAvatar,
   getCustomerAlerts,
   saveCustomerPreferences,
   changePassword,

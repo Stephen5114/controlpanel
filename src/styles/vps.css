@@ -33,7 +33,6 @@
 .vps-plan-card{position:relative;display:flex;flex-direction:column;min-width:0;padding:27px 22px 20px;border:1px solid var(--border);border-radius:10px;background:var(--surface);box-shadow:0 1px 2px rgba(15,23,42,.035)}
 .vps-plan-card--featured{border:2px solid var(--primary);padding:26px 21px 19px}
 .vps-popular{position:absolute;top:0;left:50%;transform:translate(-50%,-50%);padding:5px 12px;border-radius:99px;background:var(--primary);color:#fff;font-size:.68rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}
-.vps-plan-card__head{min-height:148px}
 .vps-plan-card__head p{font-size:.78rem;line-height:1.5}
 .vps-price{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px;margin-top:18px}
 .vps-price strong{font-size:2rem;line-height:1;font-weight:800;letter-spacing:-.045em}
@@ -61,5 +60,5 @@
 .vps-info-table{margin:14px 0 0}.vps-info-table>div{display:grid;grid-template-columns:minmax(180px,32%) 1fr;padding:13px 10px;border-bottom:1px solid var(--border)}.vps-info-table dt{color:var(--muted)}.vps-info-table dd{margin:0;font-weight:650;overflow-wrap:anywhere}
 .vps-status-card{padding:20px 28px;display:flex;align-items:center;justify-content:space-between;gap:18px}.vps-status-card>div{display:flex;align-items:center;gap:25px}.vps-status-card>div>span:first-child{color:var(--muted)}.vps-status-card .primary-button{display:inline-flex;align-items:center;gap:7px}
 
-@media(max-width:1050px){.vps-plan-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.vps-plan-card__head{min-height:125px}}
+@media(max-width:1050px){.vps-plan-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:700px){.product-tabs{align-items:flex-start;gap:12px}.product-tabs__label{padding-top:14px}.product-tabs__list{flex:1;gap:18px}.product-tab__copy span{display:none}.vps-page{gap:28px}.vps-hero{display:grid;gap:24px;padding:24px 1px}.vps-hero__assurances{min-width:0}.vps-plan-grid{grid-template-columns:1fr;gap:18px}.vps-plan-card__head{min-height:0}.vps-information-card{padding:22px}.vps-status-card{align-items:stretch;flex-direction:column}.vps-info-table>div{grid-template-columns:1fr;gap:5px}.vps-status-card .primary-button{justify-content:center}}

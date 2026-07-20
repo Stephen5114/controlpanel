@@ -248,9 +248,8 @@ export function BillingPage() {
           <h1>{t("Payments, invoices, and renewals", "Payments, invoices, and renewals")}</h1>
           <p className="page-copy">{t("Track outstanding balances, subscriptions, payment methods, and your full finance history in one place.", "Track outstanding balances, subscriptions, payment methods, and your full finance history in one place.")}</p>
         </div>
-        <button className="secondary-button" type="button" onClick={() => void refresh()} disabled={busyKey === "refresh"}>
-          <RefreshCw size={16} />
-          {busyKey === "refresh" ? t("Refreshing...", "Refreshing...") : t("Refresh", "Refresh")}
+        <button className="dm-icon-button" type="button" onClick={() => void refresh()} disabled={busyKey === "refresh"} aria-label={t("Refresh", "Refresh")}>
+          <RefreshCw size={18} />
         </button>
       </section>
 

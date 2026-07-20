@@ -48,16 +48,14 @@ function Sidebar({
       </nav>
 
       <div className="sidebar__footer">
-        <div className="account__avatar-wrapper" style={{ position: "relative" }}>
-          <button className="avatar" onClick={() => setAvatarDropdownOpen((v: boolean) => !v)} type="button" aria-label={t("Account menu", "Account menu")}>
+        <div className="account__avatar-wrapper" style={{ position: "relative" }} onClick={() => setAvatarDropdownOpen((v: boolean) => !v)}>
+          <button className="avatar" type="button" aria-label={t("Account menu", "Account menu")}>
             <User size={18} />
           </button>
           <span className="account__avatar-name">{username ?? session?.email ?? "Signed in"}</span>
           {avatarDropdownOpen && (
             <div className="account__dropdown account__dropdown--sidebar">
-              <div className="account__dropdown-header">
-                <div className="account__dropdown-name">{username ?? session?.email ?? "Signed in"}</div>
-              </div>
+              <div className="account__dropdown-header"></div>
               <div className={`account__dropdown-balance ${accountBalanceTone}`}>
                 <span>{t("Balance", "Balance")}</span>
                 <strong>{accountBalance ? formatCurrency(accountBalance.amount, accountBalance.currency) : "..."}</strong>

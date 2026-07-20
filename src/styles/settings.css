@@ -31,18 +31,11 @@
 }
 
 /* Profile & Security sections */
-.st-section-wrap {
-  max-width: 720px;
-}
-
+.st-section-wrap,
 .st-section-wrap--narrow {
   max-width: 600px;
   margin: 0 auto;
   width: 100%;
-}
-
-.st-card {
-  background: var(--surface);
 }
 
 .st-head-spacer {
@@ -84,9 +77,9 @@
   align-items: center;
   justify-content: space-between;
   padding: 14px 18px;
-  border-radius: 16px;
-  background: var(--surface-soft);
+  background: var(--card-bg);
   border: 1px solid var(--border);
+  border-radius: var(--radius);
 }
 
 .st-info-label {

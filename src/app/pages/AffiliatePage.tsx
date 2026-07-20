@@ -81,16 +81,6 @@ function MagneticButton({
   );
 }
 
-function HandDrawnReward() {
-  return (
-    <svg className="affiliate-handdrawn" viewBox="0 0 72 72" role="img" aria-label="Reward illustration">
-      <path d="M16 38c5-15 28-22 42-10 10 9 5 28-10 33-16 5-38-7-32-23Z" />
-      <path d="m27 36 7 7 13-16M20 18c5 1 8-2 9-7M49 13c-1 5 2 8 7 9M57 47c5 0 8 3 8 8" />
-      <path d="M13 52c4-2 7-1 9 3" />
-    </svg>
-  );
-}
-
 function formatMoney(amount: number, currency: string) {
   return `${currency.toUpperCase() === "USD" ? "$" : `${currency.toUpperCase()} `}${amount.toFixed(2)}`;
 }
@@ -301,7 +291,6 @@ export function AffiliatePage() {
             transition={{ type: "spring", stiffness: 170, damping: 20 }}
           >
             <div className="affiliate-hero__copy">
-              <span className="affiliate-hero__icon"><HandDrawnReward /></span>
               <h2>{t("Give a discount. Get rewarded.", "Give a discount. Get rewarded.")}</h2>
               <p>
                 {t(
@@ -360,19 +349,22 @@ export function AffiliatePage() {
             </div>
             <div className="affiliate-steps">
               <motion.article whileHover={{ y: -6, rotate: -0.35 }} transition={{ type: "spring", stiffness: 360, damping: 18 }}>
-                <span>1</span><Share2 size={22} />
+                <span>1</span>
+                <div><Share2 size={22} />
                 <h3>{t("Share your link", "Share your link")}</h3>
-                <p>{t("Send it directly or post it wherever your audience follows you.", "Send it directly or post it wherever your audience follows you.")}</p>
+                <p>{t("Send it directly or post it wherever your audience follows you.", "Send it directly or post it wherever your audience follows you.")}</p></div>
               </motion.article>
               <motion.article whileHover={{ y: -6, rotate: 0.35 }} transition={{ type: "spring", stiffness: 360, damping: 18 }}>
-                <span>2</span><UserPlus size={22} />
+                <span>2</span>
+                <div><UserPlus size={22} />
                 <h3>{t("A friend signs up", "A friend signs up")}</h3>
-                <p>{t("They receive the new customer discount and purchase a service.", "They receive the new customer discount and purchase a service.")}</p>
+                <p>{t("They receive the new customer discount and purchase a service.", "They receive the new customer discount and purchase a service.")}</p></div>
               </motion.article>
               <motion.article whileHover={{ y: -6, rotate: -0.35 }} transition={{ type: "spring", stiffness: 360, damping: 18 }}>
-                <span>3</span><Banknote size={22} />
+                <span>3</span>
+                <div><Banknote size={22} />
                 <h3>{t("You earn a reward", "You earn a reward")}</h3>
-                <p>{t("After the {days}-day protection period, the commission becomes available.", "After the {days}-day protection period, the commission becomes available.").replace("{days}", String(overview.commissionHoldDays))}</p>
+                <p>{t("After the {days}-day protection period, the commission becomes available.", "After the {days}-day protection period, the commission becomes available.").replace("{days}", String(overview.commissionHoldDays))}</p></div>
               </motion.article>
             </div>
           </section>

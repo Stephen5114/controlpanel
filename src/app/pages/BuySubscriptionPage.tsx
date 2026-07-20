@@ -306,7 +306,7 @@ export function BuySubscriptionPage() {
   return (
     <div className="stack bs-wrapper">
       {productSwitcher}
-      <section className="page-hero">
+      <section className="page-hero page-hero--inline">
         <p className="eyebrow">{t("Store", "Store")}</p>
         <h1>{isUpgradeMode ? t("Upgrade Your Plan", "Upgrade Your Plan") : t("Purchase Hosting Subscription", "Purchase Hosting Subscription")}</h1>
         <p className="page-copy">

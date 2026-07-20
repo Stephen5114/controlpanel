@@ -41,15 +41,6 @@
   text-transform: uppercase;
 }
 
-.auth-card h1 {
-  margin: 0;
-  font-size: clamp(1.5rem, 2.5vw, 1.85rem);
-  letter-spacing: -0.03em;
-  line-height: 1.15;
-  font-weight: 700;
-  color: var(--text);
-}
-
 .auth-card .page-copy {
   color: var(--muted);
   font-size: 0.9rem;

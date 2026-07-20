@@ -148,12 +148,6 @@
   text-align: center;
 }
 
-.files-workbench__empty-state h2 {
-  margin: 0;
-  color: var(--text);
-  font-size: 1.1rem;
-}
-
 .files-workbench__empty-state p {
   max-width: 420px;
   margin: 0;
@@ -205,13 +199,6 @@
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-}
-
-.files-workbench__editor-copy h2 {
-  margin: 0;
-  color: var(--text);
-  font-size: 1.32rem;
-  font-weight: 650;
 }
 
 .files-workbench__editor-copy p {
@@ -304,12 +291,6 @@
   border-radius: 18px;
   background: var(--surface-soft);
   text-align: center;
-}
-
-.files-workbench__editor-loading h3 {
-  margin: 0;
-  color: var(--text);
-  font-size: 1.05rem;
 }
 
 .files-workbench__editor-loading p {

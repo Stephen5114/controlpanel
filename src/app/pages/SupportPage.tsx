@@ -365,7 +365,7 @@ export function SupportPage() {
       <aside className="support-sidebar">
         <div>
           <p className="eyebrow">{t("Support", "Support")}</p>
-          <h1>{t("Support Center", "Support Center")}</h1>
+          <h2>{t("Support Center", "Support Center")}</h2>
         </div>
         <nav className="support-nav">
           <SupportNavButton active={view === "tickets"} icon={<Ticket size={18} />} label={t("My Tickets", "My Tickets")} onClick={() => setView("tickets")} />
@@ -538,7 +538,7 @@ function TicketDetail({ ticket, reply, setReply, replyFiles, setReplyFiles, onRe
   getStatusLabel: (status: string) => string;
 }) {
   const { t } = useLocalization();
-  if (!ticket) return <div className="support-detail empty-panel"><h2>{t("Select a ticket", "Select a ticket")}</h2><p>{t("Choose a ticket to view the full conversation.", "Choose a ticket to view the full conversation.")}</p></div>;
+  if (!ticket) return <div className="support-detail empty-panel"><h3>{t("Select a ticket", "Select a ticket")}</h3><p>{t("Choose a ticket to view the full conversation.", "Choose a ticket to view the full conversation.")}</p></div>;
   const isClosed = ticket.status === "resolved";
   return (
     <div className="support-detail">

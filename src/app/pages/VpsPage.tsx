@@ -46,14 +46,13 @@ function VpsHome() {
   }
 
   return <div className="vps-page">
-    <header className="vps-hero">
-      <div className="vps-hero__copy"><span className="vps-eyebrow">Windows VPS Hosting</span><h1>{t("High-performance VPS, without the complexity", "High-performance VPS, without the complexity")}</h1><p>{t("Dedicated resources, predictable monthly pricing, and personal provisioning by our hosting team.", "Dedicated resources, predictable monthly pricing, and personal provisioning by our hosting team.")}</p></div>
-      <ul className="vps-hero__assurances" aria-label="VPS service highlights">
-        <li><Check size={16} /> One static IP included</li>
-        <li><Check size={16} /> Unlimited data transfer</li>
-        <li><Check size={16} /> Ready within 24 hours</li>
-      </ul>
-    </header>
+    <section className="page-hero page-hero--inline">
+      <div>
+        <p className="eyebrow">Windows VPS Hosting</p>
+        <h1>{t("High-performance VPS, without the complexity", "High-performance VPS, without the complexity")}</h1>
+        <p className="page-copy">{t("Dedicated resources, predictable monthly pricing, and personal provisioning by our hosting team.", "Dedicated resources, predictable monthly pricing, and personal provisioning by our hosting team.")}</p>
+      </div>
+    </section>
     {error ? <div className="inline-message inline-message--error">{error}</div> : null}
     {loading ? <div className="empty-panel">{t("Loading VPS services...", "Loading VPS services...")}</div> : null}
     {!loading && services.length > 0 ? <section className="vps-section">
@@ -65,7 +64,14 @@ function VpsHome() {
       </Link>)}</div>
     </section> : null}
     <section className="vps-section">
-      <div className="vps-section__heading"><div><span className="vps-section__kicker">Monthly plans</span><h2>{t("Choose your Windows VPS", "Choose your Windows VPS")}</h2><p>{t("No setup fee. Upgrade at your next renewal.", "No setup fee. Upgrade at your next renewal.")}</p></div></div>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: "40px" }}>
+        <div className="vps-section__heading"><div><span className="vps-section__kicker">Monthly plans</span><h2>{t("Choose your Windows VPS", "Choose your Windows VPS")}</h2><p>{t("No setup fee. Upgrade at your next renewal.", "No setup fee. Upgrade at your next renewal.")}</p></div></div>
+        <ul className="vps-hero__assurances" aria-label="VPS service highlights">
+          <li><Check size={16} /> One static IP included</li>
+          <li><Check size={16} /> Unlimited data transfer</li>
+          <li><Check size={16} /> Ready within 24 hours</li>
+        </ul>
+      </div>
       {plans.length === 0 && !loading ? <div className="empty-panel">{t("No VPS plans are available right now.", "No VPS plans are available right now.")}</div> : null}
       <div className="vps-plan-grid">{plans.map((plan, index) => <article className={`vps-plan-card${index === 1 ? " vps-plan-card--featured" : ""}`} key={plan.id}>
         {index === 1 ? <div className="vps-popular">Most popular</div> : null}

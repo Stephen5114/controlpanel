@@ -138,7 +138,7 @@ export function SiteSettingsPage() {
 
   return (
     <div className="stack">
-      <section className="page-hero ss-hero">
+      <section className="page-hero page-hero--inline">
         <div>
           <p className="eyebrow">{formatRegionLabel(site.regionSlug)}</p>
           <h1>{site.siteName}</h1>

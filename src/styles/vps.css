@@ -10,26 +10,22 @@
 .product-tab__copy strong{font-size:.94rem}
 .product-tab__copy span{font-size:.76rem;color:var(--muted)}
 
-.vps-page{display:grid;gap:38px;color:var(--text)}
-.vps-hero{display:flex;align-items:flex-end;justify-content:space-between;gap:40px;padding:36px 2px 34px;border-bottom:1px solid var(--border)}
-.vps-hero__copy{max-width:720px}
+.vps-page{display:grid;gap:15px;color:var(--text)}
 .vps-eyebrow,.vps-section__kicker,.vps-region{display:block;color:var(--primary);font-size:.75rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase}
-.vps-hero h1{max-width:680px;margin:10px 0 12px;font-size:clamp(2rem,4vw,3.15rem);line-height:1.08;letter-spacing:-.045em}
-.vps-hero p,.vps-section__heading p,.vps-plan-card p{color:var(--muted);margin:0;line-height:1.6}
-.vps-hero__assurances{display:grid;gap:10px;min-width:225px;margin:0;padding:0;list-style:none;color:var(--text);font-size:.86rem;font-weight:650}
+.vps-section__heading p,.vps-plan-card p{color:var(--muted);margin:0;line-height:1.6}
+.vps-hero__assurances{display:grid;gap:10px;min-width:225px;margin:0;padding:0;list-style:none;color:var(--text);font-size:.86rem;font-weight:650;flex-shrink:0}
 .vps-hero__assurances li{display:flex;align-items:center;gap:9px}
 .vps-hero__assurances svg{color:var(--success)}
 
 .vps-section{display:grid;gap:20px}
 .vps-section__heading{display:flex;align-items:end;justify-content:space-between}
-.vps-section__heading h2{margin:6px 0 5px;font-size:1.65rem;letter-spacing:-.025em}
 .vps-service-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:16px}
 .vps-service-card,.vps-information-card,.vps-status-card{border:1px solid var(--border);border-radius:12px;background:var(--surface);box-shadow:0 1px 2px rgba(15,23,42,.04)}
 .vps-service-card{padding:22px;transition:border-color .18s ease,box-shadow .18s ease}
 .vps-service-card:hover{border-color:var(--primary);box-shadow:0 8px 24px rgba(15,23,42,.07)}
 .vps-service-card__top,.vps-information-card__header{display:flex;align-items:center;justify-content:space-between;gap:14px}
 .vps-server-icon{width:42px;height:42px;border-radius:8px;background:var(--primary-soft);color:var(--primary);display:grid;place-items:center}
-.vps-service-card h3{margin:18px 0 4px}.vps-login-id{margin:0;color:var(--muted);font-size:.86rem}
+.vps-login-id{margin:0;color:var(--muted);font-size:.86rem}
 .vps-card-meta{display:grid;gap:9px;margin-top:18px;padding-top:16px;border-top:1px solid var(--border)}
 .vps-card-meta span{display:flex;align-items:center;gap:9px;color:var(--muted)}
 
@@ -38,12 +34,11 @@
 .vps-plan-card--featured{border:2px solid var(--primary);padding:26px 21px 19px}
 .vps-popular{position:absolute;top:0;left:50%;transform:translate(-50%,-50%);padding:5px 12px;border-radius:99px;background:var(--primary);color:#fff;font-size:.68rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}
 .vps-plan-card__head{min-height:148px}
-.vps-plan-card h3{margin:8px 0 8px;font-size:1.28rem;letter-spacing:-.02em}
 .vps-plan-card__head p{font-size:.78rem;line-height:1.5}
-.vps-price{display:grid;grid-template-columns:auto 1fr;align-items:baseline;margin-top:18px}
+.vps-price{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px;margin-top:18px}
 .vps-price strong{font-size:2rem;line-height:1;font-weight:800;letter-spacing:-.045em}
 .vps-price>span{margin-left:5px;color:var(--muted);font-size:.78rem}
-.vps-price small{grid-column:1/-1;margin-top:5px;color:var(--muted);font-size:.7rem}
+.vps-price small{flex-basis:100%;margin-top:5px;color:var(--muted);font-size:.7rem}
 .vps-plan-divider{height:1px;margin:20px 0;background:var(--border)}
 .vps-specs{display:grid;gap:15px;margin-bottom:22px}
 .vps-specs>span{display:grid;grid-template-columns:19px 1fr;align-items:start;gap:9px;color:var(--muted)}
@@ -61,7 +56,7 @@
 .vps-status{display:inline-flex;align-items:center;border-radius:999px;padding:6px 10px;font-size:.76rem;font-weight:850;background:var(--primary-soft);color:var(--primary)}
 .vps-status--active{background:var(--success-soft);color:var(--success)}.vps-status--expired,.vps-status--canceled{background:var(--error-soft);color:var(--error)}.vps-status--renewal_due{background:var(--warning-soft);color:var(--warning)}.vps-status--renewal_paid{background:var(--primary-soft);color:var(--primary)}
 .vps-detail-page{max-width:1100px;margin:0 auto}.vps-back{display:inline-flex;align-items:center;gap:7px;color:var(--primary);font-weight:750}
-.vps-information-card{padding:28px}.vps-information-card__header h1{margin:0 0 5px;font-size:1.55rem}.vps-information-card__header p{margin:0;color:var(--muted)}
+.vps-information-card{padding:28px}.vps-information-card__header p{margin:0;color:var(--muted)}
 .vps-notice,.vps-credentials-note{margin-top:22px;padding:14px 16px;border-radius:7px;background:var(--primary-soft);color:var(--text);display:flex;align-items:center;gap:10px}
 .vps-info-table{margin:14px 0 0}.vps-info-table>div{display:grid;grid-template-columns:minmax(180px,32%) 1fr;padding:13px 10px;border-bottom:1px solid var(--border)}.vps-info-table dt{color:var(--muted)}.vps-info-table dd{margin:0;font-weight:650;overflow-wrap:anywhere}
 .vps-status-card{padding:20px 28px;display:flex;align-items:center;justify-content:space-between;gap:18px}.vps-status-card>div{display:flex;align-items:center;gap:25px}.vps-status-card>div>span:first-child{color:var(--muted)}.vps-status-card .primary-button{display:inline-flex;align-items:center;gap:7px}

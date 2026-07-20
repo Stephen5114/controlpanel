@@ -244,14 +244,6 @@
   margin-bottom: 28px;
 }
 
-.al-hero__text h1 {
-  margin: 0;
-  font-size: clamp(1.6rem, 2.5vw, 2.2rem);
-  font-weight: 800;
-  color: var(--text);
-  letter-spacing: -0.03em;
-}
-
 .al-hero__text p {
   margin: 8px 0 0;
   color: var(--muted);
@@ -400,13 +392,6 @@
   align-items: center;
   justify-content: space-between;
   margin-bottom: 16px;
-}
-
-.al-table-section__header h3 {
-  margin: 0;
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: var(--text);
 }
 
 .al-table-section__view-link {
@@ -597,10 +582,6 @@
   gap: 16px;
 }
 
-.al-modal-card__head h2 {
-  margin: 0;
-}
-
 .al-module {
   display: grid;
   gap: 28px;
@@ -669,11 +650,6 @@
   color: var(--muted);
   text-transform: uppercase;
   letter-spacing: 0.08em;
-}
-
-.al-module-card h3 {
-  margin: 0;
-  color: var(--text);
 }
 
 .al-module-card p {
@@ -859,13 +835,6 @@
   gap: 20px;
 }
 
-.al-infra-panel>h3 {
-  margin: 0;
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: var(--text);
-}
-
 .al-health-card {
   background: var(--primary);
   border-radius: 18px;
@@ -931,13 +900,6 @@
   align-items: center;
   justify-content: space-between;
   margin-bottom: 16px;
-}
-
-.al-notices__header h3 {
-  margin: 0;
-  font-size: 1rem;
-  font-weight: 700;
-  color: var(--text);
 }
 
 .al-notices__badge {
@@ -1024,13 +986,6 @@
   gap: 18px;
   padding: 16px 18px;
   border-bottom: 1px solid var(--border);
-}
-
-.files-workbench__toolbar-title h1 {
-  margin: 0;
-  color: var(--text);
-  font-size: 1.5rem;
-  font-weight: 600;
 }
 
 .files-workbench__toolbar-title p {

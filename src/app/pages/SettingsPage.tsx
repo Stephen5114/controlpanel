@@ -76,9 +76,11 @@ export function SettingsPage() {
   if (loading) {
     return (
       <div className="stack">
-        <section className="page-hero">
-          <p className="eyebrow">{t("Settings", "Settings")}</p>
-          <h1>{t("Account settings", "Account settings")}</h1>
+        <section className="page-hero page-hero--inline">
+          <div>
+            <p className="eyebrow">{t("Settings", "Settings")}</p>
+            <h1>{t("Account settings", "Account settings")}</h1>
+          </div>
         </section>
         <section className="content-grid">
           <article className="card span-3">
@@ -92,9 +94,11 @@ export function SettingsPage() {
   if (error) {
     return (
       <div className="stack">
-        <section className="page-hero">
-          <p className="eyebrow">{t("Settings", "Settings")}</p>
-          <h1>{t("Account settings", "Account settings")}</h1>
+        <section className="page-hero page-hero--inline">
+          <div>
+            <p className="eyebrow">{t("Settings", "Settings")}</p>
+            <h1>{t("Account settings", "Account settings")}</h1>
+          </div>
         </section>
         <section className="content-grid">
           <article className="card span-3">
@@ -107,10 +111,12 @@ export function SettingsPage() {
 
   return (
     <div className="stack">
-      <section className="page-hero">
-        <p className="eyebrow">{t("Settings", "Settings")}</p>
-        <h1>{t("Account settings", "Account settings")}</h1>
-        <p className="page-copy">{t("Manage your profile and security.", "Manage your profile and security.")}</p>
+      <section className="page-hero page-hero--inline">
+        <div>
+          <p className="eyebrow">{t("Settings", "Settings")}</p>
+          <h1>{t("Account settings", "Account settings")}</h1>
+          <p className="page-copy">{t("Manage your profile and security.", "Manage your profile and security.")}</p>
+        </div>
       </section>
 
       {/* Tabs */}
@@ -133,11 +139,11 @@ export function SettingsPage() {
 
       {activeTab === "profile" && (
         <div className="st-section-wrap">
-          <article className="card st-card">
-            <div className="section-head st-head-spacer">
+          <article className="card">
+            <div className="section-head st-head-spacer--lg">
               <div>
-                <h3 className="st-section-title">{t("Profile Information", "Profile Information")}</h3>
-                <p className="muted st-section-desc">{t("Your account registration details", "Your account registration details")}</p>
+                <h3 className="st-section-title--lg">{t("Profile Information", "Profile Information")}</h3>
+                <p className="muted st-section-desc--sm">{t("Your account registration details", "Your account registration details")}</p>
               </div>
             </div>
 
@@ -182,7 +188,7 @@ export function SettingsPage() {
 
       {activeTab === "security" && (
         <div className="st-section-wrap--narrow">
-          <article className="card st-card">
+          <article className="card">
             <div className="section-head st-head-spacer--lg">
               <div>
                 <h3 className="st-section-title--lg">{t("Security Settings", "Security Settings")}</h3>

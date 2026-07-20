@@ -131,13 +131,6 @@ button:disabled {
   padding: 4px 8px 8px;
 }
 
-.account__dropdown-name {
-  font-weight: 600;
-  font-size: 0.9rem;
-  color: var(--text, #111827);
-  word-break: break-word;
-}
-
 .account__dropdown-balance {
   display: flex;
   justify-content: space-between;
@@ -467,13 +460,14 @@ button:disabled {
 
 .page {
   max-width: 1240px;
+  min-width: 96%;
   margin: 0 auto;
   padding: 28px 24px 56px;
 }
 
 .stack {
   display: grid;
-  gap: 24px;
+  gap: 15px;
 }
 
 .stack-sm {
@@ -481,21 +475,25 @@ button:disabled {
   gap: 14px;
 }
 
+/* ── Typography — page headings ──────────────────── */
+h1, h2, h3 {
+  margin: 0;
+  line-height: 1.15;
+  color: var(--primary-ink);
+}
+h1 { font-size: clamp(2rem, 3vw, 2.8rem); letter-spacing: -0.025em; }
+h2 { font-size: clamp(1.3rem, 2vw, 1.65rem); }
+h3 { font-size: clamp(1rem, 1.4vw, 1.15rem); }
+
+/* ── Page hero (title banner) ──────────────────── */
 .page-hero {
   display: grid;
   gap: 10px;
 }
 
-.page-hero h1,
-.empty-state h1 {
-  margin: 0;
-  font-size: clamp(2rem, 3vw, 2.8rem);
-  line-height: 1.05;
-}
-
 .page-hero--inline {
   grid-template-columns: 1fr auto;
-  align-items: end;
+  align-items: center;
 }
 
 .eyebrow {
@@ -526,7 +524,7 @@ button:disabled {
 }
 
 .two-up-grid {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
 .quad-grid {
@@ -539,6 +537,9 @@ button:disabled {
 }
 
 .card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
   background: var(--card-bg);
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -1727,8 +1728,8 @@ select {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 18px 16px;
-  margin: 0 10px;
+  padding: 20px 16px 16px;
+  margin: 0 10px 4px;
   border-bottom: 1px solid var(--border);
 }
 
@@ -1755,14 +1756,15 @@ select {
 
 .sidebar__nav {
   flex: 1;
-  padding: 12px 10px;
+  padding: 8px 10px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
   overflow-y: auto;
 }
 
 .sidebar__link {
+  position: relative;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -1772,7 +1774,7 @@ select {
   font-size: 0.92rem;
   font-weight: 500;
   text-decoration: none;
-  transition: background 120ms ease, color 120ms ease;
+  transition: all 180ms ease;
 }
 
 .sidebar__link:hover {
@@ -1786,14 +1788,31 @@ select {
   font-weight: 600;
 }
 
+.sidebar__link.is-active::before {
+  content: "";
+  position: absolute;
+  left: -10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 20px;
+  border-radius: 0 3px 3px 0;
+  background: var(--primary);
+}
+
 .sidebar__link svg {
-  width: 17px;
-  height: 17px;
+  width: 18px;
+  height: 18px;
   flex-shrink: 0;
+  transition: transform 180ms ease;
+}
+
+.sidebar__link:hover svg {
+  transform: scale(1.1);
 }
 
 .sidebar__footer {
-  padding: 10px 10px 12px;
+  padding: 10px 10px 14px;
   border-top: 1px solid var(--border);
 }
 

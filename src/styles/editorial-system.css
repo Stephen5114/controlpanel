@@ -38,18 +38,9 @@ body {
   font-family: Inter, "Segoe UI", Arial, sans-serif;
 }
 
-h1, h2,
-.page-hero h1,
-.section-head h2,
-.section-title h2,
-.vps-hero h1,
-.vps-section__heading h2,
-.domain-management__header h1,
 .db2-header__title,
 .ov-section__title,
-.al-hero__text h1,
-.auth-brand-tagline,
-.auth-card h1 {
+.auth-brand-tagline {
   font-family: Georgia, "Noto Serif SC", "Songti SC", "Times New Roman", serif;
   font-weight: 500;
   letter-spacing: -.035em;
@@ -197,7 +188,6 @@ h1, h2,
   border-radius: 0;
   box-shadow: none;
 }
-.page-hero h1 { font-size: clamp(2.15rem, 5vw, 4rem); line-height: 1; }
 .page-copy { max-width: 720px; }
 .eyebrow { color: var(--primary); letter-spacing: .14em; }
 
@@ -294,7 +284,6 @@ input:focus, select:focus, textarea:focus { box-shadow: 3px 3px 0 var(--primary)
 
 /* VPS */
 .vps-hero { border-bottom: 2px solid var(--border); }
-.vps-hero h1 { font-size: clamp(2.4rem, 5vw, 4.4rem); }
 .vps-eyebrow, .vps-section__kicker, .vps-region { color: var(--primary); }
 .vps-service-card, .vps-information-card, .vps-status-card, .vps-plan-card {
   background: var(--surface);
@@ -305,7 +294,7 @@ input:focus, select:focus, textarea:focus { box-shadow: 3px 3px 0 var(--primary)
 .vps-service-card:hover, .vps-plan-card:hover { border-color: var(--border); transform: translate(-2px, -2px); box-shadow: var(--shadow); }
 .vps-plan-card--featured { border: 2px solid var(--border); box-shadow: 5px 5px 0 var(--border); }
 .vps-popular { color: #181713; background: var(--primary); border: 1.5px solid var(--border); border-radius: 2px; }
-.vps-price strong, .vps-plan-card h3 { font-family: Georgia, "Noto Serif SC", serif; font-weight: 500; }
+.vps-price strong { font-family: Georgia, "Noto Serif SC", serif; font-weight: 500; }
 .vps-server-icon { color: var(--text); background: var(--surface-soft); border: 1px solid var(--border); border-radius: 3px; }
 .vps-catalog-note, .vps-notice, .vps-credentials-note { background: var(--surface-soft); border-color: var(--border); border-radius: 3px; }
 
@@ -431,7 +420,6 @@ input:focus, select:focus, textarea:focus { box-shadow: 3px 3px 0 var(--primary)
 @media (max-width: 760px) {
   .topbar { padding-inline: 16px; }
   .page { padding-inline: 15px; }
-  .page-hero h1 { font-size: clamp(2rem, 12vw, 3.2rem); }
   .al-shell, .support-shell { border-inline: 0; }
   .auth-brand { border-right: 0; border-bottom: 2px solid var(--border); }
   .affiliate-nav-promo { width: 40px; padding: 5px; overflow: hidden; }

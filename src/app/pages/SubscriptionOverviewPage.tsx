@@ -186,10 +186,11 @@ export function SubscriptionOverviewPage() {
 
   // Driver.js tour
   const guideStorageKey = subId ? `ov-guide:v1:${subId}` : null;
+  const [tourDismissed, setTourDismissed] = useState(false);
   const startOverviewTour = useCallback(() => {
     const hasSites = sites.length > 0;
     const steps: DriveStep[] = [
-      { element: ".ov-header__actions", popover: { title: "Create a website", description: "Click \"Add Website\" to create your first site. Give it a name and we'll provision it with a free subdomain automatically." } },
+      { element: ".ov-header", popover: { title: "Create a website", description: "Click \"Add Website\" to create your first site. Give it a name and we'll provision it with a free subdomain automatically." } },
       { element: ".ov-stats", popover: { title: "Resource usage", description: "Track your websites, databases, storage, and bandwidth quotas at a glance." } },
     ];
     if (hasSites) {
@@ -198,33 +199,66 @@ export function SubscriptionOverviewPage() {
         { element: ".ov-site-card .ov-icon-btn[title='Domains']", popover: { title: "Add a custom domain", description: "Click the globe icon to bind your own domain name (e.g. example.com). We'll guide you through the DNS setup." } },
       );
     }
-    steps.push({
-      element: ".ov-info-row",
-      popover: {
-        title: "Server & plan info", description: "View your server status, hosting plan details, and security configuration here.",
-        onPopoverRender: (popover: { wrapper: HTMLElement }) => {
-          const btn = document.createElement("button");
-          btn.textContent = "Don't show again";
-          btn.className = "driver-popover-dismiss-btn";
-          btn.addEventListener("click", () => {
-            if (guideStorageKey) window.localStorage.setItem(guideStorageKey, "dismissed");
-            driverObj.destroy();
-          });
-          popover.wrapper.querySelector(".driver-popover-footer")?.appendChild(btn);
-        },
+    function moveProgressToTitle(popover: { wrapper: HTMLElement }) {
+      const title = popover.wrapper.querySelector<HTMLElement>(".driver-popover-title");
+      const progress = popover.wrapper.querySelector<HTMLElement>(".driver-popover-progress-text");
+      if (title && progress && !title.contains(progress)) {
+        title.style.display = "flex";
+        title.style.justifyContent = "space-between";
+        title.style.alignItems = "center";
+        title.style.gap = "12px";
+        progress.style.display = "inline";
+        title.appendChild(progress);
+      }
+    }
+
+    // Build driver config first
+    const lastStepPopover: DriveStep["popover"] = {
+      title: "Server & plan info", description: "View your server status, hosting plan details, and security configuration here.",
+    };
+    steps.push({ element: ".ov-info-row", popover: lastStepPopover });
+
+    const driverObj = driver({
+      showProgress: true,
+      animate: true,
+      overlayColor: "rgba(0, 0, 0, 0.55)",
+      steps,
+      onPopoverRender: (popover: { wrapper: HTMLElement }) => {
+        moveProgressToTitle(popover);
+        if (!driverObj.hasNextStep()) {
+          const footer = popover.wrapper.querySelector(".driver-popover-footer");
+          if (footer && !footer.querySelector(".driver-popover-dismiss-btn")) {
+            const btn = document.createElement("button");
+            btn.textContent = "Don't show again";
+            btn.className = "driver-popover-dismiss-btn";
+            btn.dataset.dismiss = "1";
+            footer.appendChild(btn);
+          }
+        }
       },
     });
-    const driverObj = driver({ showProgress: true, animate: true, overlayColor: "rgba(0, 0, 0, 0.55)", steps });
     driverObj.drive();
+
+    // Capture-phase listener for dismiss button (driver.js stops propagation)
+    function handleDismiss(e: MouseEvent) {
+      if ((e.target as HTMLElement).closest("[data-dismiss]")) {
+        if (guideStorageKey) window.localStorage.setItem(guideStorageKey, "dismissed");
+        setTourDismissed(true);
+        driverObj.moveNext();
+      }
+    }
+    document.addEventListener("click", handleDismiss, { capture: true });
+    const cleanup = () => document.removeEventListener("click", handleDismiss, { capture: true });
+    const origDestroy = driverObj.destroy.bind(driverObj);
+    driverObj.destroy = () => { cleanup(); origDestroy(); };
   }, [guideStorageKey, sites.length]);
 
   useEffect(() => {
-    if (!guideStorageKey || loading) return;
-    const isDismissed = window.localStorage.getItem(guideStorageKey) === "dismissed";
-    if (isDismissed) return;
+    if (!guideStorageKey || loading || tourDismissed) return;
+    if (window.localStorage.getItem(guideStorageKey) === "dismissed") return;
     const timeout = window.setTimeout(() => startOverviewTour(), 500);
     return () => window.clearTimeout(timeout);
-  }, [guideStorageKey, loading, startOverviewTour]);
+  }, [guideStorageKey, loading, startOverviewTour, tourDismissed]);
 
   // ── Event handlers ──────────────────────────────────────────────
 

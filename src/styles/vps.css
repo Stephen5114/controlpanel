@@ -35,7 +35,6 @@
 .vps-popular{position:absolute;top:0;left:50%;transform:translate(-50%,-50%);padding:5px 12px;border-radius:99px;background:var(--primary);color:#fff;font-size:.68rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}
 .vps-plan-card__head p{font-size:.78rem;line-height:1.5}
 .vps-price{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px;margin-top:18px}
-.vps-price strong{font-size:2rem;line-height:1;font-weight:800;letter-spacing:-.045em}
 .vps-price>span{margin-left:5px;color:var(--muted);font-size:.78rem}
 .vps-price small{flex-basis:100%;margin-top:5px;color:var(--muted);font-size:.7rem}
 .vps-plan-divider{height:1px;margin:20px 0;background:var(--border)}

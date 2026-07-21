@@ -59,8 +59,15 @@ if ((Test-Path "IIS:\AppPools\$AppPoolName") -and
     throw "IIS app pool '$AppPoolName' did not stop within 30 seconds."
 }
 
-Write-Host 'Syncing dist to IIS target...' -ForegroundColor Cyan
-robocopy $distRoot $TargetRoot /MIR /NFL /NDL /NJH /NJS /NP /R:2 /W:2 | Out-Null
+Write-Host 'Syncing hashed assets before the application entry point...' -ForegroundColor Cyan
+$distAssets = Join-Path $distRoot 'assets'
+$targetAssets = Join-Path $TargetRoot 'assets'
+New-Item -ItemType Directory -Path $targetAssets -Force | Out-Null
+robocopy $distAssets $targetAssets /E /NFL /NDL /NJH /NJS /NP /R:2 /W:2 | Out-Null
+if ($LASTEXITCODE -ge 8) { throw "Asset sync failed with exit code $LASTEXITCODE." }
+robocopy $distRoot $TargetRoot /E /XF index.html app.js web.config /XD assets logs /NFL /NDL /NJH /NJS /NP /R:2 /W:2 | Out-Null
+if ($LASTEXITCODE -ge 8) { throw "Static file sync failed with exit code $LASTEXITCODE." }
+Copy-Item (Join-Path $distRoot 'index.html') (Join-Path $TargetRoot 'index.html') -Force
 
 $logsPath = Join-Path $TargetRoot 'logs'
 if (-not (Test-Path $logsPath)) {

@@ -1,11 +1,12 @@
-import { ArrowLeft, CalendarDays, Check, Clock3, Cpu, Database, Globe2, HardDrive, Server, ShoppingCart } from "lucide-react";
+import { ArrowLeft, Check, Clock3, Cpu, Database, Globe2, HardDrive, Monitor, ShoppingCart, Terminal } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useSearchParams } from "react-router-dom";
 import { getCustomerSession } from "../lib/customer-session";
-import { createVpsCheckout, createVpsRenewalCheckout, getVpsCatalog, getVpsService, type VpsPlan, type VpsService } from "../lib/api-vps";
+import { createVpsCheckout, createVpsRenewalCheckout, createVpsUpgradeCheckout, getVpsCatalog, getVpsService, type VpsPlan, type VpsService } from "../lib/api-vps";
 import { getActiveLocale, useLocalization } from "../lib/i18n";
 
 const pendingStatuses = new Set(["pending_purchase", "provisioning"]);
+const purchaseRegions = ["US", "EU", "Asia"];
 
 export function VpsPage() {
   const { serviceId } = useParams();
@@ -14,8 +15,13 @@ export function VpsPage() {
 
 function VpsHome() {
   const { t } = useLocalization();
+  const [searchParams] = useSearchParams();
+  const upgradeServiceId = searchParams.get("upgrade");
+  const [upgradeService, setUpgradeService] = useState<VpsService | null>(null);
   const [plans, setPlans] = useState<VpsPlan[]>([]);
+  const [platform, setPlatform] = useState<"windows" | "linux">("windows");
   const [selectedOs, setSelectedOs] = useState<Record<string, string>>({});
+  const [selectedRegion, setSelectedRegion] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -23,20 +29,24 @@ function VpsHome() {
   useEffect(() => {
     const session = getCustomerSession();
     if (!session) return;
-    getVpsCatalog(session)
-      .then((planRows) => {
+    Promise.all([getVpsCatalog(session), upgradeServiceId ? getVpsService(session, upgradeServiceId) : Promise.resolve(null)])
+      .then(([planRows, service]) => {
         setPlans(planRows);
+        setUpgradeService(service);
         setSelectedOs(Object.fromEntries(planRows.map((plan) => [plan.id, plan.operatingSystems[0] ?? ""])));
+        setSelectedRegion(Object.fromEntries(planRows.map((plan) => [plan.id, "US"])));
       })
       .catch((e) => setError(e instanceof Error ? e.message : t("Could not load VPS services.", "Could not load VPS services.")))
       .finally(() => setLoading(false));
-  }, [t]);
+  }, [t, upgradeServiceId]);
 
   async function buy(plan: VpsPlan) {
     const session = getCustomerSession(); if (!session) return;
     setBusy(plan.id); setError(null);
     try {
-      const result = await createVpsCheckout(session, plan.id, selectedOs[plan.id] || plan.operatingSystems[0] || "");
+      const result = upgradeService
+        ? await createVpsUpgradeCheckout(session, upgradeService.id, plan.id)
+        : await createVpsCheckout(session, plan.id, selectedRegion[plan.id] || "US", selectedOs[plan.id] || plan.operatingSystems[0] || "");
       if (result.checkoutUrl) window.location.assign(result.checkoutUrl);
       else if (result.success && result.subscriptionScopeReference) window.location.assign(`/vps/${result.subscriptionScopeReference}`);
       else setError(result.message);
@@ -44,37 +54,48 @@ function VpsHome() {
     finally { setBusy(null); }
   }
 
+  const activePlatform = upgradeService?.platform ?? platform;
+  const visiblePlans = plans.filter((plan) => plan.platform === activePlatform);
+  const isLinux = activePlatform === "linux";
+
   return <div className="vps-page">
     <section className="page-hero page-hero--inline">
       <div>
-        <p className="eyebrow">Windows VPS Hosting</p>
-        <h1>{t("High-performance VPS, without the complexity", "High-performance VPS, without the complexity")}</h1>
-        <p className="page-copy">{t("Dedicated resources, predictable monthly pricing, and personal provisioning by our hosting team.", "Dedicated resources, predictable monthly pricing, and personal provisioning by our hosting team.")}</p>
+        <p className="eyebrow">Cloud VPS Hosting</p>
+        <h1>{upgradeService ? t("Upgrade your VPS", "Upgrade your VPS") : isLinux ? t("Fast Linux VPS for modern workloads", "Fast Linux VPS for modern workloads") : t("High-performance Windows VPS", "High-performance Windows VPS")}</h1>
+        <p className="page-copy">{upgradeService ? `${upgradeService.hostingLoginId} · ${t("Choose a higher plan. It will take effect with your next renewal.", "Choose a higher plan. It will take effect with your next renewal.")}` : t("Dedicated resources, predictable monthly pricing, and personal provisioning by our hosting team.", "Dedicated resources, predictable monthly pricing, and personal provisioning by our hosting team.")}</p>
       </div>
     </section>
     {error ? <div className="inline-message inline-message--error">{error}</div> : null}
     {loading ? <div className="empty-panel">{t("Loading VPS services...", "Loading VPS services...")}</div> : null}
     <section className="vps-section">
+      {!upgradeService ? <div className="vps-platform-switch" role="tablist" aria-label="VPS platform">
+        <button type="button" role="tab" aria-selected={platform === "windows"} className={platform === "windows" ? "is-active" : ""} onClick={() => setPlatform("windows")}><Monitor size={19} /><span><strong>Windows VPS</strong><small>Remote Desktop &amp; Windows Server</small></span></button>
+        <button type="button" role="tab" aria-selected={platform === "linux"} className={platform === "linux" ? "is-active" : ""} onClick={() => setPlatform("linux")}><Terminal size={19} /><span><strong>Linux VPS</strong><small>Root access, Docker-ready</small></span></button>
+      </div> : null}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: "40px" }}>
-        <div className="vps-section__heading"><div><span className="vps-section__kicker">{t("Monthly plans", "Monthly plans")}</span><h2>{t("Choose your Windows VPS", "Choose your Windows VPS")}</h2><p>{t("No setup fee. Upgrade at your next renewal.", "No setup fee. Upgrade at your next renewal.")}</p></div></div>
+        <div className="vps-section__heading"><div><span className="vps-section__kicker">{t("Monthly plans", "Monthly plans")}</span><h2>{isLinux ? t("Choose your Linux VPS", "Choose your Linux VPS") : t("Choose your Windows VPS", "Choose your Windows VPS")}</h2><p>{t("No setup fee. Choose your region and operating system before checkout.", "No setup fee. Choose your region and operating system before checkout.")}</p></div></div>
         <ul className="vps-hero__assurances" aria-label="VPS service highlights">
           <li><Check size={16} /> {t("One static IP included", "One static IP included")}</li>
           <li><Check size={16} /> {t("Unlimited data transfer", "Unlimited data transfer")}</li>
-          <li><Check size={16} /> {t("Ready within 24 hours", "Ready within 24 hours")}</li>
+          <li><Check size={16} /> {isLinux ? t("Full root access", "Full root access") : t("Full administrator access", "Full administrator access")}</li>
         </ul>
       </div>
-      {plans.length === 0 && !loading ? <div className="empty-panel">{t("No VPS plans are available right now.", "No VPS plans are available right now.")}</div> : null}
-      <div className="vps-plan-grid">{plans.map((plan, index) => <article className={`vps-plan-card${index === 1 ? " vps-plan-card--featured" : ""}`} key={plan.id}>
+      {visiblePlans.length === 0 && !loading ? <div className="empty-panel">{t("No VPS plans are available right now.", "No VPS plans are available right now.")}</div> : null}
+      <div className="vps-plan-grid">{visiblePlans.map((plan, index) => <article className={`vps-plan-card${index === 1 ? " vps-plan-card--featured" : ""}`} key={plan.id}>
         {index === 1 ? <div className="vps-popular">{t("Most popular", "Most popular")}</div> : null}
-        <div className="vps-plan-card__head"><span className="vps-region">{t("Windows VPS", "Windows VPS")}</span><h3>{plan.name}</h3><p>{plan.description}</p></div>
+        <div className="vps-plan-card__head"><span className="vps-region">{isLinux ? t("Linux VPS", "Linux VPS") : t("Windows VPS", "Windows VPS")}</span><h3>{plan.name}</h3><p>{plan.description}</p></div>
         <div className="vps-price"><strong>{formatMoney(plan.monthlyPrice, plan.currency)}</strong><span>{t("/ month", "/ month")}</span><small>{t("Billed monthly", "Billed monthly")}</small></div>
         <div className="vps-plan-divider" />
         <div className="vps-specs"><span><Cpu size={17} /><span><strong>{plan.cpuCores} vCPU</strong><small>{t("Processor cores", "Processor cores")}</small></span></span><span><Database size={17} /><span><strong>{formatRam(plan.ramMb)} RAM</strong><small>{t("Dedicated memory", "Dedicated memory")}</small></span></span><span><HardDrive size={17} /><span><strong>{plan.storageGb} GB {plan.storageType}</strong><small>{t("High-speed storage", "High-speed storage")}</small></span></span><span><Globe2 size={17} /><span><strong>{plan.bandwidth}</strong><small>{t("Data transfer", "Data transfer")}</small></span></span></div>
-        <label className="vps-os-label">{t("Operating system", "Operating system")}<select value={selectedOs[plan.id] ?? ""} onChange={(e) => setSelectedOs((old) => ({ ...old, [plan.id]: e.target.value }))}>{plan.operatingSystems.map((os) => <option value={os} key={os}>{os}</option>)}</select></label>
-        <button className="primary-button vps-buy-button" onClick={() => void buy(plan)} disabled={busy === plan.id}><ShoppingCart size={16} />{busy === plan.id ? t("Opening checkout...", "Opening checkout...") : t("Choose plan", "Choose plan")}</button>
+        {!upgradeService ? <div className="vps-config-options">
+          <label className="vps-os-label">{t("Server region", "Server region")}<select value={selectedRegion[plan.id] ?? "US"} onChange={(e) => setSelectedRegion((old) => ({ ...old, [plan.id]: e.target.value }))}>{purchaseRegions.map((region) => <option value={region} key={region}>{region}</option>)}</select></label>
+          <label className="vps-os-label">{isLinux ? t("Linux distribution", "Linux distribution") : t("Windows version", "Windows version")}<select value={selectedOs[plan.id] ?? ""} onChange={(e) => setSelectedOs((old) => ({ ...old, [plan.id]: e.target.value }))}>{plan.operatingSystems.map((os) => <option value={os} key={os}>{os}</option>)}</select></label>
+        </div> : null}
+        <button className="primary-button vps-buy-button" onClick={() => void buy(plan)} disabled={busy === plan.id || upgradeService?.planId === plan.id}><ShoppingCart size={16} />{busy === plan.id ? t("Opening checkout...", "Opening checkout...") : upgradeService?.planId === plan.id ? t("Current plan", "Current plan") : upgradeService ? t("Upgrade to this plan", "Upgrade to this plan") : t("Choose plan", "Choose plan")}</button>
         <p className="vps-fulfilment-note">{t("Manual provisioning · Password sent by email", "Manual provisioning · Password sent by email")}</p>
       </article>)}</div>
-      <div className="vps-catalog-note"><strong>{t("All plans include:", "All plans include:")}</strong> {t("full administrator access, a static IPv4 address, and your choice of supported Windows Server edition. This is an unmanaged service.", "full administrator access, a static IPv4 address, and your choice of supported Windows Server edition. This is an unmanaged service.")}</div>
+      <div className="vps-catalog-note"><strong>{t("All plans include:", "All plans include:")}</strong> {isLinux ? t("full root access, a static IPv4 address, and your choice of supported Linux distribution. This is an unmanaged service.", "full root access, a static IPv4 address, and your choice of supported Linux distribution. This is an unmanaged service.") : t("full administrator access, a static IPv4 address, and your choice of supported Windows Server edition. This is an unmanaged service.", "full administrator access, a static IPv4 address, and your choice of supported Windows Server edition. This is an unmanaged service.")}</div>
     </section>
   </div>;
 }

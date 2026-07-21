@@ -32,6 +32,20 @@ import "./styles/landing.css";
 import "./styles/status.css";
 import "driver.js/dist/driver.css";
 
+// A customer can keep an older index bundle open while a new release is
+// being deployed. If one of that bundle's lazy chunks is no longer available,
+// reload once so the browser receives the current hashed asset manifest.
+const chunkReloadKey = "cp-chunk-reload-at";
+window.addEventListener("vite:preloadError", (event) => {
+  event.preventDefault();
+  const previousReload = Number(sessionStorage.getItem(chunkReloadKey) ?? "0");
+  if (Date.now() - previousReload > 15_000) {
+    sessionStorage.setItem(chunkReloadKey, String(Date.now()));
+    window.location.reload();
+  }
+});
+window.setTimeout(() => sessionStorage.removeItem(chunkReloadKey), 20_000);
+
 function AuthLoadingFallback() {
   return (
     <div className="auth-brand auth-brand--loading">

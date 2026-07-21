@@ -15,7 +15,7 @@ import { formatRegionLabel } from "../lib/display";
 import { getCustomerSession } from "../lib/customer-session";
 import { getActiveLocale, useLocalization } from "../lib/i18n";
 import { Badge, EmptyState, Button } from "../components";
-import { getVpsServices, type VpsService } from "../lib/api-vps";
+import { createVpsRenewalCheckout, getVpsServices, type VpsService } from "../lib/api-vps";
 
 type DashboardState = {
   subs: HostingSubscription[];
@@ -117,6 +117,23 @@ export function DashboardPage() {
       window.dispatchEvent(new Event("balance-changed"));
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not renew subscription.");
+    } finally {
+      setBusyKey(null);
+    }
+  }
+
+  async function handleVpsRenew(service: VpsService) {
+    const session = getCustomerSession();
+    if (!session) return;
+    setBusyKey(`vps-renew-${service.id}`);
+    setError(null);
+    try {
+      const result = await createVpsRenewalCheckout(session, service.id);
+      if (result.checkoutUrl) window.location.assign(result.checkoutUrl);
+      else if (result.success) { await reload(); window.dispatchEvent(new Event("balance-changed")); }
+      else setError(result.message);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not renew VPS.");
     } finally {
       setBusyKey(null);
     }
@@ -389,6 +406,16 @@ export function DashboardPage() {
                       <span className="project-card__meta-item"><Activity size={14} /> {service.ipAddress || t("Pending assignment", "Pending assignment")}</span>
                       <span className="project-card__meta-item"><Database size={14} /> {service.operatingSystem || t("Operating system pending", "Operating system pending")}</span>
                     </div>
+                    {!(["pending_purchase", "provisioning", "renewal_paid", "canceled"].includes(service.status)) ? (
+                      <div className="dashboard-sub-actions" onClick={(event) => event.stopPropagation()}>
+                        <button className="dashboard-sub-action" type="button" disabled={busyKey === `vps-renew-${service.id}`} onClick={() => void handleVpsRenew(service)}>
+                          <RefreshCw size={14} /> {busyKey === `vps-renew-${service.id}` ? t("Processing...", "Processing...") : t("Renew", "Renew")}
+                        </button>
+                        <Link className="dashboard-sub-action dashboard-sub-action--primary" to={`/vps?upgrade=${encodeURIComponent(service.id)}`}>
+                          <ArrowUpCircle size={14} /> {t("Upgrade", "Upgrade")}
+                        </Link>
+                      </div>
+                    ) : null}
                   </div>
                 );
               }

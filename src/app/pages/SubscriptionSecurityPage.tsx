@@ -63,17 +63,12 @@ export function SubscriptionSecurityPage() {
 
   return (
     <div className="al-module">
-      <section className="al-hero">
-        <div className="al-hero__text">
-          <h1>{t("Security Ledger", "Security Ledger")}</h1>
-          <p>{t("Real hostname, HTTPS, certificate, quota, provisioning, and node health signals.", "Real hostname, HTTPS, certificate, quota, provisioning, and node health signals.")}</p>
-        </div>
-        <div className="al-hero__actions">
-          <button type="button" className="al-hero__btn al-hero__btn--secondary" onClick={() => setRefreshTick((tick) => tick + 1)}>
-            <RefreshCw size={16} />
-            {t("Refresh", "Refresh")}
-          </button>
-        </div>
+      <section style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12 }}>
+        <h2>{t("Security Ledger", "Security Ledger")}</h2>
+        <button type="button" className="secondary-button" onClick={() => setRefreshTick((tick) => tick + 1)}>
+          <RefreshCw size={16} />
+          {t("Refresh", "Refresh")}
+        </button>
       </section>
 
       <section className="al-metrics" style={{ gridTemplateColumns: "repeat(3, minmax(0, 1fr))" }}>

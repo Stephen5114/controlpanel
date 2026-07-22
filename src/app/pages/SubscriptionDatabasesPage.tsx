@@ -402,9 +402,9 @@ export function SubscriptionDatabasesPage() {
   return (
     <>
       {/* ── Page header ── */}
-      <div className="db2-header">
-        <div className="db2-header__left">
-          <h1 className="db2-header__title">{t("Databases", "Databases")}</h1>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <h2>{t("Databases", "Databases")}</h2>
           <div className="db2-header__stats">
             <span className="db2-stat db2-stat--green">
               <span className="db2-stat__dot" />

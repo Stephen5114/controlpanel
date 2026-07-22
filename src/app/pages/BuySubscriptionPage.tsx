@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import {
   BillingSummary,
@@ -31,6 +31,7 @@ import {
 } from "lucide-react";
 import { getActiveLocale, useLocalization } from "../lib/i18n";
 import { formatCurrency } from "../lib/display";
+import { Modal } from "../components/Modal";
 import { VpsPage } from "./VpsPage";
 
 type AppliedCoupon = { code: string; discountAmount: number; message: string };
@@ -47,6 +48,7 @@ export function BuySubscriptionPage() {
   const [selectedPlan, setSelectedPlan] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [couponInput, setCouponInput] = useState("");
   const [appliedCoupon, setAppliedCoupon] = useState<AppliedCoupon | null>(null);
   const [couponError, setCouponError] = useState<string | null>(null);
@@ -62,6 +64,50 @@ export function BuySubscriptionPage() {
   const upgradeRegion = upgradeScope?.includes("_") ? upgradeScope.split("_").slice(1).join("_") : null;
 
   const [upgradePreview, setUpgradePreview] = useState<UpgradePreview | null>(null);
+
+  const doPurchase = useCallback(async () => {
+    const activeSession = getCustomerSession();
+    if (!activeSession) {
+      setError(t("Your session has expired. Please sign in again.", "Your session has expired. Please sign in again."));
+      return;
+    }
+    if (!billingSummary) {
+      setError(t("We could not confirm your account balance. Please reload and try again.", "We could not confirm your account balance. Please reload and try again."));
+      return;
+    }
+
+    setIsSubmitting(true);
+    setError(null);
+
+    try {
+      let checkout;
+      if (isUpgradeMode && upgradeScope) {
+        checkout = await createUpgradeCheckout(activeSession, {
+          currentScopeReference: upgradeScope,
+          newPlanSlug: selectedPlan,
+        });
+      } else {
+        checkout = await createHostingSubscriptionCheckout(activeSession, {
+          planSlug: selectedPlan,
+          regionSlug: selectedRegion,
+          couponCode: appliedCoupon?.code,
+        });
+      }
+      if (checkout.checkoutUrl) {
+        if (checkout.subscriptionScopeReference) {
+          sessionStorage.setItem("pendingSubscriptionScope", checkout.subscriptionScopeReference);
+        }
+        window.location.assign(checkout.checkoutUrl);
+        return;
+      }
+      const subscriptionId = checkout.subscriptionScopeReference ?? buildSubscriptionId(selectedPlan, selectedRegion);
+      navigate(`/subscription/${subscriptionId}/overview`);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : isUpgradeMode ? t("Upgrade failed.", "Upgrade failed.") : t("Purchase failed.", "Purchase failed."));
+    } finally {
+      setIsSubmitting(false);
+    }
+  }, [billingSummary, isUpgradeMode, upgradeScope, selectedPlan, selectedRegion, appliedCoupon, navigate, t]);
 
   const session = getCustomerSession();
 
@@ -241,37 +287,13 @@ export function BuySubscriptionPage() {
       return;
     }
 
-    setIsSubmitting(true);
-    setError(null);
-
-    try {
-      let checkout;
-      if (isUpgradeMode && upgradeScope) {
-        checkout = await createUpgradeCheckout(activeSession, {
-          currentScopeReference: upgradeScope,
-          newPlanSlug: selectedPlan,
-        });
-      } else {
-        checkout = await createHostingSubscriptionCheckout(activeSession, {
-          planSlug: selectedPlan,
-          regionSlug: selectedRegion,
-          couponCode: appliedCoupon?.code,
-        });
-      }
-      if (checkout.checkoutUrl) {
-        if (checkout.subscriptionScopeReference) {
-          sessionStorage.setItem("pendingSubscriptionScope", checkout.subscriptionScopeReference);
-        }
-        window.location.assign(checkout.checkoutUrl);
-        return;
-      }
-      const subscriptionId = checkout.subscriptionScopeReference ?? buildSubscriptionId(selectedPlan, selectedRegion);
-      navigate(`/subscription/${subscriptionId}/overview`);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : isUpgradeMode ? t("Upgrade failed.", "Upgrade failed.") : t("Purchase failed.", "Purchase failed."));
-    } finally {
-      setIsSubmitting(false);
+    // 账户余额支付前让用户再次确认
+    if (!willPayByCard && !isUpgradeMode) {
+      setShowConfirmModal(true);
+      return;
     }
+
+    await doPurchase();
   }
 
   const productSwitcher = !isUpgradeMode ? (
@@ -307,13 +329,15 @@ export function BuySubscriptionPage() {
     <div className="stack bs-wrapper">
       {productSwitcher}
       <section className="page-hero page-hero--inline">
-        <p className="eyebrow">{t("Store", "Store")}</p>
-        <h1>{isUpgradeMode ? t("Upgrade Your Plan", "Upgrade Your Plan") : t("Purchase Hosting Subscription", "Purchase Hosting Subscription")}</h1>
-        <p className="page-copy">
-          {isUpgradeMode
-            ? t("Select your new plan below. You only pay the prorated difference for the remaining days in your current billing cycle.", "Select your new plan below. You only pay the prorated difference for the remaining days in your current billing cycle.")
-            : t("Pick your region and plan. We use your account balance when it covers the price, otherwise you'll continue to secure card checkout — and your card is saved for automatic renewals.", "Pick your region and plan. We use your account balance when it covers the price, otherwise you'll continue to secure card checkout — and your card is saved for automatic renewals.")}
-        </p>
+        <div>
+          <p className="eyebrow">{t("Store", "Store")}</p>
+          <h1>{isUpgradeMode ? t("Upgrade Your Plan", "Upgrade Your Plan") : t("Purchase Hosting Subscription", "Purchase Hosting Subscription")}</h1>
+          <p className="page-copy">
+            {isUpgradeMode
+              ? t("Select your new plan below. You only pay the prorated difference for the remaining days in your current billing cycle.", "Select your new plan below. You only pay the prorated difference for the remaining days in your current billing cycle.")
+              : t("Pick your region and plan. We use your account balance when it covers the price, otherwise you'll continue to secure card checkout — and your card is saved for automatic renewals.", "Pick your region and plan. We use your account balance when it covers the price, otherwise you'll continue to secure card checkout — and your card is saved for automatic renewals.")}
+          </p>
+        </div>
       </section>
 
       {error ? <div className="inline-message inline-message--error">{error}</div> : null}
@@ -518,6 +542,37 @@ export function BuySubscriptionPage() {
           </div>
         </form>
       )}
+
+      <Modal
+        open={showConfirmModal}
+        onClose={() => setShowConfirmModal(false)}
+        title={t("Ready to go! 🚀", "Ready to go! 🚀")}
+        subtitle={t("Your plan will be activated immediately.", "Your plan will be activated immediately.")}
+        footer={
+          <>
+            <button
+              className="primary-button"
+              type="button"
+              style={{ flex: 1 }}
+              onClick={() => {
+                setShowConfirmModal(false);
+                doPurchase();
+              }}
+            >
+              {t("Yes, activate now", "Yes, activate now")} <ChevronRight size={18} />
+            </button>
+          </>
+        }
+      >
+        <div style={{ textAlign: "center", padding: "8px 0" }}>
+          <div style={{ fontSize: "2rem", fontWeight: 700, lineHeight: 1.2, marginBottom: 4 }}>
+            {formatCurrency(total, currency)}
+          </div>
+          <div style={{ color: "var(--muted)", fontSize: "0.9rem" }}>
+            {selectedPlanDetails?.name ?? ""}
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

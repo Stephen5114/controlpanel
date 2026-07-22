@@ -1,4 +1,4 @@
-import { Globe, Plus, Server, Activity, CalendarClock, AlertTriangle, ArrowUpCircle, Database, RefreshCw, Wallet, CreditCard, ArrowUpDown } from "lucide-react";
+import { Globe, Plus, Server, Activity, CalendarClock, AlertTriangle, ArrowUpCircle, Database, RefreshCw, Wallet, CreditCard, ArrowUpDown, ChevronRight } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
@@ -14,7 +14,7 @@ import {
 import { formatRegionLabel } from "../lib/display";
 import { getCustomerSession } from "../lib/customer-session";
 import { getActiveLocale, useLocalization } from "../lib/i18n";
-import { Badge, EmptyState, Button } from "../components";
+import { Badge, EmptyState, Button, Modal } from "../components";
 import { createVpsRenewalCheckout, getVpsServices, type VpsService } from "../lib/api-vps";
 
 type DashboardState = {
@@ -503,7 +503,7 @@ export function DashboardPage() {
                       ) : (
                         <span>{t("No scheduled renewal", "No scheduled renewal")}</span>
                       )}
-                      {billing ? <span className="dashboard-renew__amount">{formatCurrency(billing.monthlyAmount, billing.currency)}/mo</span> : null}
+
                     </div>
                   )}
 
@@ -535,35 +535,41 @@ export function DashboardPage() {
         ) : null}
       </section>
 
-      {confirmRenew ? (
-        <div className="confirm-overlay" onClick={() => setConfirmRenew(null)}>
-          <div className="confirm-modal" onClick={(e) => e.stopPropagation()}>
-            <h3 className="confirm-modal__title">{t("Confirm Renewal", "Confirm Renewal")}</h3>
-            <p className="confirm-modal__body">
-              {t("Renew", "Renew")} <strong>{confirmRenew.sub.name}</strong>
-              {confirmRenew.billing ? ` · ${formatCurrency(confirmRenew.billing.monthlyAmount, confirmRenew.billing.currency)}/mo` : ""}?
-              {" "}{t("Your next renewal date will be extended by 1 month.", "Your next renewal date will be extended by 1 month.")}
-            </p>
-            <div className="confirm-modal__actions">
-              <Button variant="secondary" onClick={() => setConfirmRenew(null)}>
-                {t("Cancel", "Cancel")}
-              </Button>
-              <Button
-                variant="primary"
-                disabled={busyKey === `renew-${confirmRenew.sub.id}`}
-                onClick={() => {
-                  const sub = confirmRenew.sub;
-                  setConfirmRenew(null);
-                  void handleRenew(sub);
-                }}
-              >
-                <RefreshCw size={14} />
-                {t("Confirm Renewal", "Confirm Renewal")}
-              </Button>
-            </div>
+      <Modal
+        open={confirmRenew !== null}
+        onClose={() => setConfirmRenew(null)}
+        title={t("Ready to renew! 🚀", "Ready to renew! 🚀")}
+        subtitle={t("Your subscription will be extended by 1 month.", "Your subscription will be extended by 1 month.")}
+        footer={
+          <>
+            <button className="secondary-button" type="button" onClick={() => setConfirmRenew(null)}>
+              {t("Cancel", "Cancel")}
+            </button>
+            <button
+              className="primary-button"
+              type="button"
+              style={{ flex: 1 }}
+              disabled={busyKey === `renew-${confirmRenew?.sub.id}`}
+              onClick={() => {
+                const sub = confirmRenew!.sub;
+                setConfirmRenew(null);
+                void handleRenew(sub);
+              }}
+            >
+              {t("Yes, renew now", "Yes, renew now")} <ChevronRight size={18} />
+            </button>
+          </>
+        }
+      >
+        <div style={{ textAlign: "center", padding: "8px 0" }}>
+          <div style={{ fontSize: "2rem", fontWeight: 700, lineHeight: 1.2, marginBottom: 4 }}>
+            {confirmRenew?.billing ? formatCurrency(confirmRenew.billing.monthlyAmount, confirmRenew.billing.currency) : ""}
+          </div>
+          <div style={{ color: "var(--muted)", fontSize: "0.9rem" }}>
+            {confirmRenew?.sub.name ?? ""}
           </div>
         </div>
-      ) : null}
+      </Modal>
     </div>
   );
 }

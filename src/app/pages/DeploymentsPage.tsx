@@ -171,13 +171,8 @@ export function DeploymentsPage() {
 
   return (
     <div className="ov-wrapper">
-      <div className="ov-header">
-        <div>
-          <h1 className="ov-header__title">{t("Deployments", "Deployments")}</h1>
-          <p className="dep-header-desc">
-            {t("History, logs, and rollback", "History, logs, and rollback")}
-          </p>
-        </div>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+        <h2>{t("Deployments", "Deployments")}</h2>
         <div className="dep-header-actions">
           {sites.length > 1 && (
             <select

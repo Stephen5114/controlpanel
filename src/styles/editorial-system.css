@@ -294,7 +294,6 @@ input:focus, select:focus, textarea:focus { box-shadow: 3px 3px 0 var(--primary)
 .vps-service-card:hover, .vps-plan-card:hover { border-color: var(--border); transform: translate(-2px, -2px); box-shadow: var(--shadow); }
 .vps-plan-card--featured { border: 2px solid var(--border); box-shadow: 5px 5px 0 var(--border); }
 .vps-popular { color: #181713; background: var(--primary); border: 1.5px solid var(--border); border-radius: 2px; }
-.vps-price strong { font-family: Georgia, "Noto Serif SC", serif; font-weight: 500; }
 .vps-server-icon { color: var(--text); background: var(--surface-soft); border: 1px solid var(--border); border-radius: 3px; }
 .vps-catalog-note, .vps-notice, .vps-credentials-note { background: var(--surface-soft); border-color: var(--border); border-radius: 3px; }
 
@@ -329,7 +328,6 @@ input:focus, select:focus, textarea:focus { box-shadow: 3px 3px 0 var(--primary)
 /* Subscription workspace */
 .al-shell { background: var(--bg); border: 2px solid var(--border); border-radius: 4px; overflow: hidden; }
 .al-sidebar { background: var(--surface); border-right: 2px solid var(--border); backdrop-filter: none; }
-.al-sidebar__title { font-family: Georgia, "Noto Serif SC", serif; font-weight: 500; }
 .al-sidebar__link { border-radius: 3px; }
 .al-sidebar__link.is-active { color: var(--text); background: var(--primary); }
 .al-sidebar__deploy-btn { color: #181713; background: var(--primary); border: 1.5px solid var(--border); border-radius: 3px; box-shadow: 2px 2px 0 var(--border); }

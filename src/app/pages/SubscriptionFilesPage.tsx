@@ -877,14 +877,7 @@ export function SubscriptionFilesPage() {
   return (
     <div className="files-workbench">
       <section className="files-workbench__toolbar">
-        <div className="files-workbench__toolbar-title">
-          <h1>{t("File Manager", "File Manager")}</h1>
-          <p>
-            {selectedSite
-              ? `${selectedSite.siteName} - ${selectedSite.domain}`
-              : displayedAbsolutePath || t("Open a site folder to start browsing.", "Open a site folder to start browsing.")}
-          </p>
-        </div>
+        <h2>{t("File Manager", "File Manager")}</h2>
 
         <div className="files-workbench__toolbar-actions">
           <label className="files-workbench__btn files-workbench__btn--primary" aria-disabled={!selectedSiteId || busyAction !== null}>

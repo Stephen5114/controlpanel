@@ -49,8 +49,8 @@ function Sidebar({
       </nav>
 
       <div className="sidebar__footer">
-        <div className="account__avatar-wrapper" style={{ position: "relative" }}>
-          <button className={`avatar${avatarUrl ? " avatar--custom" : " avatar--default"}`} onClick={() => setAvatarDropdownOpen((v: boolean) => !v)} type="button" aria-label={t("Account menu", "Account menu")}>
+        <div className="account__avatar-wrapper" style={{ position: "relative" }} onClick={() => setAvatarDropdownOpen((v: boolean) => !v)}>
+          <button className={`avatar${avatarUrl ? " avatar--custom" : " avatar--default"}`} type="button" aria-label={t("Account menu", "Account menu")}>
             {avatarUrl ? <img src={avatarUrl} alt="" /> : <span className="avatar__initial">{avatarInitial}</span>}
             <span className="avatar__edit-badge" aria-hidden="true"><Camera size={9} /></span>
           </button>

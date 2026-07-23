@@ -316,6 +316,7 @@ export type BillingSubscriptionView = {
   gracePeriodEndsUtc: string | null;
   cancelAtPeriodEnd: boolean;
   lastError: string | null;
+  targetHostingSubscriptionId: string | null;
 };
 
 export type BillingInvoiceLineView = {
@@ -841,6 +842,7 @@ export type CustomerResourceSummary = {
   diskQuotaMb: number;
   usedDiskMb: number;
   fileQuotaCount: number;
+  usedFileCount: number;
   databaseSpaceLimitMb: number;
   usedDatabaseSpaceMb: number;
 };
@@ -851,6 +853,7 @@ export type SubscriptionChoice = {
   planName: string;
   planSlug: string;
   regionSlug: string;
+  resources: CustomerResourceSummary;
 };
 
 export type AddonCatalogResponse = {

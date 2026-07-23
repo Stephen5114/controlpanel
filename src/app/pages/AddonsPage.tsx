@@ -1,10 +1,21 @@
-import { Package, HardDrive, Database, Globe, AlertCircle, CheckCircle, Loader2, FileText } from "lucide-react";
+import {
+  AlertCircle,
+  CheckCircle,
+  ChevronRight,
+  Database,
+  FileText,
+  Globe,
+  HardDrive,
+  Loader2,
+  MapPin,
+  Package,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import {
-  getAddonCatalog,
-  createAddonCheckout,
-  getBillingSubscriptions,
   cancelBillingSubscription,
+  createAddonCheckout,
+  getAddonCatalog,
+  getBillingSubscriptions,
   type AddonCatalogResponse,
   type AddonPriceTier,
   type BillingSubscriptionView,
@@ -34,10 +45,10 @@ function formatDate(value: string | null | undefined) {
 function AddonsCategoryHeader({ categoryKey }: { categoryKey: string }) {
   const { t } = useLocalization();
   const titles: Record<string, { title: string; description: string }> = {
-    site_quota: { title: "Site Quota", description: "Add more website slots to your account" },
-    disk_space: { title: "Web Space", description: "Increase your disk storage allocation" },
-    database_quota: { title: "Database Quota", description: "Add more database slots" },
-    database_space: { title: "Database Space", description: "Increase database storage capacity" },
+    site_quota: { title: "Site Quota", description: "Add more website slots to this package" },
+    disk_space: { title: "Web Space", description: "Increase this package's web storage" },
+    database_quota: { title: "Database Quota", description: "Add more database slots to this package" },
+    database_space: { title: "Database Space", description: "Increase this package's database allocation" },
     file_quota: { title: "File Quota", description: "Increase the maximum number of files allowed" },
   };
   const entry = titles[categoryKey];
@@ -63,32 +74,33 @@ function groupAddonsByCategory(addons: AddonPriceTier[]): AddonCategory[] {
     { key: "database_space", icon: Database, tiers: [] },
     { key: "file_quota", icon: FileText, tiers: [] },
   ];
-
   for (const addon of addons) {
-    const cat = categories.find((c) => c.key === addon.addonType);
-    if (cat) {
-      cat.tiers.push(addon);
-    }
+    categories.find((category) => category.key === addon.addonType)?.tiers.push(addon);
   }
-
-  return categories.filter((c) => c.tiers.length > 0);
+  return categories.filter((category) => category.tiers.length > 0);
 }
 
 function UsageBar({ label, used, quota, unit }: { label: string; used: number; quota: number; unit: string }) {
-  const pct = quota > 0 ? Math.min((used / quota) * 100, 100) : 0;
-  const tone = pct >= 90 ? "is-danger" : pct >= 70 ? "is-warning" : "is-ok";
+  const { t } = useLocalization();
+  const rawPercent = quota > 0 ? (used / quota) * 100 : 0;
+  const percent = Math.min(rawPercent, 100);
+  const tone = rawPercent >= 90 ? "is-danger" : rawPercent >= 70 ? "is-warning" : "is-ok";
+  const overBy = Math.max(used - quota, 0);
 
   return (
     <div className="addon-usage-bar">
       <div className="addon-usage-bar__header">
         <span className="addon-usage-bar__label">{label}</span>
-        <span className="addon-usage-bar__value">
-          {used} / {quota} {unit}
-        </span>
+        <span className="addon-usage-bar__value">{used} / {quota} {unit}</span>
       </div>
       <div className="addon-usage-bar__track">
-        <div className={`addon-usage-bar__fill ${tone}`} style={{ width: `${pct}%` }} />
+        <div className={`addon-usage-bar__fill ${tone}`} style={{ width: `${percent}%` }} />
       </div>
+      {overBy > 0 ? (
+        <span className="addon-usage-bar__over">
+          {overBy} {unit} {t("over the current limit", "over the current limit")}
+        </span>
+      ) : null}
     </div>
   );
 }
@@ -96,14 +108,14 @@ function UsageBar({ label, used, quota, unit }: { label: string; used: number; q
 export function AddonsPage() {
   const { t } = useLocalization();
   const [catalog, setCatalog] = useState<AddonCatalogResponse | null>(null);
-  const [subscriptions, setSubscriptions] = useState<BillingSubscriptionView[]>([]);
+  const [addonSubscriptions, setAddonSubscriptions] = useState<BillingSubscriptionView[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [selectedTiers, setSelectedTiers] = useState<Record<string, string>>({});
   const [busyCategory, setBusyCategory] = useState<string | null>(null);
   const [cancellingId, setCancellingId] = useState<string | null>(null);
-  const [selectedSubscription, setSelectedSubscription] = useState<string>("");
+  const [selectedSubscription, setSelectedSubscription] = useState("");
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -117,27 +129,25 @@ export function AddonsPage() {
   useEffect(() => {
     const session = getCustomerSession();
     if (!session) return;
-
     let active = true;
 
     async function load() {
       setLoading(true);
       setError(null);
       try {
-        const [catalogResult, subsResult] = await Promise.all([
+        const [catalogResult, subscriptionsResult] = await Promise.all([
           getAddonCatalog(session!),
           getBillingSubscriptions(session!),
         ]);
         if (!active) return;
         setCatalog(catalogResult);
-        setSubscriptions(subsResult.filter((s) => s.scopeType === "resource_addon"));
-        // Auto-select if only one hosting subscription
-        if (catalogResult.subscriptions.length === 1) {
-          setSelectedSubscription(catalogResult.subscriptions[0].id);
-        }
-      } catch (err) {
+        setAddonSubscriptions(subscriptionsResult.filter((item) => item.scopeType === "resource_addon"));
+        const requestedId = new URLSearchParams(window.location.search).get("subscription");
+        const requested = catalogResult.subscriptions.find((item) => item.id === requestedId);
+        setSelectedSubscription(requested?.id ?? catalogResult.subscriptions[0]?.id ?? "");
+      } catch (loadError) {
         if (!active) return;
-        setError(err instanceof Error ? err.message : t("Failed to load addon catalog.", "Failed to load addon catalog."));
+        setError(loadError instanceof Error ? loadError.message : t("Failed to load addon catalog.", "Failed to load addon catalog."));
       } finally {
         if (active) setLoading(false);
       }
@@ -147,37 +157,46 @@ export function AddonsPage() {
     return () => { active = false; };
   }, []);
 
-  async function handlePurchase(categoryKey: string) {
+  async function reload() {
     const session = getCustomerSession();
     if (!session) return;
+    const [catalogResult, subscriptionsResult] = await Promise.all([
+      getAddonCatalog(session),
+      getBillingSubscriptions(session),
+    ]);
+    setCatalog(catalogResult);
+    setAddonSubscriptions(subscriptionsResult.filter((item) => item.scopeType === "resource_addon"));
+  }
 
+  function chooseSubscription(subscriptionId: string) {
+    setSelectedSubscription(subscriptionId);
+    setSelectedTiers({});
+    const url = new URL(window.location.href);
+    url.searchParams.set("subscription", subscriptionId);
+    window.history.replaceState({}, "", url);
+  }
+
+  async function handlePurchase(categoryKey: string) {
+    const session = getCustomerSession();
     const priceId = selectedTiers[categoryKey];
-    if (!priceId) return;
-
+    if (!session || !priceId || !selectedSubscription) return;
     setBusyCategory(categoryKey);
     setError(null);
     setMessage(null);
-
     try {
       const result = await createAddonCheckout(session, {
         priceId,
-        subscriptionId: selectedSubscription || undefined,
+        subscriptionId: selectedSubscription,
       });
       if (result.checkoutUrl) {
         window.location.assign(result.checkoutUrl);
-      } else {
-        setMessage(result.message || t("Addon purchased successfully! Your resource limits have been updated.", "Addon purchased successfully! Your resource limits have been updated."));
-        // Reload data
-        const [catalogResult, subsResult] = await Promise.all([
-          getAddonCatalog(session),
-          getBillingSubscriptions(session),
-        ]);
-        setCatalog(catalogResult);
-        setSubscriptions(subsResult.filter((s) => s.scopeType === "resource_addon"));
-        setSelectedTiers((prev) => ({ ...prev, [categoryKey]: "" }));
+        return;
       }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : t("Purchase failed.", "Purchase failed."));
+      setMessage(result.message || t("Addon purchased successfully! Your resource limits have been updated.", "Addon purchased successfully! Your resource limits have been updated."));
+      await reload();
+      setSelectedTiers((current) => ({ ...current, [categoryKey]: "" }));
+    } catch (purchaseError) {
+      setError(purchaseError instanceof Error ? purchaseError.message : t("Purchase failed.", "Purchase failed."));
     } finally {
       setBusyCategory(null);
     }
@@ -186,30 +205,26 @@ export function AddonsPage() {
   async function handleCancel(subscriptionId: string) {
     const session = getCustomerSession();
     if (!session) return;
-
     setCancellingId(subscriptionId);
     setError(null);
     setMessage(null);
-
     try {
       const result = await cancelBillingSubscription(session, subscriptionId);
       setMessage(result.message || t("Addon subscription canceled.", "Addon subscription canceled."));
-      // Reload
-      const [catalogResult, subsResult] = await Promise.all([
-        getAddonCatalog(session),
-        getBillingSubscriptions(session),
-      ]);
-      setCatalog(catalogResult);
-      setSubscriptions(subsResult.filter((s) => s.scopeType === "resource_addon"));
-    } catch (err) {
-      setError(err instanceof Error ? err.message : t("Cancellation failed.", "Cancellation failed."));
+      await reload();
+    } catch (cancelError) {
+      setError(cancelError instanceof Error ? cancelError.message : t("Cancellation failed.", "Cancellation failed."));
     } finally {
       setCancellingId(null);
     }
   }
 
   const categories = catalog ? groupAddonsByCategory(catalog.addons) : [];
-  const resources = catalog?.resources;
+  const selectedPackage = catalog?.subscriptions.find((item) => item.id === selectedSubscription);
+  const resources = selectedPackage?.resources;
+  const visibleAddonSubscriptions = addonSubscriptions.filter(
+    (item) => !item.targetHostingSubscriptionId || item.targetHostingSubscriptionId === selectedSubscription,
+  );
 
   return (
     <div className="stack">
@@ -217,111 +232,115 @@ export function AddonsPage() {
         <div>
           <p className="eyebrow">{t("Addons", "Addons")}</p>
           <h1>{t("Resource Addons", "Resource Addons")}</h1>
-          <p className="page-copy">{t("Purchase additional resources for your hosting account. All addons are billed monthly.", "Purchase additional resources for your hosting account. All addons are billed monthly.")}</p>
+          <p className="page-copy">{t("Purchase additional resources for a specific hosting package. All addons are billed monthly.", "Purchase additional resources for a specific hosting package. All addons are billed monthly.")}</p>
         </div>
       </section>
 
-      {message ? (
-        <div className="inline-message inline-message--success">
-          <CheckCircle size={16} /> {message}
-        </div>
-      ) : null}
+      {message ? <div className="inline-message inline-message--success"><CheckCircle size={16} /> {message}</div> : null}
+      {error ? <div className="inline-message inline-message--error"><AlertCircle size={16} /> {error}</div> : null}
+      {loading ? <div className="empty-panel"><Loader2 size={20} className="spin" /> {t("Loading addon catalog...", "Loading addon catalog...")}</div> : null}
 
-      {error ? (
-        <div className="inline-message inline-message--error">
-          <AlertCircle size={16} /> {error}
-        </div>
-      ) : null}
-
-      {loading ? (
-        <div className="empty-panel">
-          <Loader2 size={20} className="spin" /> {t("Loading addon catalog...", "Loading addon catalog...")}
-        </div>
-      ) : null}
-
-      {!loading && resources ? (
+      {!loading && catalog && catalog.subscriptions.length > 0 ? (
         <section className="stack">
           <div className="section-title">
-            <h2>{t("Current Resource Usage", "Current Resource Usage")}</h2>
+            <div>
+              <h2>{t("Choose a package", "Choose a package")}</h2>
+              <p className="muted">{t("Resource usage and addons are managed separately for each package.", "Resource usage and addons are managed separately for each package.")}</p>
+            </div>
           </div>
-          <div className="card">
+          <div className="addon-package-grid">
+            {catalog.subscriptions.map((subscription) => {
+              const selected = subscription.id === selectedSubscription;
+              const usage = subscription.resources;
+              return (
+                <button
+                  className={`addon-package-card${selected ? " is-selected" : ""}`}
+                  key={subscription.id}
+                  onClick={() => chooseSubscription(subscription.id)}
+                  type="button"
+                >
+                  <div className="addon-package-card__top">
+                    <div>
+                      <span className="addon-package-card__plan">{subscription.displayName}</span>
+                      <span className="addon-package-card__region"><MapPin size={13} /> {subscription.regionSlug.toUpperCase()}</span>
+                    </div>
+                    <span className="badge badge--success">{t("Active", "Active")}</span>
+                  </div>
+                  <div className="addon-package-card__metrics">
+                    <span><strong>{usage.usedSites}/{usage.siteQuota}</strong>{t("Sites", "Sites")}</span>
+                    <span><strong>{Math.round(usage.usedDiskMb)}/{usage.diskQuotaMb} MB</strong>{t("Web Space", "Web Space")}</span>
+                    <span><strong>{usage.usedDatabases}/{usage.databaseQuota}</strong>{t("Databases", "Databases")}</span>
+                  </div>
+                  <span className="addon-package-card__action">
+                    {selected ? t("Selected package", "Selected package") : t("Manage resources", "Manage resources")}
+                    <ChevronRight size={15} />
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </section>
+      ) : null}
+
+      {!loading && resources && selectedPackage ? (
+        <section className="stack">
+          <div className="section-title">
+            <div>
+              <p className="eyebrow">{t("Selected package", "Selected package")}</p>
+              <h2>{selectedPackage.displayName} — {t("Resource usage", "Resource usage")}</h2>
+            </div>
+          </div>
+          <div className="card addon-resource-panel">
             <div className="addon-usage-grid">
               <UsageBar label={t("Sites", "Sites")} used={resources.usedSites} quota={resources.siteQuota} unit="" />
               <UsageBar label={t("Databases", "Databases")} used={resources.usedDatabases} quota={resources.databaseQuota} unit="" />
-              <UsageBar
-                label={t("Disk Space", "Disk Space")}
-                used={Math.round(resources.usedDiskMb)}
-                quota={resources.diskQuotaMb}
-                unit="MB"
-              />
-              {resources.databaseSpaceLimitMb > 0 && (
-                <UsageBar
-                  label={t("Database Space", "Database Space")}
-                  used={resources.usedDatabaseSpaceMb}
-                  quota={resources.databaseSpaceLimitMb}
-                  unit="MB"
-                />
-              )}
-              <UsageBar label={t("File Quota", "File Quota")} used={0} quota={resources.fileQuotaCount} unit={t("files", "files")} />
+              <UsageBar label={t("Web Space", "Web Space")} used={Math.round(resources.usedDiskMb)} quota={resources.diskQuotaMb} unit="MB" />
+              {resources.databaseSpaceLimitMb > 0 ? (
+                <UsageBar label={t("Database Allocation", "Database Allocation")} used={resources.usedDatabaseSpaceMb} quota={resources.databaseSpaceLimitMb} unit="MB" />
+              ) : null}
+              <UsageBar label={t("File Quota", "File Quota")} used={resources.usedFileCount} quota={resources.fileQuotaCount} unit={t("files", "files")} />
             </div>
           </div>
         </section>
       ) : null}
 
-      {!loading && catalog && catalog.subscriptions.length > 1 ? (
-        <section className="stack">
-          <div className="section-title">
-            <h2>{t("Target Subscription", "Target Subscription")}</h2>
-          </div>
-          <div className="card" style={{ padding: "1rem" }}>
-            <label style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
-              <span className="muted">{t("Select which hosting subscription these addons apply to:", "Select which hosting subscription these addons apply to:")}</span>
-              <select
-                value={selectedSubscription}
-                onChange={(e) => setSelectedSubscription(e.target.value)}
-                style={{ padding: "0.5rem", borderRadius: "6px", border: "1px solid var(--border)", fontSize: "0.9rem", maxWidth: "400px" }}
-              >
-                <option value="">{t("— Select a subscription —", "— Select a subscription —")}</option>
-                {catalog.subscriptions.map((sub) => (
-                  <option key={sub.id} value={sub.id}>
-                    {sub.displayName}
-                  </option>
-                ))}
-              </select>
-            </label>
-          </div>
-        </section>
+      {!loading && catalog && catalog.subscriptions.length === 0 ? (
+        <div className="empty-panel addon-empty-state">
+          <Package size={24} />
+          <strong>{t("No hosting package found", "No hosting package found")}</strong>
+          <span className="muted">{t("Purchase a hosting package before adding resources.", "Purchase a hosting package before adding resources.")}</span>
+          <a className="primary-button" href="/buy">{t("Buy a hosting plan", "Buy a hosting plan")}</a>
+        </div>
       ) : null}
 
-      {!loading && categories.length > 0 ? (
+      {!loading && selectedPackage && categories.length > 0 ? (
         <section className="stack">
           <div className="section-title">
-            <h2>{t("Available Addons", "Available Addons")}</h2>
+            <div>
+              <h2>{t("Available Addons", "Available Addons")}</h2>
+              <p className="muted">{t("New resources will be added to", "New resources will be added to")} <strong>{selectedPackage.displayName}</strong>.</p>
+            </div>
           </div>
           <div className="two-up-grid">
-            {categories.map((cat) => {
-              const Icon = cat.icon;
-              const selected = selectedTiers[cat.key] || "";
-              const isBusy = busyCategory === cat.key;
-
+            {categories.map((category) => {
+              const Icon = category.icon;
+              const selectedTier = selectedTiers[category.key] || "";
+              const busy = busyCategory === category.key;
               return (
-                <article className="card addon-card" key={cat.key}>
+                <article className="card addon-card" key={category.key}>
                   <div className="addon-card__header">
                     <Icon size={20} />
-                    <div>
-                      <AddonsCategoryHeader categoryKey={cat.key} />
-                    </div>
+                    <div><AddonsCategoryHeader categoryKey={category.key} /></div>
                   </div>
-
                   <div className="addon-card__tiers">
-                    {cat.tiers.map((tier) => (
-                      <label className={`addon-tier${selected === tier.priceId ? " is-selected" : ""}`} key={tier.priceId}>
+                    {category.tiers.map((tier) => (
+                      <label className={`addon-tier${selectedTier === tier.priceId ? " is-selected" : ""}`} key={tier.priceId}>
                         <input
                           type="radio"
-                          name={`addon-${cat.key}`}
+                          name={`addon-${category.key}`}
                           value={tier.priceId}
-                          checked={selected === tier.priceId}
-                          onChange={() => setSelectedTiers((prev) => ({ ...prev, [cat.key]: tier.priceId }))}
+                          checked={selectedTier === tier.priceId}
+                          onChange={() => setSelectedTiers((current) => ({ ...current, [category.key]: tier.priceId }))}
                         />
                         <div className="addon-tier__info">
                           <strong>{t(tier.label, tier.label)}</strong>
@@ -333,17 +352,11 @@ export function AddonsPage() {
                       </label>
                     ))}
                   </div>
-
-                  <button
-                    className="primary-button"
-                    disabled={!selected || isBusy || (catalog!.subscriptions.length > 1 && !selectedSubscription)}
-                    onClick={() => handlePurchase(cat.key)}
-                    type="button"
-                  >
-                    {isBusy ? (
+                  <button className="primary-button" disabled={!selectedTier || busy} onClick={() => handlePurchase(category.key)} type="button">
+                    {busy ? (
                       <><Loader2 size={14} className="spin" /> {t("Processing...", "Processing...")}</>
                     ) : (
-                      t("Purchase", "Purchase")
+                      `${t("Add to", "Add to")} ${selectedPackage.displayName}`
                     )}
                   </button>
                 </article>
@@ -353,10 +366,13 @@ export function AddonsPage() {
         </section>
       ) : null}
 
-      {!loading && subscriptions.length > 0 ? (
+      {!loading && visibleAddonSubscriptions.length > 0 ? (
         <section className="stack">
           <div className="section-title">
-            <h2>{t("Active Addon Subscriptions", "Active Addon Subscriptions")}</h2>
+            <div>
+              <h2>{t("Active Addon Subscriptions", "Active Addon Subscriptions")}</h2>
+              <p className="muted">{t("Addons for the selected package are shown below. Account-wide legacy addons remain visible.", "Addons for the selected package are shown below. Account-wide legacy addons remain visible.")}</p>
+            </div>
           </div>
           <div className="table-wrap">
             <table>
@@ -370,25 +386,25 @@ export function AddonsPage() {
                 </tr>
               </thead>
               <tbody>
-                {subscriptions.map((sub) => (
-                  <tr key={sub.id}>
-                    <td><strong>{sub.displayName}</strong></td>
-                    <td>{formatCurrency(sub.monthlyAmount, sub.currency)}{t("/mo", "/mo")}</td>
+                {visibleAddonSubscriptions.map((subscription) => (
+                  <tr key={subscription.id}>
+                    <td><strong>{subscription.displayName}</strong></td>
+                    <td>{formatCurrency(subscription.monthlyAmount, subscription.currency)}{t("/mo", "/mo")}</td>
                     <td>
-                      <span className={`badge${sub.status === "active" ? " badge--success" : sub.status === "canceled" ? " badge--danger" : ""}`}>
-                        {sub.status === "active" ? t("Active", "Active") : sub.status === "canceled" ? t("Canceled", "Canceled") : sub.status}
+                      <span className={`badge${subscription.status === "active" ? " badge--success" : subscription.status === "canceled" ? " badge--danger" : ""}`}>
+                        {subscription.status === "active" ? t("Active", "Active") : subscription.status === "canceled" ? t("Canceled", "Canceled") : subscription.status}
                       </span>
                     </td>
-                    <td>{formatDate(sub.currentPeriodEndUtc)}</td>
+                    <td>{formatDate(subscription.currentPeriodEndUtc)}</td>
                     <td>
-                      {sub.status === "active" ? (
+                      {subscription.status === "active" ? (
                         <button
                           className="text-button text-button--danger"
-                          disabled={cancellingId === sub.id}
-                          onClick={() => handleCancel(sub.id)}
+                          disabled={cancellingId === subscription.id}
+                          onClick={() => handleCancel(subscription.id)}
                           type="button"
                         >
-                          {cancellingId === sub.id ? t("Cancelling...", "Cancelling...") : t("Cancel", "Cancel")}
+                          {cancellingId === subscription.id ? t("Cancelling...", "Cancelling...") : t("Cancel", "Cancel")}
                         </button>
                       ) : null}
                     </td>
@@ -400,10 +416,8 @@ export function AddonsPage() {
         </section>
       ) : null}
 
-      {!loading && categories.length === 0 && !error ? (
-        <div className="empty-panel">
-          {t("No addons are available at this time.", "No addons are available at this time.")}
-        </div>
+      {!loading && catalog && catalog.subscriptions.length > 0 && categories.length === 0 && !error ? (
+        <div className="empty-panel">{t("No addons are available at this time.", "No addons are available at this time.")}</div>
       ) : null}
     </div>
   );

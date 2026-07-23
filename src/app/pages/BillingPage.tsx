@@ -76,14 +76,14 @@ export function BillingPage() {
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    if (params.get("checkout") === "success") {
+    if (params.get("checkout") === "success" || params.get("upgrade") === "success") {
       setMessage(t("Payment completed. Your subscription is now being activated.", "Payment completed. Your subscription is now being activated."));
       const pendingScope = sessionStorage.getItem("pendingSubscriptionScope") || params.get("scope");
       if (pendingScope) {
         sessionStorage.removeItem("pendingSubscriptionScope");
         setNewSubscriptionScope(pendingScope);
       }
-    } else if (params.get("checkout") === "cancel") {
+    } else if (params.get("checkout") === "cancel" || params.get("upgrade") === "cancel") {
       setMessage(t("Checkout was canceled.", "Checkout was canceled."));
     } else if (params.get("paymentMethod") === "success") {
       setMessage(t("Payment method saved.", "Payment method saved."));
